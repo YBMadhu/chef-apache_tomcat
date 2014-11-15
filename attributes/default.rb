@@ -1,7 +1,5 @@
 # rubocop:disable Metrics/LineLength
 
-default['tomcat_bin']['install_java'] = false
-
 default['tomcat_bin']['user'] = 'tomcat'
 default['tomcat_bin']['group'] = 'tomcat'
 
@@ -10,14 +8,18 @@ default['tomcat_bin']['version'] = '7.0.56'
 default['tomcat_bin']['checksum'] = 'c0ca44be20bccebbb043ccd7ab5ea4d94060fdde6bb84812f3da363955dae5bb'
 default['tomcat_bin']['install_dir']  = '/opt'
 
-default['tomcat_bin']['use_logrotate'] = true
+# Install java using java community cookbook
+default['tomcat_bin']['install_java'] = false
 
-default['tomcat_bin']['shutdown_port'] = '8005'
+# Use logrotate LWRP to rotate tomcat logs
+default['tomcat_bin']['use_logrotate'] = true
 
 default['tomcat_bin']['catalina_opts'] = nil
 default['tomcat_bin']['java_opts'] = nil
 default['tomcat_bin']['java_home'] = nil
 
+# Server.xml settings
+default['tomcat_bin']['shutdown_port'] = '8005'
 default['tomcat_bin']['connectors'] = Mash.new
 default['tomcat_bin']['executors'] = Mash.new
 default['tomcat_bin']['engine_valves'] = Mash.new
