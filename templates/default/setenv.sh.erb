@@ -9,4 +9,8 @@ JAVA_HOME='<%= @java_home %>'
 CATALINA_HOME='<%= @tomcat_home %>'
 CATALINA_BASE='<%= @tomcat_home %>'
 JAVA_OPTS='<%= @java_opts %>'
+<% if @catalina_opts && @catalina_opts.is_a?(Array) %>
+CATALINA_OPTS='<%= @catalina_opts.join(' ') %>'
+<% elsif @catalina_opts %>
 CATALINA_OPTS='<%= @catalina_opts %>'
+<% end %>
