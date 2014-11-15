@@ -45,7 +45,7 @@ ark tomcat_name do
   action :put
 end
 
-template "etc/init.d/#{tomcat_name}" do
+template "/etc/init.d/#{tomcat_name}" do
   source 'tomcat.init.erb'
   variables(
     tomcat_home: tomcat_home,
@@ -117,8 +117,8 @@ logfiles = [
 logrotate_app tomcat_name do
   path      logfiles
   options   %w(missingok compress delaycompress copytruncate notifempty)
-  frequency 'daily'
-  rotate    30
+  frequency node['tomcat_bin']['logrotate_frequency'] || 'weekly'
+  rotate    node['tomcat_bin']['logrotate_rotate'] || 4
   create    "0440 #{node['tomcat_bin']['user']} root"
   only_if   node['use_logrotate']
 end
