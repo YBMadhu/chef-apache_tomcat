@@ -26,7 +26,8 @@ describe 'tomcat_bin::default' do
         'c0ca44be20bccebbb043ccd7ab5ea4d94060fdde6bb84812f3da363955dae5bb',
       version: '7.7.77',
       path: '/var',
-      owner: 'tomcat')
+      owner: 'tomcat',
+      group: 'tomcat')
   end
 
   it 'creates tomcat init template' do

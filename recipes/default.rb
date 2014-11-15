@@ -42,6 +42,7 @@ ark tomcat_name do
   version version
   path node['tomcat_bin']['install_dir']
   owner node['tomcat_bin']['user']
+  group node['tomcat_bin']['group']
   action :put
 end
 
