@@ -32,7 +32,7 @@ export CATALINA_PID="$PID_DIR/tomcat.pid"
 
 if [[ -z "$CATALINA_HOME" ]]
 then
-    echo CATALINE_HOME must be set!
+    echo CATALINA_HOME must be set!
     exit 5
 fi
 
@@ -89,4 +89,3 @@ status)
     tomcat_status
     ;;
 esac
-
