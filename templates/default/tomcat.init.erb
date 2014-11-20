@@ -20,15 +20,15 @@ if [ $UID -ne "0" ]; then
    exit 4
 fi
 
-RUNAS=<%= node['tomcat_bin']['user'] %>
-PID_DIR=/var/run/tomcat<%= @base_version %>
+RUNAS=<%= @tomcat_user %>
+PID_DIR=/var/run/tomcat
 
 [[ -d "$PID_DIR" ]] || mkdir -p $PID_DIR
 chown $RUNAS: "$PID_DIR"
 
 export CATALINA_HOME=<%= @tomcat_home %>
 export CATALINA_BASE=<%= @tomcat_home %>
-export CATALINA_PID="$PID_DIR/tomcat.pid"
+export CATALINA_PID="$PID_DIR/<%= @tomcat_name %>.pid"
 
 if [[ -z "$CATALINA_HOME" ]]
 then

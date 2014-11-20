@@ -23,7 +23,6 @@ group node['tomcat_bin']['group']
 user node['tomcat_bin']['user'] do
   system true
   group node['tomcat_bin']['group']
-  system true
   shell '/bin/bash'
 end
 
@@ -49,8 +48,9 @@ end
 template "/etc/init.d/#{tomcat_name}" do
   source 'tomcat.init.erb'
   variables(
-    tomcat_home: tomcat_home,
-    base_version: base_version
+    tomcat_user: node['tomcat_bin']['user'],
+    tomcat_name: tomcat_name,
+    tomcat_home: tomcat_home
   )
   mode 0755
   owner 'root'
@@ -67,7 +67,8 @@ template setenv_sh do
     tomcat_home: tomcat_home,
     java_home: node['tomcat_bin']['java_home'],
     catalina_opts: node['tomcat_bin']['catalina_opts'],
-    java_opts: node['tomcat_bin']['java_opts']
+    java_opts: node['tomcat_bin']['java_opts'],
+    additional: node['tomcat_bin']['setenv_additional'] || []
   )
   cookbook node['tomcat_bin']['template_cookbook'] || 'tomcat_bin'
 end
@@ -79,11 +80,16 @@ template server_xml do
   group node['tomcat_bin']['group']
   variables(
     shutdown_port: node['tomcat_bin']['shutdown_port'],
-    connectors: node['tomcat_bin']['connectors'],
-    executors: node['tomcat_bin']['executors'],
+    thread_pool: node['tomcat_bin']['thread_pool'],
+    http: node['tomcat_bin']['http'],
+    ssl: node['tomcat_bin']['ssl'],
+    ajp: node['tomcat_bin']['ajp'],
     engine_valves: node['tomcat_bin']['engine_valves'],
-    host_valves: node['tomcat_bin']['host_valves'],
-    access_log_valve: node['tomcat_bin']['access_log_valve']
+    default_host: node['tomcat_bin']['default_host'],
+    default_host_valves: node['tomcat_bin']['default_host_valves'],
+    access_log_valve: node['tomcat_bin']['access_log_valve'],
+    additional_hosts: node['tomcat_bin']['additional_hosts'],
+    additional_access_logs: node['tomcat_bin']['additional_access_logs']
   )
   cookbook node['tomcat_bin']['template_cookbook'] || 'tomcat_bin'
 end

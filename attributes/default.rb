@@ -19,25 +19,19 @@ default['tomcat_bin']['java_opts'] = nil
 default['tomcat_bin']['java_home'] = nil
 
 # Server.xml settings
-default['tomcat_bin']['shutdown_port'] = '8005'
-default['tomcat_bin']['connectors'] = Mash.new
-default['tomcat_bin']['executors'] = Mash.new
+default['tomcat_bin']['shutdown_port'] = 8005
 default['tomcat_bin']['engine_valves'] = Mash.new
-default['tomcat_bin']['host_valves'] = Mash.new
+default['tomcat_bin']['default_host_valves'] = Mash.new
 
-# default['tomcat_bin']['connectors']['8080']['protocol'] = 'HTTP/1.1'
-# default['tomcat_bin']['connectors']['8080']['redirectPort'] = '8443'
-# default['tomcat_bin']['connectors']['8080']['connectionTimeout'] = '20000'
+default['tomcat_bin']['default_host']['name'] = 'localhost'
+default['tomcat_bin']['default_host']['appBase'] = 'webapps'
+default['tomcat_bin']['default_host']['unpackWARs'] = true
+default['tomcat_bin']['default_host']['autoDeploy'] = true
 
-# default['tomcat_bin']['connectors']['8443']['protocol'] = 'org.apache.coyote.http11.Http11Protocol'
-# default['tomcat_bin']['connectors']['8443']['maxThreads'] = 150
-# default['tomcat_bin']['connectors']['8443']['SSLEnabled'] = true
-# default['tomcat_bin']['connectors']['8443']['scheme'] = 'https'
-# default['tomcat_bin']['connectors']['8443']['clientAuth'] = false
-# default['tomcat_bin']['connectors']['8443']['sslProtocol'] = 'TLS'
-
-# default['tomcat_bin']['connectors']['8009']['protocol'] = 'AJP/1.3'
-# default['tomcat_bin']['connectors']['8009']['redirectPort'] = '8443'
+# default['tomcat_bin']['thread_pool'] = 'tomcatThreadPool'
+# default['tomcat_bin']['http']['port'] = 8080
+# default['tomcat_bin']['ssl']['port'] = 8443
+# default['tomcat_bin']['ajp']['port'] = 8009
 
 default['tomcat_bin']['access_log_valve']['directory'] = 'logs'
 default['tomcat_bin']['access_log_valve']['suffix'] = '.log'

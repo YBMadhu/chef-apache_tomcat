@@ -16,13 +16,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+node.normal['java']['jdk_version'] = '7'
 node.normal['tomcat_bin']['install_java'] = true
 
-node.normal['tomcat_bin']['connectors']['8080']['protocol'] = 'HTTP/1.1'
-node.normal['tomcat_bin']['connectors']['8080']['redirectPort'] = 8443
-node.normal['tomcat_bin']['connectors']['8080']['connectionTimeout'] = 20_000
+node.normal['tomcat_bin']['thread_pool'] = 'tomcatThreadPool'
+node.normal['tomcat_bin']['http']['port'] = 8080
+node.normal['tomcat_bin']['http']['connectionTimeout'] = 20_000
 
-node.normal['tomcat_bin']['connectors']['8009']['protocol'] = 'AJP/1.3'
-node.normal['tomcat_bin']['connectors']['8009']['redirectPort'] = '8443'
+node.normal['tomcat_bin']['ajp']['port'] = 8009
+
+node.normal['tomcat_bin']['ssl']['port'] = 8443
+
+node.normal['tomcat_bin']['additional_hosts'] = {
+  'test.example.com' => {
+    'appBase' => 'webapps/example_com'
+  }
+}
+
+node.normal['tomcat_bin']['additional_access_logs'] = {
+  'test.example.com' => {
+    'prefix' => 'test.example.com_access_log.',
+    'directory' => 'logs',
+    'suffix' => '.log'
+  }
+}
 
 include_recipe 'tomcat_bin'

@@ -8,9 +8,16 @@ JAVA_HOME='<%= @java_home %>'
 <% end %>
 CATALINA_HOME='<%= @tomcat_home %>'
 CATALINA_BASE='<%= @tomcat_home %>'
+<% if @java_opts && @java_opts.is_a?(Array) %>
+JAVA_OPTS='<%= @catalina_opts.join(' ') %>'
+<% elsif @java_opts %>
 JAVA_OPTS='<%= @java_opts %>'
+<% end %>
 <% if @catalina_opts && @catalina_opts.is_a?(Array) %>
 CATALINA_OPTS='<%= @catalina_opts.join(' ') %>'
 <% elsif @catalina_opts %>
 CATALINA_OPTS='<%= @catalina_opts %>'
+<% end %>
+<% @additional.each do |item| %>
+<%= item %>
 <% end %>
