@@ -24,21 +24,6 @@ node.normal['tomcat_bin']['http']['port'] = 8080
 node.normal['tomcat_bin']['http']['connectionTimeout'] = 20_000
 
 node.normal['tomcat_bin']['ajp']['port'] = 8009
-
 node.normal['tomcat_bin']['ssl']['port'] = 8443
-
-node.normal['tomcat_bin']['additional_hosts'] = {
-  'test.example.com' => {
-    'appBase' => 'webapps/example_com'
-  }
-}
-
-node.normal['tomcat_bin']['additional_access_logs'] = {
-  'test.example.com' => {
-    'prefix' => 'test.example.com_access_log.',
-    'directory' => 'logs',
-    'suffix' => '.log'
-  }
-}
 
 include_recipe 'tomcat_bin'

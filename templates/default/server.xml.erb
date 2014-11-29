@@ -56,8 +56,8 @@
        Documentation at /docs/config/service.html
    -->
   <Service name="Catalina">
-
   <% if @thread_pool && @thread_pool['name'] %>
+
     <!-- Define a shared executor (thread pool) -->
     <Executor name="<%= @thread_pool['name'] %>"
               namePrefix="<%= @thread_pool['namePrefix'] || 'catalina-exec-' %>"
@@ -91,8 +91,8 @@
     <% end %>
                />
   <% end %>
-
   <% if @ssl && @ssl['port'] %>
+
     <!-- Define a SSL HTTP Connector on port <%= @ssl['port'] %> -->
     <Connector port="<%= @ssl['port'] %>"
                protocol="<%= @ssl['protocol'] || 'org.apache.coyote.http11.Http11Protocol' %>"
@@ -109,8 +109,8 @@
     <% end %>
                />
   <% end %>
-
   <% if @ajp && @ajp['port'] %>
+
     <!-- Define an AJP Connector on port <%= @ajp['port'] %> -->
     <Connector port="<%= @ajp['port'] %>"
                protocol="<%= @ajp['protocol'] || 'AJP/1.3' %>"
@@ -136,14 +136,13 @@
     <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">
     -->
     <Engine name="Catalina" defaultHost="<%= @default_host['name'] %>" <% unless @jvm_route.nil? %>jvmRoute="<%= @jvm_route %>"<% end %>>
-
     <% @engine_valves.each do |name, attributes| %>
+
       <Valve className="<%= name %>"
       <% attributes.each do |k, v| %>
              <%= k %>="<%= v %>"
       <% end %>
              />
-
     <% end %>
 
       <!--For clustering, please take a look at documentation at:
@@ -195,21 +194,6 @@
                />
 
       </Host>
-  <% if @additional_hosts %>
-    <% @additional_hosts.each do |name, attributes| %>
-
-      <Host name="<%= name %>" <% attributes.each do |k, v| %><%= k %>="<%= v %>" <% end %>>
-      <% if @additional_access_logs && @additional_access_logs[name] %>
-        <Valve className="org.apache.catalina.valves.AccessLogValve"
-        <% @additional_access_logs[name].each do |k, v| %>
-               <%= k %>="<%= v %>"
-        <% end %>
-               />
-
-      <% end %>
-      </Host>
-    <% end %>
-  <% end %>
     </Engine>
   </Service>
 </Server>

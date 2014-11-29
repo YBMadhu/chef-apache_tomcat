@@ -26,11 +26,6 @@ attribute :home, kind_of: String, required: true
 attribute :user, kind_of: String, default: node['tomcat_bin']['user']
 attribute :group, kind_of: String, default: node['tomcat_bin']['group']
 
-attribute :mirror, kind_of: String, default: node['tomcat_bin']['mirror']
-attribute :version, kind_of: String, default: node['tomcat_bin']['version']
-attribute :checksum, kind_of: String, default: node['tomcat_bin']['checksum']
-attribute :install_dir, kind_of: String, default: node['tomcat_bin']['install_dir']
-
 attribute :java_home, kind_of: String
 attribute :catalina_opts, kind_of: [String, Array]
 attribute :java_opts, kind_of: [String, Array]
@@ -45,9 +40,13 @@ attribute :engine_valves, kind_of: Hash, default: node['tomcat_bin']['engine_val
 attribute :default_host, kind_of: Hash, default: node['tomcat_bin']['default_host']
 attribute :default_host_valves, kind_of: Hash, default: node['tomcat_bin']['default_host_valves']
 attribute :access_log_valve, kind_of: Hash, default: node['tomcat_bin']['access_log_valve']
-attribute :additional_hosts, kind_of: Hash, default: node['tomcat_bin']['additional_hosts']
-attribute :additional_access_logs, kind_of: Hash, default: node['tomcat_bin']['additional_access_logs']
 
-attribute :init_template_cookbook, kind_of: String, default: 'tomcat_bin'
-attribute :setenv_template_cookbook, kind_of: String, default: 'tomcat_bin'
-attribute :server_xml_template_cookbook, kind_of: String, default: 'tomcat_bin'
+attribute :use_logrotate, kind_of: [TrueClass, FalseClass], default: node['tomcat_bin']['logrotate']['enabled']
+attribute :logrotate_rotate, kind_of: String, default: node['tomcat_bin']['logrotate']['rotate']
+attribute :logrotate_frequency, kind_of: String, default: node['tomcat_bin']['logrotate']['frequency']
+
+attribute :init_cookbook, kind_of: String, default: 'tomcat_bin'
+attribute :setenv_cookbook, kind_of: String, default: 'tomcat_bin'
+attribute :server_xml_cookbook, kind_of: String, default: 'tomcat_bin'
+attribute :logging_properties_cookbook, kind_of: String, default: 'tomcat_bin'
+attribute :logrotate_cookbook, kind_of: String, default: 'tomcat_bin'

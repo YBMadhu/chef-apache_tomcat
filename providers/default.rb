@@ -22,27 +22,11 @@ def whyrun_supported?
   true
 end
 
-def load_current_resource
-end
-
-action :install do
-  create_user_group
-  version = new_resource.version
-
-  ark new_resource.name do
-    url "#{new_resource.mirror}/#{version}/tomcat-#{version}.tar.gz"
-    checksum new_resource.checksum
-    version version
-    path new_resource.install_dir
-    owner new_resource.user
-    group new_resource.group
-    action :put
-  end
-end
-
 action :configure do
-
-  create_user_group
+  setenv_sh = ::File.join(new_resource.home, 'bin', 'setenv.sh')
+  server_xml = ::File.join(new_resource.home, 'conf', 'server.xml')
+  logging_properties =
+    ::File.join(new_resource.home, 'conf', 'logging.properties')
 
   template "/etc/init.d/#{new_resource.name}" do
     source 'tomcat.init.erb'
@@ -54,10 +38,10 @@ action :configure do
     mode 0755
     owner 'root'
     group 'root'
-    cookbook new_resource.init_template_cookbook
+    cookbook new_resource.init_cookbook
   end
 
-  template ::File.join(new_resource.home, 'bin', 'setenv.sh') do
+  template setenv_sh do
     source 'setenv.sh.erb'
     mode 0755
     owner new_resource.user
@@ -69,10 +53,10 @@ action :configure do
       java_opts: new_resource.java_opts,
       additional: new_resource.setenv_opts
     )
-    cookbook new_resource.setenv_template_cookbook
+    cookbook new_resource.setenv_cookbook
   end
 
-  template ::File.join(new_resource.home, 'conf', 'server.xml') do
+  template server_xml do
     source 'server.xml.erb'
     mode 0755
     owner new_resource.user
@@ -86,23 +70,52 @@ action :configure do
       engine_valves: new_resource.engine_valves,
       default_host: new_resource.default_host,
       default_host_valves: new_resource.default_host_valves,
-      access_log_valve: new_resource.access_log_valve,
-      additional_hosts: new_resource.additional_hosts,
-      additional_access_logs: new_resource.additional_access_logs
+      access_log_valve: new_resource.access_log_valve
     )
-    cookbook new_resource.server_xml_template_cookbook
+    cookbook new_resource.server_xml_cookbook
   end
 
-end
-
-private
-
-def create_user_group
-  group new_resource.group
-
-  user new_resource.user do
-    system true
+  template logging_properties do
+    source 'logging.properties.erb'
+    mode 0755
+    owner new_resource.user
     group new_resource.group
-    shell '/bin/bash'
+    variables(
+      use_logrotate: new_resource.use_logrotate
+    )
+    cookbook new_resource.logging_properties_cookbook
+  end
+
+  logfiles = [
+    'catalina.out',
+    'catalina.log',
+    'manager.log',
+    'host-manager.log',
+    'localhost.log',
+    new_resource.access_log_valve['prefix'] +
+      new_resource.access_log_valve['suffix']
+  ].map { |logfile| ::File.join(new_resource.home, 'logs', logfile) }
+
+  template "/etc/logrotate.d/#{new_resource.name}" do
+    source 'logrotate.erb'
+    mode 0644
+    owner 'root'
+    group 'root'
+    variables(
+      files: logfiles,
+      frequency: new_resource.logrotate_frequency,
+      rotate: new_resource.logrotate_rotate
+    )
+    cookbook new_resource.logrotate_cookbook
+    only_if { new_resource.use_logrotate }
+  end
+
+  service new_resource.name do
+    supports restart: true, start: true, stop: true, status: true
+    action [:enable, :start]
+    subscribes :restart, "template[/etc/init.d/#{new_resource.name}]"
+    subscribes :restart, "template[#{server_xml}]"
+    subscribes :restart, "template[#{setenv_sh}]"
+    subscribes :restart, "template[#{logging_properties}]"
   end
 end

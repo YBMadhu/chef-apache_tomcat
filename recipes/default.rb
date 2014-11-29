@@ -17,6 +17,7 @@
 # limitations under the License.
 
 include_recipe 'java' if node['tomcat_bin']['install_java']
+include_recipe 'logrotate' if node['tomcat_bin']['logrotate']['enabled']
 
 group node['tomcat_bin']['group']
 
@@ -26,106 +27,22 @@ user node['tomcat_bin']['user'] do
   shell '/bin/bash'
 end
 
-mirror = node['tomcat_bin']['mirror']
 version = node['tomcat_bin']['version']
-base_version = version.split('.').first
-tomcat_name = "tomcat#{base_version}"
-tomcat_home = ::File.join(node['tomcat_bin']['install_dir'], tomcat_name)
-server_xml = ::File.join(tomcat_home, 'conf', 'server.xml')
-setenv_sh = ::File.join(tomcat_home, 'bin', 'setenv.sh')
-logging_properties = ::File.join(tomcat_home, 'conf', 'logging.properties')
+install_dir = ::File.dirname(node['tomcat_bin']['home'])
+name = ::File.basename(node['tomcat_bin']['home'])
 
-ark tomcat_name do
-  url "#{mirror}/#{version}/tomcat-#{version}.tar.gz"
+ark name do
+  url "#{node['tomcat_bin']['mirror']}/#{version}/tomcat-#{version}.tar.gz"
   checksum node['tomcat_bin']['checksum']
   version version
-  path node['tomcat_bin']['install_dir']
+  path install_dir
   owner node['tomcat_bin']['user']
   group node['tomcat_bin']['group']
   action :put
+  notifies :configure, "tomcat_bin[#{name}]", :immediately
 end
 
-template "/etc/init.d/#{tomcat_name}" do
-  source 'tomcat.init.erb'
-  variables(
-    tomcat_user: node['tomcat_bin']['user'],
-    tomcat_name: tomcat_name,
-    tomcat_home: tomcat_home
-  )
-  mode 0755
-  owner 'root'
-  group 'root'
-  cookbook node['tomcat_bin']['template_cookbook'] || 'tomcat_bin'
-end
-
-template setenv_sh do
-  source 'setenv.sh.erb'
-  mode 0755
-  owner node['tomcat_bin']['user']
-  group node['tomcat_bin']['group']
-  variables(
-    tomcat_home: tomcat_home,
-    java_home: node['tomcat_bin']['java_home'],
-    catalina_opts: node['tomcat_bin']['catalina_opts'],
-    java_opts: node['tomcat_bin']['java_opts'],
-    additional: node['tomcat_bin']['setenv_additional'] || []
-  )
-  cookbook node['tomcat_bin']['template_cookbook'] || 'tomcat_bin'
-end
-
-template server_xml do
-  source 'server.xml.erb'
-  mode 0755
-  owner node['tomcat_bin']['user']
-  group node['tomcat_bin']['group']
-  variables(
-    shutdown_port: node['tomcat_bin']['shutdown_port'],
-    thread_pool: node['tomcat_bin']['thread_pool'],
-    http: node['tomcat_bin']['http'],
-    ssl: node['tomcat_bin']['ssl'],
-    ajp: node['tomcat_bin']['ajp'],
-    engine_valves: node['tomcat_bin']['engine_valves'],
-    default_host: node['tomcat_bin']['default_host'],
-    default_host_valves: node['tomcat_bin']['default_host_valves'],
-    access_log_valve: node['tomcat_bin']['access_log_valve'],
-    additional_hosts: node['tomcat_bin']['additional_hosts'],
-    additional_access_logs: node['tomcat_bin']['additional_access_logs']
-  )
-  cookbook node['tomcat_bin']['template_cookbook'] || 'tomcat_bin'
-end
-
-template logging_properties do
-  source 'logging.properties.erb'
-  mode 0755
-  owner node['tomcat_bin']['user']
-  group node['tomcat_bin']['group']
-  cookbook node['tomcat_bin']['template_cookbook'] || 'tomcat_bin'
-end
-
-service tomcat_name do
-  supports restart: true, start: true, stop: true, status: true
-  action [:enable, :start]
-  subscribes :restart, "template[/etc/init.d/#{tomcat_name}]"
-  subscribes :restart, "template[#{server_xml}]"
-  subscribes :restart, "template[#{setenv_sh}]"
-  subscribes :restart, "template[#{logging_properties}]"
-end
-
-logfiles = [
-  'catalina.out',
-  'catalina.log',
-  'manager.log',
-  'host-manager.log',
-  'localhost.log',
-  node['tomcat_bin']['access_log_valve']['prefix'] +
-    node['tomcat_bin']['access_log_valve']['suffix']
-].map { |logfile| ::File.join(tomcat_home, 'logs', logfile) }
-
-logrotate_app tomcat_name do
-  path      logfiles
-  options   %w(missingok compress delaycompress copytruncate notifempty)
-  frequency node['tomcat_bin']['logrotate_frequency'] || 'weekly'
-  rotate    node['tomcat_bin']['logrotate_rotate'] || 4
-  create    "0440 #{node['tomcat_bin']['user']} root"
-  only_if   node['use_logrotate']
+tomcat_bin name do
+  home node['tomcat_bin']['home']
+  action [:configure]
 end

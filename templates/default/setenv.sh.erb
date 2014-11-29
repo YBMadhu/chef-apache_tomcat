@@ -18,6 +18,8 @@ CATALINA_OPTS='<%= @catalina_opts.join(' ') %>'
 <% elsif @catalina_opts %>
 CATALINA_OPTS='<%= @catalina_opts %>'
 <% end %>
-<% @additional.each do |item| %>
+<% if @additional %>
+  <% @additional.each do |item| %>
 <%= item %>
+  <% end %>
 <% end %>
