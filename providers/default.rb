@@ -47,7 +47,6 @@ action :configure do
     owner new_resource.user
     group new_resource.group
     variables(
-      tomcat_home: new_resource.home,
       java_home: new_resource.java_home,
       catalina_opts: new_resource.catalina_opts,
       java_opts: new_resource.java_opts,

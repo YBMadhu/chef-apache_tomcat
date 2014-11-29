@@ -6,8 +6,6 @@
 <% if @java_home %>
 JAVA_HOME='<%= @java_home %>'
 <% end %>
-CATALINA_HOME='<%= @tomcat_home %>'
-CATALINA_BASE='<%= @tomcat_home %>'
 <% if @java_opts && @java_opts.is_a?(Array) %>
 JAVA_OPTS='<%= @catalina_opts.join(' ') %>'
 <% elsif @java_opts %>
