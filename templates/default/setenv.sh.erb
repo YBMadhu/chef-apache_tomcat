@@ -7,7 +7,7 @@
 JAVA_HOME="<%= @java_home %>"
 <% end %>
 <% if @java_opts && @java_opts.is_a?(Array) %>
-JAVA_OPTS="<%= @catalina_opts.join(' ') %>"
+JAVA_OPTS="<%= @java_opts.join(' ') %>"
 <% elsif @java_opts %>
 JAVA_OPTS="<%= @java_opts %>"
 <% end %>
