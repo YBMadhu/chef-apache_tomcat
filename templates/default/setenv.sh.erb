@@ -4,17 +4,17 @@
 # Local modifications will be overwritten.
 #
 <% if @java_home %>
-JAVA_HOME='<%= @java_home %>'
+JAVA_HOME="<%= @java_home %>"
 <% end %>
 <% if @java_opts && @java_opts.is_a?(Array) %>
-JAVA_OPTS='<%= @catalina_opts.join(' ') %>'
+JAVA_OPTS="<%= @catalina_opts.join(' ') %>"
 <% elsif @java_opts %>
-JAVA_OPTS='<%= @java_opts %>'
+JAVA_OPTS="<%= @java_opts %>"
 <% end %>
 <% if @catalina_opts && @catalina_opts.is_a?(Array) %>
-CATALINA_OPTS='<%= @catalina_opts.join(' ') %>'
+CATALINA_OPTS="<%= @catalina_opts.join(' ') %>"
 <% elsif @catalina_opts %>
-CATALINA_OPTS='<%= @catalina_opts %>'
+CATALINA_OPTS="<%= @catalina_opts %>"
 <% end %>
 <% if @additional %>
   <% @additional.each do |item| %>
