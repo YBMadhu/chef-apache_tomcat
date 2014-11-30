@@ -42,7 +42,7 @@ attribute :default_host_valves, kind_of: Hash, default: node['tomcat_bin']['defa
 attribute :access_log_valve, kind_of: Hash, default: node['tomcat_bin']['access_log_valve']
 
 attribute :use_logrotate, kind_of: [TrueClass, FalseClass], default: node['tomcat_bin']['logrotate']['enabled']
-attribute :logrotate_rotate, kind_of: String, default: node['tomcat_bin']['logrotate']['rotate']
+attribute :logrotate_rotate, kind_of: Integer, default: node['tomcat_bin']['logrotate']['rotate']
 attribute :logrotate_frequency, kind_of: String, default: node['tomcat_bin']['logrotate']['frequency']
 
 attribute :init_cookbook, kind_of: String, default: 'tomcat_bin'
