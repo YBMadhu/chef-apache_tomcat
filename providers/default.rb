@@ -22,6 +22,33 @@ def whyrun_supported?
   true
 end
 
+action :install do
+  # run_context.include_recipe 'ark'
+
+  group new_resource.group do
+    system true
+  end
+
+  user new_resource.user do
+    system true
+    group new_resource.group
+    shell '/bin/bash'
+  end
+
+  version = new_resource.version
+  name = ::File.basename(new_resource.home)
+
+  ark name do
+    url "#{new_resource.mirror}/#{version}/tomcat-#{version}.tar.gz"
+    checksum new_resource.checksum
+    version version
+    path ::File.dirname(new_resource.home)
+    owner new_resource.user
+    group new_resource.group
+    action :put
+  end
+end
+
 action :configure do
   setenv_sh = ::File.join(new_resource.home, 'bin', 'setenv.sh')
   server_xml = ::File.join(new_resource.home, 'conf', 'server.xml')

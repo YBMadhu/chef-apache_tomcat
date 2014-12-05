@@ -19,30 +19,7 @@
 include_recipe 'java' if node['tomcat_bin']['install_java']
 include_recipe 'logrotate' if node['tomcat_bin']['logrotate']['enabled']
 
-group node['tomcat_bin']['group']
-
-user node['tomcat_bin']['user'] do
-  system true
-  group node['tomcat_bin']['group']
-  shell '/bin/bash'
-end
-
-version = node['tomcat_bin']['version']
-install_dir = ::File.dirname(node['tomcat_bin']['home'])
-name = ::File.basename(node['tomcat_bin']['home'])
-
-ark name do
-  url "#{node['tomcat_bin']['mirror']}/#{version}/tomcat-#{version}.tar.gz"
-  checksum node['tomcat_bin']['checksum']
-  version version
-  path install_dir
-  owner node['tomcat_bin']['user']
-  group node['tomcat_bin']['group']
-  action :put
-  notifies :configure, "tomcat_bin[#{name}]", :immediately
-end
-
-tomcat_bin name do
+tomcat_bin ::File.basename(node['tomcat_bin']['home']) do
   home node['tomcat_bin']['home']
-  action [:configure]
+  action [:install, :configure]
 end
