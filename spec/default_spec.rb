@@ -3,7 +3,6 @@ require_relative 'spec_helper'
 describe 'tomcat_bin::default' do
   let(:chef_run) do
     ChefSpec::Runner.new(step_into: ['tomcat_bin']) do |node|
-      node.set['tomcat_bin']['name'] = 'tomcat7'
       node.set['tomcat_bin']['mirror'] = 'https://getstuff.org/blah'
       node.set['tomcat_bin']['checksum'] =
         'c0ca44be20bccebbb043ccd7ab5ea4d94060fdde6bb84812f3da363955dae5bb'
@@ -33,7 +32,7 @@ describe 'tomcat_bin::default' do
   end
 
   it 'configures tomcat instance' do
-    expect(chef_run).to configure_tomcat_bin('tomcat7')
+    expect(chef_run).to configure_tomcat_bin('/var/tomcat7')
   end
 
   it 'puts tomcat binaries with ark' do

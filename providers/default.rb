@@ -52,15 +52,16 @@ end
 action :configure do
   setenv_sh = ::File.join(new_resource.home, 'bin', 'setenv.sh')
   server_xml = ::File.join(new_resource.home, 'conf', 'server.xml')
+  service_name = new_resource.service_name || ::File.basename(new_resource.home)
   logging_properties =
     ::File.join(new_resource.home, 'conf', 'logging.properties')
 
-  template "/etc/init.d/#{new_resource.name}" do
+  template "/etc/init.d/#{service_name}" do
     source 'tomcat.init.erb'
     variables(
       tomcat_home: new_resource.home,
       tomcat_user: new_resource.user,
-      tomcat_name: new_resource.name
+      tomcat_name: service_name
     )
     mode 0755
     owner 'root'
@@ -122,7 +123,7 @@ action :configure do
       new_resource.access_log_valve['suffix']
   ].map { |logfile| ::File.join(new_resource.home, 'logs', logfile) }
 
-  template "/etc/logrotate.d/#{new_resource.name}" do
+  template "/etc/logrotate.d/#{service_name}" do
     source 'logrotate.erb'
     mode 0644
     owner 'root'
@@ -136,12 +137,20 @@ action :configure do
     only_if { new_resource.use_logrotate }
   end
 
-  service new_resource.name do
+  service service_name do
     supports restart: true, start: true, stop: true, status: true
     action [:enable, :start]
-    subscribes :restart, "template[/etc/init.d/#{new_resource.name}]"
+    subscribes :restart, "template[/etc/init.d/#{service_name}]"
     subscribes :restart, "template[#{server_xml}]"
     subscribes :restart, "template[#{setenv_sh}]"
     subscribes :restart, "template[#{logging_properties}]"
+  end
+end
+
+action :restart do
+  service_name = new_resource.service_name || ::File.basename(new_resource.home)
+  service service_name do
+    supports restart: true
+    action :restart
   end
 end

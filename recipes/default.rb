@@ -19,7 +19,6 @@
 include_recipe 'java' if node['tomcat_bin']['install_java']
 include_recipe 'logrotate' if node['tomcat_bin']['logrotate']['enabled']
 
-tomcat_bin ::File.basename(node['tomcat_bin']['home']) do
-  home node['tomcat_bin']['home']
+tomcat_bin node['tomcat_bin']['home'] do
   action [:install, :configure]
 end

@@ -18,11 +18,11 @@
 #
 # rubocop:disable Metrics/LineLength
 
-actions :install, :configure
+actions :install, :configure, :restart
 default_action :configure
 
-attribute :name, kind_of: String, name_attribute: true, required: true
-attribute :home, kind_of: String, required: true
+attribute :home, kind_of: String, name_attribute: true, required: true
+attribute :service_name, kind_of: String
 attribute :user, kind_of: String, default: node['tomcat_bin']['user']
 attribute :group, kind_of: String, default: node['tomcat_bin']['group']
 
