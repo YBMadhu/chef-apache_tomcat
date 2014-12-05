@@ -12,7 +12,18 @@ platforms:
 suites:
   - name: default
     run_list:
-      - 'recipe[tomcat_test::default]'
+      - 'recipe[tomcat_bin::default]'
     attributes:
       tomcat_bin:
         install_java: true
+        home: '/opt/tomcat7'
+        thread_pool: 'tomcatThreadPool'
+        http:
+          port: 8080
+          connectionTimeout: 20_000
+        ssl:
+          port: 8443
+        ajp:
+          port: 8009
+      java:
+        jdk_version: '7'
