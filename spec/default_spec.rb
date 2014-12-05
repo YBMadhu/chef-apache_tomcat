@@ -31,6 +31,10 @@ describe 'tomcat_bin::default' do
     expect(chef_run).to create_group('tomcat')
   end
 
+  it 'installs tomcat instance' do
+    expect(chef_run).to install_tomcat_bin('/var/tomcat7')
+  end
+
   it 'configures tomcat instance' do
     expect(chef_run).to configure_tomcat_bin('/var/tomcat7')
   end
