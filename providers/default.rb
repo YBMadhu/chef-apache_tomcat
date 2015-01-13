@@ -120,7 +120,7 @@ action :configure do
     'host-manager.log',
     'localhost.log',
     new_resource.access_log_valve['prefix'] +
-      new_resource.access_log_valve['suffix']
+    new_resource.access_log_valve['suffix']
   ].map { |logfile| ::File.join(new_resource.home, 'logs', logfile) }
 
   template "/etc/logrotate.d/#{service_name}" do

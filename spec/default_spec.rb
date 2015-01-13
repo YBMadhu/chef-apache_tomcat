@@ -2,7 +2,7 @@ require_relative 'spec_helper'
 
 describe 'tomcat_bin::default' do
   let(:chef_run) do
-    ChefSpec::Runner.new(step_into: ['tomcat_bin']) do |node|
+    ChefSpec::SoloRunner.new(step_into: ['tomcat_bin']) do |node|
       node.set['tomcat_bin']['mirror'] = 'https://getstuff.org/blah'
       node.set['tomcat_bin']['checksum'] =
         'c0ca44be20bccebbb043ccd7ab5ea4d94060fdde6bb84812f3da363955dae5bb'
