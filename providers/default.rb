@@ -22,6 +22,10 @@ def whyrun_supported?
   true
 end
 
+def service_name
+  new_resource.service_name || ::File.basename(new_resource.home)
+end
+
 action :install do
   # run_context.include_recipe 'ark'
 
@@ -52,7 +56,6 @@ end
 action :configure do
   setenv_sh = ::File.join(new_resource.home, 'bin', 'setenv.sh')
   server_xml = ::File.join(new_resource.home, 'conf', 'server.xml')
-  service_name = new_resource.service_name || ::File.basename(new_resource.home)
   logging_properties =
     ::File.join(new_resource.home, 'conf', 'logging.properties')
 
@@ -67,6 +70,7 @@ action :configure do
     owner 'root'
     group 'root'
     cookbook new_resource.init_cookbook
+    notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
   template setenv_sh do
@@ -81,6 +85,7 @@ action :configure do
       additional: new_resource.setenv_opts
     )
     cookbook new_resource.setenv_cookbook
+    notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
   template server_xml do
@@ -100,6 +105,7 @@ action :configure do
       access_log_valve: new_resource.access_log_valve
     )
     cookbook new_resource.server_xml_cookbook
+    notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
   template logging_properties do
@@ -111,6 +117,7 @@ action :configure do
       use_logrotate: new_resource.use_logrotate
     )
     cookbook new_resource.logging_properties_cookbook
+    notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
   logfiles = [
@@ -140,15 +147,22 @@ action :configure do
   service service_name do
     supports restart: true, start: true, stop: true, status: true
     action [:enable, :start]
-    subscribes :restart, "template[/etc/init.d/#{service_name}]"
-    subscribes :restart, "template[#{server_xml}]"
-    subscribes :restart, "template[#{setenv_sh}]"
-    subscribes :restart, "template[#{logging_properties}]"
+  end
+
+  # hack to prevent mulptiple starts/restarts on first-run
+  ruby_block "restart_#{service_name}" do
+    block do
+      r = resources(service: service_name)
+      a = Array.new(r.action)
+      a << :restart unless a.include?(:restart)
+      a.delete(:start) if a.include?(:restart)
+      r.action(a)
+    end
+    action :nothing
   end
 end
 
 action :restart do
-  service_name = new_resource.service_name || ::File.basename(new_resource.home)
   service service_name do
     supports restart: true
     action :restart
