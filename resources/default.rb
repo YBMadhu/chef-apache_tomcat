@@ -25,6 +25,7 @@ attribute :home, kind_of: String, name_attribute: true, required: true
 attribute :service_name, kind_of: String
 attribute :user, kind_of: String, default: node['tomcat_bin']['user']
 attribute :group, kind_of: String, default: node['tomcat_bin']['group']
+attribute :kill_delay, regex: /^[1-9][0-9]?$/, default: node['tomcat_bin']['kill_delay']
 
 attribute :version, kind_of: String, default: node['tomcat_bin']['version']
 attribute :mirror, kind_of: String, default: node['tomcat_bin']['mirror']

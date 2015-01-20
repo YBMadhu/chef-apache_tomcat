@@ -16,6 +16,7 @@ default['tomcat_bin']['logs_rotatable'] = false
 default['tomcat_bin']['logrotate_frequency'] = 'weekly'
 default['tomcat_bin']['logrotate_count'] = 4
 
+default['tomcat_bin']['kill_delay'] = nil
 default['tomcat_bin']['catalina_opts'] = nil
 default['tomcat_bin']['java_opts'] = nil
 default['tomcat_bin']['java_home'] = nil

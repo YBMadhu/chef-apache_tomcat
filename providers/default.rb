@@ -71,7 +71,8 @@ action :configure do
     variables(
       tomcat_home: new_resource.home,
       tomcat_user: new_resource.user,
-      tomcat_name: service_name
+      tomcat_name: service_name,
+      kill_delay: new_resource.kill_delay
     )
     mode 0755
     owner 'root'

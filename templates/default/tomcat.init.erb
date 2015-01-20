@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# /etc/init.d/tomcat -- Startup/shutdown script for Tomcat
+# /etc/init.d/<%= @tomcat_name %> -- Startup/shutdown script for Tomcat
 #
 #
 ### BEGIN INIT INFO
@@ -37,13 +37,15 @@ then
 fi
 
 tomcat_start() {
-    # ulimit -n 100000
-    # umask 007
-    /bin/su -p -s /bin/sh $RUNAS $CATALINA_HOME/bin/catalina.sh start
+    /bin/su -p -s /bin/sh -c "$CATALINA_HOME/bin/catalina.sh start" $RUNAS
 }
 
 tomcat_stop() {
-    /bin/su -p -s /bin/sh $RUNAS $CATALINA_HOME/bin/catalina.sh stop
+<% if @kill_delay %>
+    /bin/su -p -s /bin/sh -c "$CATALINA_HOME/bin/catalina.sh stop <%= @kill_delay %> -force" $RUNAS
+<% else %>
+    /bin/su -p -s /bin/sh -c "$CATALINA_HOME/bin/catalina.sh stop" $RUNAS
+<% end %>
 }
 
 tomcat_status() {
