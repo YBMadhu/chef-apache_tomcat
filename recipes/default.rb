@@ -17,7 +17,7 @@
 # limitations under the License.
 
 include_recipe 'java' if node['tomcat_bin']['install_java']
-include_recipe 'logrotate' if node['tomcat_bin']['logrotate']['enabled']
+include_recipe 'logrotate'
 
 tomcat_bin node['tomcat_bin']['home'] do
   action [:install, :configure]

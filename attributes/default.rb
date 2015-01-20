@@ -11,10 +11,10 @@ default['tomcat_bin']['home'] = '/opt/tomcat'
 # Install java using java community cookbook
 default['tomcat_bin']['install_java'] = false
 
-# Use logrotate LWRP to rotate tomcat logs
-default['tomcat_bin']['logrotate']['enabled'] = true
-default['tomcat_bin']['logrotate']['frequency'] = 'weekly'
-default['tomcat_bin']['logrotate']['rotate'] = 4
+default['tomcat_bin']['log_dir'] = 'logs'
+default['tomcat_bin']['logs_rotatable'] = false
+default['tomcat_bin']['logrotate_frequency'] = 'weekly'
+default['tomcat_bin']['logrotate_count'] = 4
 
 default['tomcat_bin']['catalina_opts'] = nil
 default['tomcat_bin']['java_opts'] = nil
@@ -32,17 +32,21 @@ default['tomcat_bin']['default_host']['unpackWARs'] = true
 default['tomcat_bin']['default_host']['autoDeploy'] = true
 
 # default['tomcat_bin']['thread_pool'] = 'tomcatThreadPool'
-# default['tomcat_bin']['http']['port'] = 8080
-# default['tomcat_bin']['ssl']['port'] = 8443
-# default['tomcat_bin']['ajp']['port'] = 8009
+default['tomcat_bin']['http']['port'] = 8080
+default['tomcat_bin']['ssl']['port'] = 8443
+default['tomcat_bin']['ajp']['port'] = 8009
 
 default['tomcat_bin']['access_log_valve']['directory'] = 'logs'
 default['tomcat_bin']['access_log_valve']['suffix'] = '.log'
-if node['tomcat_bin']['logrotate']['enabled']
+default['tomcat_bin']['access_log_valve']['pattern'] = '%h %l %u %t &quot;%r&quot; %s %b'
+if node['tomcat_bin']['logs_rotatable']
+  default['tomcat_bin']['access_log_valve']['prefix'] = 'localhost_access_log.'
+  default['tomcat_bin']['access_log_valve']['rotatable'] = true
+else
   default['tomcat_bin']['access_log_valve']['prefix'] = 'localhost_access_log'
   default['tomcat_bin']['access_log_valve']['rotatable'] = false
-else
-  default['tomcat_bin']['access_log_valve']['prefix'] = 'localhost_access_log.'
-  default['tomcat_bin']['access_log_valve']['pattern'] = '%h %l %u %t &quot;%r&quot; %s %b'
-  default['tomcat_bin']['access_log_valve']['rotatable'] = true
 end
+
+# Tomcat user ulimits
+default['tomcat_bin']['ulimit_nofile'] = 20_000
+default['tomcat_bin']['ulimit_nproc'] = 50_000

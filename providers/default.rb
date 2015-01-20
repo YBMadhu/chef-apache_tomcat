@@ -54,6 +54,13 @@ action :install do
 end
 
 action :configure do
+  nofiles = new_resource.ulimit_nofile
+  nprocs = new_resource.ulimit_nproc
+  user_ulimit new_resource.user do
+    filehandle_limit nofiles
+    process_limit nprocs
+  end
+
   setenv_sh = ::File.join(new_resource.home, 'bin', 'setenv.sh')
   server_xml = ::File.join(new_resource.home, 'conf', 'server.xml')
   logging_properties =
@@ -114,21 +121,23 @@ action :configure do
     owner new_resource.user
     group new_resource.group
     variables(
-      use_logrotate: new_resource.use_logrotate
+      rotatable: new_resource.logs_rotatable
     )
     cookbook new_resource.logging_properties_cookbook
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
-  logfiles = [
-    'catalina.out',
-    'catalina.log',
-    'manager.log',
-    'host-manager.log',
-    'localhost.log',
-    new_resource.access_log_valve['prefix'] +
-    new_resource.access_log_valve['suffix']
-  ].map { |logfile| ::File.join(new_resource.home, 'logs', logfile) }
+  logs = %w(catalina.out)
+  unless new_resource.logs_rotatable
+    logs.concat [
+      'catalina.log',
+      'manager.log',
+      'host-manager.log',
+      'localhost.log',
+      new_resource.access_log_valve['prefix'] +
+        new_resource.access_log_valve['suffix']
+    ]
+  end
 
   template "/etc/logrotate.d/#{service_name}" do
     source 'logrotate.erb'
@@ -136,12 +145,11 @@ action :configure do
     owner 'root'
     group 'root'
     variables(
-      files: logfiles,
+      files: logs.map { |log| ::File.join(new_resource.home, 'logs', log) },
       frequency: new_resource.logrotate_frequency,
-      rotate: new_resource.logrotate_rotate
+      rotate: new_resource.logrotate_count
     )
     cookbook new_resource.logrotate_cookbook
-    only_if { new_resource.use_logrotate }
   end
 
   service service_name do
@@ -149,7 +157,7 @@ action :configure do
     action [:enable, :start]
   end
 
-  # hack to prevent mulptiple starts/restarts on first-run
+  # Hack to prevent mulptiple starts/restarts on first-run
   ruby_block "restart_#{service_name}" do
     block do
       r = resources(service: service_name)

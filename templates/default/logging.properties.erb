@@ -25,39 +25,23 @@ handlers = 1catalina.org.apache.juli.FileHandler, 2localhost.org.apache.juli.Fil
 
 1catalina.org.apache.juli.FileHandler.level = FINE
 1catalina.org.apache.juli.FileHandler.directory = ${catalina.base}/logs
-<% if @use_logrotate %>
-1catalina.org.apache.juli.FileHandler.prefix = catalina
-1catalina.org.apache.juli.FileHandler.rotatable = false
-<% else %>
-1catalina.org.apache.juli.FileHandler.prefix = catalina.
-<% end %>
+1catalina.org.apache.juli.FileHandler.prefix = catalina<%= '.' if @rotatable %>
+1catalina.org.apache.juli.FileHandler.rotatable = <%= @rotatable.to_s %>
 
 2localhost.org.apache.juli.FileHandler.level = FINE
 2localhost.org.apache.juli.FileHandler.directory = ${catalina.base}/logs
-<% if @use_logrotate %>
-2localhost.org.apache.juli.FileHandler.prefix = localhost
-2localhost.org.apache.juli.FileHandler.rotatable = false
-<% else %>
-2localhost.org.apache.juli.FileHandler.prefix = localhost.
-<% end %>
+2localhost.org.apache.juli.FileHandler.prefix = localhost<%= '.' if @rotatable %>
+2localhost.org.apache.juli.FileHandler.rotatable = <%= @rotatable.to_s %>
 
 3manager.org.apache.juli.FileHandler.level = FINE
 3manager.org.apache.juli.FileHandler.directory = ${catalina.base}/logs
-<% if @use_logrotate %>
-3manager.org.apache.juli.FileHandler.prefix = manager
-3manager.org.apache.juli.FileHandler.rotatable = false
-<% else %>
-3manager.org.apache.juli.FileHandler.prefix = manager.
-<% end %>
+3manager.org.apache.juli.FileHandler.prefix = manager<%= '.' if @rotatable %>
+3manager.org.apache.juli.FileHandler.rotatable = <%= @rotatable.to_s %>
 
 4host-manager.org.apache.juli.FileHandler.level = FINE
 4host-manager.org.apache.juli.FileHandler.directory = ${catalina.base}/logs
-<% if @use_logrotate %>
-4host-manager.org.apache.juli.FileHandler.prefix = host-manager
-4host-manager.org.apache.juli.FileHandler.rotatable = false
-<% else %>
-4host-manager.org.apache.juli.FileHandler.prefix = host-manager.
-<% end %>
+4host-manager.org.apache.juli.FileHandler.prefix = host-manager<%= '.' if @rotatable %>
+4host-manager.org.apache.juli.FileHandler.rotatable = <%= @rotatable.to_s %>
 
 java.util.logging.ConsoleHandler.level = FINE
 java.util.logging.ConsoleHandler.formatter = java.util.logging.SimpleFormatter

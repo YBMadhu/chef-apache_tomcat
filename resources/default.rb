@@ -44,10 +44,14 @@ attribute :engine_valves, kind_of: Hash, default: node['tomcat_bin']['engine_val
 attribute :default_host, kind_of: Hash, default: node['tomcat_bin']['default_host']
 attribute :default_host_valves, kind_of: Hash, default: node['tomcat_bin']['default_host_valves']
 attribute :access_log_valve, kind_of: Hash, default: node['tomcat_bin']['access_log_valve']
+attribute :log_dir, kind_of: String, default: 'logs'
 
-attribute :use_logrotate, kind_of: [TrueClass, FalseClass], default: node['tomcat_bin']['logrotate']['enabled']
-attribute :logrotate_rotate, kind_of: Integer, default: node['tomcat_bin']['logrotate']['rotate']
-attribute :logrotate_frequency, kind_of: String, default: node['tomcat_bin']['logrotate']['frequency']
+attribute :logs_rotatable, equal_to: [true, false], default: node['tomcat_bin']['logs_rotatable']
+attribute :logrotate_count, kind_of: Integer, default: node['tomcat_bin']['logrotate_count']
+attribute :logrotate_frequency, kind_of: String, default: node['tomcat_bin']['logrotate_frequency']
+
+attribute :ulimit_nofile, kind_of: Integer, default: node['tomcat_bin']['ulimit_nofile']
+attribute :ulimit_nproc, kind_of: Integer, default: node['tomcat_bin']['ulimit_nproc']
 
 attribute :init_cookbook, kind_of: String, default: 'tomcat_bin'
 attribute :setenv_cookbook, kind_of: String, default: 'tomcat_bin'
