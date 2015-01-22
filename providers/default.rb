@@ -45,6 +45,7 @@ def ssl_connector
     'port' => new_resource.ssl_port,
     'protocol' => 'HTTP/1.1',
     'connectionTimeout' => '20000',
+    'URIEncoding' => 'UTF-8',
     'SSLEnabled' => 'true',
     'scheme' => 'https',
     'secure' => 'true',
@@ -67,7 +68,8 @@ def ajp_connector
   return unless new_resource.ajp_port
   ajp = {
     'port' => new_resource.ajp_port,
-    'protocol' => 'AJP/1.3'
+    'protocol' => 'AJP/1.3',
+    'URIEncoding' => 'UTF-8'
   }
   ajp['redirectPort'] = new_resource.ssl_port if new_resource.ssl_port
   ajp.merge!(new_resource.ajp_additional || {})
