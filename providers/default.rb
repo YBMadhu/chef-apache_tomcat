@@ -142,6 +142,7 @@ action :configure do
   user_ulimit new_resource.user do
     filehandle_limit nofiles
     process_limit nprocs
+    only_if { nofiles || nprocs }
   end
 
   setenv_sh = ::File.join(new_resource.home, 'bin', 'setenv.sh')
