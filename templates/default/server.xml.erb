@@ -56,75 +56,47 @@
        Documentation at /docs/config/service.html
    -->
   <Service name="Catalina">
-  <% if @thread_pool && @thread_pool['name'] %>
 
-    <!-- Define a shared executor (thread pool) -->
+  <% if @thread_pool %>
+    <!-- Define a shared executor using a named thread pool -->
     <Executor name="<%= @thread_pool['name'] %>"
-              namePrefix="<%= @thread_pool['namePrefix'] || 'catalina-exec-' %>"
-    <% @thread_pool.each do |k, v| %>
-      <% next if %(name namePrefix).include?(k) %>
+    <% @http.each do |k, v| %>
+      <% next if k == 'name' %>
               <%= k %>="<%= v %>"
     <% end %>
-              />
-  <% end %>
+               />
 
-    <!-- A "Connector" represents an endpoint by which requests are received
-         and responses are returned. Documentation at :
-         Java HTTP Connector: /docs/config/http.html (blocking & non-blocking)
-         Java AJP  Connector: /docs/config/ajp.html
-         APR (HTTP/AJP) Connector: /docs/apr.html
-    -->
-  <% if @http && @http['port'] %>
-    <!-- Define a non-SSL HTTP Connector on port <%= @http['port'] %>  -->
+  <% end %>
+  <% if @http %>
+    <!-- Define a non-SSL HTTP Connector on port <%= @http['port'] %> -->
     <Connector port="<%= @http['port'] %>"
-               protocol="<%= @http['protocol'] || 'HTTP/1.1' %>"
-               URIEncoding="<%= @http['URIEncoding'] || 'UTF-8' %>"
-    <% if @ssl && @ssl['port'] && @http['redirectPort'].nil? %>
-               redirectPort="<%= @ssl['port'] %>"
-    <% end %>
-    <% if @thread_pool && @thread_pool['name'] %>
-               executor="<%= @thread_pool['name'] %>"
-    <% end %>
     <% @http.each do |k, v| %>
-      <% next if %(port protocol URIEncoding).include?(k) %>
+      <% next if k == 'port' %>
                <%= k %>="<%= v %>"
     <% end %>
                />
-  <% end %>
-  <% if @ssl && @ssl['port'] %>
 
-    <!-- Define a SSL HTTP Connector on port <%= @ssl['port'] %> -->
+  <% end %>
+  <% if @ssl %>
+    <!-- Define an SSL Connector on port <%= @ssl['port'] %> -->
     <Connector port="<%= @ssl['port'] %>"
-               protocol="<%= @ssl['protocol'] || 'org.apache.coyote.http11.Http11Protocol' %>"
-               SSLEnabled="true"
-               scheme="https"
-               secure="true"
-               URIEncoding="<%= @ssl['URIEncoding'] || 'UTF-8' %>"
-    <% if @thread_pool && @thread_pool['name'] %>
-               executor="<%= @thread_pool['name'] %>"
-    <% end %>
     <% @ssl.each do |k, v| %>
-      <% next if %(port protocol URIEncoding).include?(k) %>
+      <% next if k == 'port' %>
                <%= k %>="<%= v %>"
     <% end %>
                />
-  <% end %>
-  <% if @ajp && @ajp['port'] %>
 
+  <% end %>
+  <% if @ajp %>
     <!-- Define an AJP Connector on port <%= @ajp['port'] %> -->
     <Connector port="<%= @ajp['port'] %>"
-               protocol="<%= @ajp['protocol'] || 'AJP/1.3' %>"
-               URIEncoding="<%= @ajp['URIEncoding'] || 'UTF-8' %>"
-    <% if @ssl && @ssl['port'] && @ajp['redirectPort'].nil? %>
-               redirectPort="<%= @ssl['port'] %>"
-    <% end %>
     <% @ajp.each do |k, v| %>
-      <% next if %(port protocol URIEncoding).include?(k) %>
+      <% next if k == 'port' %>
                <%= k %>="<%= v %>"
     <% end %>
                />
-  <% end %>
 
+  <% end %>
 
     <!-- An Engine represents the entry point (within Catalina) that processes
          every request.  The Engine implementation for Tomcat stand alone
@@ -135,15 +107,7 @@
     <!-- You should set jvmRoute to support load-balancing via AJP ie :
     <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">
     -->
-    <Engine name="Catalina" defaultHost="<%= @default_host['name'] %>" <% unless @jvm_route.nil? %>jvmRoute="<%= @jvm_route %>"<% end %>>
-    <% @engine_valves.each do |name, attributes| %>
-
-      <Valve className="<%= name %>"
-      <% attributes.each do |k, v| %>
-             <%= k %>="<%= v %>"
-      <% end %>
-             />
-    <% end %>
+    <Engine name="Catalina" defaultHost="localhost">
 
       <!--For clustering, please take a look at documentation at:
           /docs/cluster-howto.html  (simple how to)
@@ -151,7 +115,14 @@
       <!--
       <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>
       -->
+    <% @engine_valves.each do |name, attributes| %>
+      <Valve className="<%= name %>"
+      <% attributes.each do |k, v| %>
+             <%= k %>="<%= v %>"
+      <% end %>
+             />
 
+    <% end %>
       <!-- Use the LockOutRealm to prevent attempts to guess user passwords
            via a brute-force attack -->
       <Realm className="org.apache.catalina.realm.LockOutRealm">
@@ -163,35 +134,33 @@
                resourceName="UserDatabase"/>
       </Realm>
 
-      <Host <% @default_host.each do |k, v| %><%= k %>="<%= v %>" <% end %>>
+      <Host name="localhost"  appBase="webapps"
+            unpackWARs="true" autoDeploy="true">
 
         <!-- SingleSignOn valve, share authentication between web applications
              Documentation at: /docs/config/valve.html -->
         <!--
         <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
         -->
-      <% @default_host_valves.each do |name, attributes| %>
+      <% @host_valves.each do |name, attributes| %>
         <Valve className="<%= name %>"
-        <% attributes.each do |k, v| %>
+        <% valve.each do |k, v| %>
                <%= k %>="<%= v %>"
         <% end %>
                />
 
       <% end %>
 
+      <% if @access_log_valve %>
         <!-- Access log processes all example.
-             Documentation at: /docs/config/valve.html
-             Note: The pattern used is equivalent to using pattern="common" -->
-        <!--
-        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
-               prefix="localhost_access_log." suffix=".txt"
-               pattern="%h %l %u %t &quot;%r&quot; %s %b" />
-        -->
-        <Valve className="org.apache.catalina.valves.AccessLogValve"
+             Documentation at: /docs/config/valve.html -->
+        <Valve className="<%= @access_log_valve['className'] %>"
         <% @access_log_valve.each do |k, v| %>
+          <% next if k == 'className' %>
                <%= k %>="<%= v %>"
         <% end %>
                />
+      <% end %>
 
       </Host>
     </Engine>

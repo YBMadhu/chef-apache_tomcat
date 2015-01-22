@@ -25,28 +25,32 @@ attribute :home, kind_of: String, name_attribute: true, required: true
 attribute :service_name, kind_of: String
 attribute :user, kind_of: String, default: node['tomcat_bin']['user']
 attribute :group, kind_of: String, default: node['tomcat_bin']['group']
-attribute :kill_delay, regex: /^[1-9][0-9]?$/, default: node['tomcat_bin']['kill_delay']
 
 attribute :version, kind_of: String, default: node['tomcat_bin']['version']
 attribute :mirror, kind_of: String, default: node['tomcat_bin']['mirror']
 attribute :checksum, kind_of: String, default: node['tomcat_bin']['checksum']
 
+attribute :kill_delay, regex: /^[1-9][0-9]?$/, default: node['tomcat_bin']['kill_delay']
 attribute :java_home, kind_of: String
 attribute :catalina_opts, kind_of: [String, Array]
 attribute :java_opts, kind_of: [String, Array]
-attribute :setenv_opts, kind_of: Array, default: []
+attribute :setenv_opts, kind_of: Array
 
-attribute :shutdown_port, kind_of: Integer, default: node['tomcat_bin']['shutdown_port']
-attribute :thread_pool, kind_of: Hash, default: node['tomcat_bin']['thread_pool']
-attribute :http, kind_of: Hash, default: node['tomcat_bin']['http']
-attribute :ssl, kind_of: Hash, default: node['tomcat_bin']['ssl']
-attribute :ajp, kind_of: Hash, default: node['tomcat_bin']['ajp']
-attribute :engine_valves, kind_of: Hash, default: node['tomcat_bin']['engine_valves']
-attribute :default_host, kind_of: Hash, default: node['tomcat_bin']['default_host']
-attribute :default_host_valves, kind_of: Hash, default: node['tomcat_bin']['default_host_valves']
-attribute :access_log_valve, kind_of: Hash, default: node['tomcat_bin']['access_log_valve']
-attribute :log_dir, kind_of: String, default: 'logs'
+attribute :shutdown_port, kind_of: Integer
+attribute :pool_enabled, equal_to: [true, false], default: false
+attribute :pool_additional, kind_of: Hash
+attribute :http_port, kind_of: Integer
+attribute :http_additional, kind_of: Hash
+attribute :ssl_port, kind_of: Integer
+attribute :ssl_additional, kind_of: Hash
+attribute :ajp_port, kind_of: Integer
+attribute :ajp_additional, kind_of: Hash
+attribute :engine_valves, kind_of: Hash
+attribute :host_valves, kind_of: Hash
+attribute :access_log_enabled, equal_to: [true, false], default: false
+attribute :access_log_additional, kind_of: Hash
 
+attribute :log_dir, kind_of: String
 attribute :logs_rotatable, equal_to: [true, false], default: node['tomcat_bin']['logs_rotatable']
 attribute :logrotate_count, kind_of: Integer, default: node['tomcat_bin']['logrotate_count']
 attribute :logrotate_frequency, kind_of: String, default: node['tomcat_bin']['logrotate_frequency']

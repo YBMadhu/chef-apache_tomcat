@@ -8,6 +8,9 @@
 <%= item %>
   <% end %>
 <% end %>
+<% if @catalina_out_dir %>
+CATALINA_OUT="<%= @catalina_out_dir %>/catalina.out"
+<% end %>
 <% if @java_home %>
 JAVA_HOME="<%= @java_home %>"
 <% end %>

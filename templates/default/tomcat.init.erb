@@ -15,37 +15,36 @@
 # Short-Description: Start and stop Tomcat
 ### END INIT INFO
 
-if [ $UID -ne "0" ]; then
-   echo "You must run this program with root permissions..."
-   exit 4
-fi
-
 RUNAS=<%= @tomcat_user %>
 PID_DIR=/var/run/tomcat
-
-[[ -d "$PID_DIR" ]] || mkdir -p $PID_DIR
-chown $RUNAS: "$PID_DIR"
+KILL_WAIT=<%= @kill_delay || 45 %>
 
 export CATALINA_HOME=<%= @tomcat_home %>
 export CATALINA_BASE=<%= @tomcat_home %>
 export CATALINA_PID="$PID_DIR/<%= @tomcat_name %>.pid"
 
-if [[ -z "$CATALINA_HOME" ]]
-then
-    echo CATALINA_HOME must be set!
+if [ -z "$CATALINA_HOME" ]; then
+    echo "CATALINA_HOME must be set!"
     exit 5
 fi
 
+require_root() {
+    if [ $(id -u) -ne 0 ]; then
+        echo "Root permission is required for this operation"
+        exit 4
+    fi
+}
+
 tomcat_start() {
+    require_root
+    [ -d "$DIRECTORY" ] || mkdir -p $PID_DIR
+    chown $RUNAS: "$PID_DIR"
     /bin/su -p -s /bin/sh -c "$CATALINA_HOME/bin/catalina.sh start" $RUNAS
 }
 
 tomcat_stop() {
-<% if @kill_delay %>
-    /bin/su -p -s /bin/sh -c "$CATALINA_HOME/bin/catalina.sh stop <%= @kill_delay %> -force" $RUNAS
-<% else %>
-    /bin/su -p -s /bin/sh -c "$CATALINA_HOME/bin/catalina.sh stop" $RUNAS
-<% end %>
+    require_root
+    /bin/su -p -s /bin/sh -c "$CATALINA_HOME/bin/catalina.sh stop $KILL_WAIT -force" $RUNAS
 }
 
 tomcat_status() {

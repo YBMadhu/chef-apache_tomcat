@@ -26,8 +26,91 @@ def service_name
   new_resource.service_name || ::File.basename(new_resource.home)
 end
 
+def http_connector
+  return unless new_resource.http_port
+  http = {
+    'port' => new_resource.http_port,
+    'protocol' => 'HTTP/1.1',
+    'connectionTimeout' => '20000',
+    'URIEncoding' => 'UTF-8'
+  }
+  http['executor'] = thread_pool['name'] if thread_pool
+  http['redirectPort'] = new_resource.ssl_port if new_resource.ssl_port
+  http.merge!(new_resource.http_additional || {})
+end
+
+def ssl_connector
+  return unless new_resource.ssl_port
+  ssl = {
+    'port' => new_resource.ssl_port,
+    'protocol' => 'HTTP/1.1',
+    'connectionTimeout' => '20000',
+    'SSLEnabled' => 'true',
+    'scheme' => 'https',
+    'secure' => 'true',
+    'sslProtocol' => 'TLS',
+    'clientAuth' => 'false'
+  }
+  ssl['executor'] = thread_pool['name'] if thread_pool
+  ssl.merge!(new_resource.ssl_additional || {})
+end
+
+def thread_pool
+  return unless new_resource.pool_enabled
+  {
+    'name' => 'tomcatThreadPool',
+    'namePrefix' => 'catalina-exec-'
+  }.merge!(new_resource.pool_additional || {})
+end
+
+def ajp_connector
+  return unless new_resource.ajp_port
+  ajp = {
+    'port' => new_resource.ajp_port,
+    'protocol' => 'AJP/1.3'
+  }
+  ajp['redirectPort'] = new_resource.ssl_port if new_resource.ssl_port
+  ajp.merge!(new_resource.ajp_additional || {})
+end
+
+def access_log_valve
+  return unless new_resource.access_log_enabled
+  valve = {
+    'className' => 'org.apache.catalina.valves.AccessLogValve',
+    'prefix' => 'localhost_access_log.',
+    'suffix' => '.log',
+    'pattern' => 'common'
+  }
+  valve['rotatable'] = new_resource.logs_rotatable
+  valve['prefix'].chomp!('.') unless new_resource.logs_rotatable
+  valve.merge!(new_resource.access_log_additional || {})
+  valve['directory'] = log_dir
+  valve
+end
+
+def logs_absolute?
+  ::Pathname.new(log_dir).absolute?
+end
+
+def log_dir
+  new_resource.log_dir || 'logs'
+end
+
+def absolute_log_dir
+  return log_dir if ::Pathname.new(log_dir).absolute?
+  ::File.join(new_resource.home, log_dir)
+end
+
+def absolute_log_path(file, dir = log_dir)
+  if logs_absolute?
+    ::File.join(dir, file)
+  else
+    ::File.join(new_resource.home, dir, file)
+  end
+end
+
 action :install do
-  # run_context.include_recipe 'ark'
+  package 'gzip'
 
   group new_resource.group do
     system true
@@ -66,6 +149,13 @@ action :configure do
   logging_properties =
     ::File.join(new_resource.home, 'conf', 'logging.properties')
 
+  directory absolute_log_dir do
+    not_if { log_dir == 'logs' }
+    recursive true
+    owner new_resource.user
+    group new_resource.group
+  end
+
   template "/etc/init.d/#{service_name}" do
     source 'tomcat.init.erb'
     variables(
@@ -90,7 +180,8 @@ action :configure do
       java_home: new_resource.java_home,
       catalina_opts: new_resource.catalina_opts,
       java_opts: new_resource.java_opts,
-      additional: new_resource.setenv_opts
+      additional: new_resource.setenv_opts,
+      catalina_out_dir: log_dir == 'logs' ? nil : absolute_log_dir
     )
     cookbook new_resource.setenv_cookbook
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
@@ -103,14 +194,13 @@ action :configure do
     group new_resource.group
     variables(
       shutdown_port: new_resource.shutdown_port,
-      thread_pool: new_resource.thread_pool,
-      http: new_resource.http,
-      ssl: new_resource.ssl,
-      ajp: new_resource.ajp,
-      engine_valves: new_resource.engine_valves,
-      default_host: new_resource.default_host,
-      default_host_valves: new_resource.default_host_valves,
-      access_log_valve: new_resource.access_log_valve
+      thread_pool: thread_pool,
+      http: http_connector,
+      ssl: ssl_connector,
+      ajp: ajp_connector,
+      engine_valves: new_resource.engine_valves || {},
+      host_valves: new_resource.host_valves || {},
+      access_log_valve: access_log_valve
     )
     cookbook new_resource.server_xml_cookbook
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
@@ -122,7 +212,8 @@ action :configure do
     owner new_resource.user
     group new_resource.group
     variables(
-      rotatable: new_resource.logs_rotatable
+      rotatable: new_resource.logs_rotatable,
+      log_dir: logs_absolute? ? absolute_log_dir : "${catalina.base}/#{log_dir}"
     )
     cookbook new_resource.logging_properties_cookbook
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
@@ -130,14 +221,12 @@ action :configure do
 
   logs = %w(catalina.out)
   unless new_resource.logs_rotatable
-    logs.concat [
-      'catalina.log',
-      'manager.log',
-      'host-manager.log',
-      'localhost.log',
-      new_resource.access_log_valve['prefix'] +
-        new_resource.access_log_valve['suffix']
-    ]
+    logs.concat %w(catalina.log manager.log host-manager.log localhost.log)
+  end
+  log_paths = logs.map { |log| ::File.join(absolute_log_dir, log) }
+  if access_log_valve
+    fname = access_log_valve['prefix'] + access_log_valve['suffix']
+    log_paths << ::File.join(absolute_log_dir, fname)
   end
 
   template "/etc/logrotate.d/#{service_name}" do
@@ -146,7 +235,7 @@ action :configure do
     owner 'root'
     group 'root'
     variables(
-      files: logs.map { |log| ::File.join(new_resource.home, 'logs', log) },
+      files: log_paths,
       frequency: new_resource.logrotate_frequency,
       rotate: new_resource.logrotate_count
     )

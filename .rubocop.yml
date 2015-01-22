@@ -11,4 +11,10 @@ AllCops:
 Style/SingleSpaceBeforeFirstArg:
   Enabled: false
 
+Metrics/AbcSize:
+  Max: 18
+
+Metrics/MethodLength:
+  Max: 20
+
 #inherit_from: .rubocop_todo.yml

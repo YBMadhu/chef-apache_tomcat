@@ -12,18 +12,41 @@ platforms:
 suites:
   - name: default
     run_list:
+      - 'recipe[java]'
+      - 'recipe[tomcat_bin::default]'
+    attributes:
+      tomcat_bin:
+        install_java: true
+      java:
+        jdk_version: '7'
+  - name: custom
+    run_list:
+      - 'recipe[java]'
       - 'recipe[tomcat_bin::default]'
     attributes:
       tomcat_bin:
         install_java: true
         home: '/opt/tomcat7'
-        thread_pool: 'tomcatThreadPool'
-        http:
-          port: 8080
-          connectionTimeout: 20_000
-        ssl:
-          port: 8443
-        ajp:
-          port: 8009
+        log_dir: '/var/log/tomcat7'
+        logrotate_frequency: monthly
+        logrotate_count: 12
+        shutdown_port: 9005
+        ajp_port: 9009
+        http_port: 9080
+        http_additional:
+          protocol: org.apache.coyote.http11.Http11NioProtocol
+        ssl_port: 9443
+        ssl_additional:
+          protocol: org.apache.coyote.http11.Http11NioProtocol
+        pool_enabled: true
+        pool_additional:
+          maxThreads: 250
+          minSpareThreads: 25
+        access_log_enabled: true
+        engine_valves:
+          org.apache.catalina.valves.RemoteIpValve:
+            internalProxies: 127\.0\.0\.1
+            protocolHeader: x-forwarded-proto
+            portHeader: x-forwarded-port
       java:
         jdk_version: '7'
