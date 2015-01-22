@@ -19,24 +19,24 @@
 # rubocop:disable Metrics/LineLength
 
 actions :install, :configure, :restart
-default_action :configure
+default_action :install
 
 attribute :home, kind_of: String, name_attribute: true, required: true
 attribute :service_name, kind_of: String
-attribute :user, kind_of: String, default: node['tomcat_bin']['user']
-attribute :group, kind_of: String, default: node['tomcat_bin']['group']
+attribute :user, kind_of: String, default: 'tomcat'
+attribute :group, kind_of: String, default: 'tomcat'
 
 attribute :version, kind_of: String, default: node['tomcat_bin']['version']
 attribute :mirror, kind_of: String, default: node['tomcat_bin']['mirror']
 attribute :checksum, kind_of: String, default: node['tomcat_bin']['checksum']
 
-attribute :kill_delay, regex: /^[1-9][0-9]?$/, default: node['tomcat_bin']['kill_delay']
+attribute :kill_delay, regex: /^[1-9][0-9]?$/
 attribute :java_home, kind_of: String
 attribute :catalina_opts, kind_of: [String, Array]
 attribute :java_opts, kind_of: [String, Array]
 attribute :setenv_opts, kind_of: Array
 
-attribute :shutdown_port, kind_of: Integer
+attribute :shutdown_port, kind_of: Integer, required: true
 attribute :pool_enabled, equal_to: [true, false], default: false
 attribute :pool_additional, kind_of: Hash
 attribute :http_port, kind_of: Integer
@@ -51,12 +51,12 @@ attribute :access_log_enabled, equal_to: [true, false], default: false
 attribute :access_log_additional, kind_of: Hash
 
 attribute :log_dir, kind_of: String
-attribute :logs_rotatable, equal_to: [true, false], default: node['tomcat_bin']['logs_rotatable']
-attribute :logrotate_count, kind_of: Integer, default: node['tomcat_bin']['logrotate_count']
-attribute :logrotate_frequency, kind_of: String, default: node['tomcat_bin']['logrotate_frequency']
+attribute :logs_rotatable, equal_to: [true, false], default: false
+attribute :logrotate_count, kind_of: Integer, default: 4
+attribute :logrotate_frequency, kind_of: String, default: 'weekly'
 
-attribute :ulimit_nofile, kind_of: Integer, default: node['tomcat_bin']['ulimit_nofile']
-attribute :ulimit_nproc, kind_of: Integer, default: node['tomcat_bin']['ulimit_nproc']
+attribute :ulimit_nofile, kind_of: Integer
+attribute :ulimit_nproc, kind_of: Integer
 
 attribute :init_cookbook, kind_of: String, default: 'tomcat_bin'
 attribute :setenv_cookbook, kind_of: String, default: 'tomcat_bin'
