@@ -1,6 +1,7 @@
 require_relative 'spec_helper'
 
 describe 'tomcat_bin::default' do
+  let(:log_dir) { 'logs' }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['tomcat_bin']) do |node|
       node.set['tomcat_bin']['mirror'] = 'https://getstuff.org/blah'
@@ -8,15 +9,18 @@ describe 'tomcat_bin::default' do
         'c0ca44be20bccebbb043ccd7ab5ea4d94060fdde6bb84812f3da363955dae5bb'
       node.set['tomcat_bin']['version'] = '7.7.77'
       node.set['tomcat_bin']['home'] = '/var/tomcat7'
-      node.set['tomcat_bin']['logrotate']['enabled'] = true
-      node.set['tomcat_bin']['logrotate']['frequency'] = 'daily'
-      node.set['tomcat_bin']['logrotate']['rotate'] = 7
-      node.set['tomcat_bin']['install_java'] = true
+      node.set['tomcat_bin']['logs_rotatable'] = false
+      node.set['tomcat_bin']['logrotate_frequency'] = 'daily'
+      node.set['tomcat_bin']['logrotate_rotate'] = 7
+      node.set['tomcat_bin']['log_dir'] = log_dir
     end.converge(described_recipe)
   end
 
-  it 'includes the java recipe' do
-    expect(chef_run).to include_recipe('java')
+  let(:init_template) { chef_run.template('/etc/init.d/tomcat7') }
+  let(:setenv_template) { chef_run.template('/var/tomcat7/bin/setenv.sh') }
+  let(:server_template) { chef_run.template('/var/tomcat7/conf/server.xml') }
+  let(:log_template) do
+    chef_run.template('/var/tomcat7/conf/logging.properties')
   end
 
   it 'includes the logrotate recipe' do
@@ -39,6 +43,10 @@ describe 'tomcat_bin::default' do
     expect(chef_run).to configure_tomcat_bin('/var/tomcat7')
   end
 
+  it 'installs the gzip package' do
+    expect(chef_run).to install_package('gzip')
+  end
+
   it 'puts tomcat binaries with ark' do
     expect(chef_run).to put_ark('tomcat7').with(
       url: 'https://getstuff.org/blah/7.7.77/tomcat-7.7.77.tar.gz',
@@ -50,12 +58,37 @@ describe 'tomcat_bin::default' do
       group: 'tomcat')
   end
 
+  context 'when log_dir is logs' do
+    let(:log_dir) { 'logs' }
+    it 'does not create log directory' do
+      expect(chef_run).not_to create_directory('/var/tomcat7/logs')
+    end
+  end
+
+  context 'when log_dir is relative' do
+    let(:log_dir) { 'my_logs' }
+    it 'creates log_dir relative to tomcat home' do
+      expect(chef_run).to create_directory('/var/tomcat7/my_logs')
+    end
+  end
+
+  context 'when log_dir is absolute' do
+    let(:log_dir) { '/var/log/my_tomcat_logs' }
+    it 'creates absolute log_dir' do
+      expect(chef_run).to create_directory('/var/log/my_tomcat_logs')
+    end
+  end
+
   it 'creates tomcat init template' do
     expect(chef_run).to create_template('/etc/init.d/tomcat7').with(
       mode: 0755,
       owner: 'root',
       group: 'root',
       source: 'tomcat.init.erb')
+  end
+
+  it 'init template notifies restart ruby_block' do
+    expect(init_template).to notify('ruby_block[restart_tomcat7]').immediately
   end
 
   it 'creates setenv.sh template' do
@@ -66,12 +99,20 @@ describe 'tomcat_bin::default' do
       source: 'setenv.sh.erb')
   end
 
+  it 'setenv.sh template notifies restart ruby_block' do
+    expect(setenv_template).to notify('ruby_block[restart_tomcat7]').immediately
+  end
+
   it 'creates server.xml template' do
     expect(chef_run).to create_template('/var/tomcat7/conf/server.xml').with(
       mode: 0755,
       owner: 'tomcat',
       group: 'tomcat',
       source: 'server.xml.erb')
+  end
+
+  it 'server.xml template notifies restart ruby_block' do
+    expect(server_template).to notify('ruby_block[restart_tomcat7]').immediately
   end
 
   it 'creates logging.properties template' do
@@ -83,12 +124,21 @@ describe 'tomcat_bin::default' do
         source: 'logging.properties.erb')
   end
 
+  it 'logging.properties template notifies restart ruby_block' do
+    expect(log_template).to notify('ruby_block[restart_tomcat7]').immediately
+  end
+
   it 'enables tomcat service' do
     expect(chef_run).to enable_service('tomcat7')
   end
 
   it 'starts tomcat service' do
     expect(chef_run).to start_service('tomcat7')
+  end
+
+  it 'restart ruby_block does nothing' do
+    resource = chef_run.ruby_block('restart_tomcat7')
+    expect(resource).to do_nothing
   end
 
   it 'creates logrotate template' do
