@@ -21,7 +21,7 @@ include_recipe 'logrotate'
 tomcat_bin node['tomcat_bin']['home'] do
   user node['tomcat_bin']['user']
   group node['tomcat_bin']['group']
-  service_name['tomcat_bin']['service_name']
+  service_name node['tomcat_bin']['service_name']
   version node['tomcat_bin']['version']
   mirror node['tomcat_bin']['mirror']
   checksum node['tomcat_bin']['checksum']
