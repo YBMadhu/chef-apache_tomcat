@@ -16,7 +16,7 @@
 ### END INIT INFO
 
 RUNAS=<%= @tomcat_user %>
-PID_DIR=/var/run/tomcat
+PID_DIR=/var/run/<%= @tomcat_name %>
 KILL_WAIT=<%= @kill_delay || 45 %>
 
 export CATALINA_HOME=<%= @tomcat_home %>

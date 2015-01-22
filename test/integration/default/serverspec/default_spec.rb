@@ -64,3 +64,7 @@ end
 describe file('/opt/tomcat/logs/localhost_access_log.log') do
   it { should_not be_file }
 end
+
+describe file('/var/run/tomcat/tomcat.pid') do
+  it { should be_file }
+end
