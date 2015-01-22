@@ -60,7 +60,7 @@
   <% if @thread_pool %>
     <!-- Define a shared executor using a named thread pool -->
     <Executor name="<%= @thread_pool['name'] %>"
-    <% @http.each do |k, v| %>
+    <% @thread_pool.each do |k, v| %>
       <% next if k == 'name' %>
               <%= k %>="<%= v %>"
     <% end %>
@@ -144,7 +144,7 @@
         -->
       <% @host_valves.each do |name, attributes| %>
         <Valve className="<%= name %>"
-        <% valve.each do |k, v| %>
+        <% attributes.each do |k, v| %>
                <%= k %>="<%= v %>"
         <% end %>
                />
