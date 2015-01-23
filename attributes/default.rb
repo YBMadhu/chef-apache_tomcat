@@ -24,6 +24,9 @@ default['tomcat_bin']['catalina_opts'] = nil
 default['tomcat_bin']['java_opts'] = nil
 default['tomcat_bin']['java_home'] = nil
 default['tomcat_bin']['setenv_additional'] = nil
+default['tomcat_bin']['initial_heap_size'] = nil
+default['tomcat_bin']['max_heap_size'] = nil
+default['tomcat_bin']['max_perm_size'] = nil
 
 # Server.xml settings
 default['tomcat_bin']['shutdown_port'] = 8005

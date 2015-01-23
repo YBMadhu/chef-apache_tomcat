@@ -90,6 +90,21 @@ def access_log_valve
   valve
 end
 
+def catalina_opts
+  opts = []
+  {
+    '-Xms' => new_resource.initial_heap_size,
+    '-Xmx' => new_resource.max_heap_size,
+    '-XX:MaxPermSize=' => new_resource.max_perm_size
+  }.each { |k, v| opts << k + v unless v.nil? || v.empty? }
+  if new_resource.catalina_opts.is_a?(String)
+    opts.concat new_resource.catalina_opts.split(' ')
+  elsif new_resource.catalina_opts.is_a?(Array)
+    opts.concat new_resource.catalina_opts
+  end
+  opts
+end
+
 def logs_absolute?
   ::Pathname.new(log_dir).absolute?
 end
@@ -181,7 +196,7 @@ action :configure do
     group new_resource.group
     variables(
       java_home: new_resource.java_home,
-      catalina_opts: new_resource.catalina_opts,
+      catalina_opts: catalina_opts,
       java_opts: new_resource.java_opts,
       additional: new_resource.setenv_opts,
       catalina_out_dir: log_dir == 'logs' ? nil : absolute_log_dir

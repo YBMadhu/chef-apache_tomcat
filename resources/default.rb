@@ -35,6 +35,9 @@ attribute :java_home, kind_of: String
 attribute :catalina_opts, kind_of: [String, Array]
 attribute :java_opts, kind_of: [String, Array]
 attribute :setenv_opts, kind_of: Array
+attribute :initial_heap_size, kind_of: String
+attribute :max_heap_size, kind_of: String
+attribute :max_perm_size, kind_of: String
 
 attribute :shutdown_port, kind_of: Integer, required: true
 attribute :pool_enabled, equal_to: [true, false], default: false

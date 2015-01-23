@@ -23,6 +23,7 @@ Install and/or configure an instance of tomcat.
 
 #### Attributes
 * `home` - required install directory of tomcat; default: name of resource block
+* `service_name` - optional name of service (defaults to basename of `home`)
 * `user` - user running tomcat; default: `tomcat`
 * `group` - primary group of tomcat user; default: `tomcat`
 * `mirror` - url to apache tomcat mirror (defaults to node attribute)
@@ -38,6 +39,10 @@ tomcat will not rotate logs but logrotate will.
 * `ulimit_nofile` - optional open file ulimit for tomcat user
 * `ulimit_nproc` - optional num procs ulimit for tomcat user
 * `kill_delay` - seconds to wait before kill -9 on service stop/restart; default: 45
+* `initial_heap_size` - optional java initial heap size (-Xms) added to CATALINA_OPTS
+* `max_heap_size` - optional java max heap size (-Xmx) added to CATALINA_OPTS
+* `max_perm_size` - optional java max permanent size (-XX:MaxPermSize)
+added to CATALINA_OPTS
 * `catalina_opts` - optional string or array of CATALINA_OPTS in setenv.sh
 * `java_opts` - optional string or array of JAVA_OPTS in setenv.sh
 * `java_home` - optional JAVA_HOME in setenv.sh

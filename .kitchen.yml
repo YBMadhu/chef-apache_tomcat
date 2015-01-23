@@ -30,6 +30,8 @@ suites:
         log_dir: '/var/log/tomcat7'
         logrotate_frequency: monthly
         logrotate_count: 12
+        initial_heap_size: 256m
+        max_heap_size: 512m
         shutdown_port: 9005
         ajp_port: 9009
         http_port: 9080

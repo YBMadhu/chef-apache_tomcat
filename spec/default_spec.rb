@@ -1,6 +1,9 @@
 require_relative 'spec_helper'
 
 describe 'tomcat_bin::default' do
+  let(:initial_heap_size) { nil }
+  let(:max_heap_size) { nil }
+  let(:max_perm_size) { nil }
   let(:log_dir) { 'logs' }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['tomcat_bin']) do |node|
@@ -13,6 +16,9 @@ describe 'tomcat_bin::default' do
       node.set['tomcat_bin']['logrotate_frequency'] = 'daily'
       node.set['tomcat_bin']['logrotate_rotate'] = 7
       node.set['tomcat_bin']['log_dir'] = log_dir
+      node.set['tomcat_bin']['initial_heap_size'] = initial_heap_size
+      node.set['tomcat_bin']['max_heap_size'] = max_heap_size
+      node.set['tomcat_bin']['max_perm_size'] = max_perm_size
     end.converge(described_recipe)
   end
 
@@ -148,5 +154,39 @@ describe 'tomcat_bin::default' do
         owner: 'root',
         group: 'root',
         source: 'logrotate.erb')
+  end
+
+  context 'when java heap options set' do
+    let(:initial_heap_size) { '384m' }
+    let(:max_heap_size) { '1024m' }
+    let(:max_perm_size) { '256m' }
+
+    it 'renders correct initial_heap_size in setenv.sh' do
+      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(/CATALINA_OPTS=.*?-Xms384m/)
+    end
+    it 'renders correct max_heap_size in setenv.sh' do
+      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(/CATALINA_OPTS=.*?-Xmx1024m/)
+    end
+    it 'renders correct max_perm_size in setenv.sh' do
+      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(/^CATALINA_OPTS=.*?-XX:MaxPermSize=256m/)
+    end
+  end
+
+  context 'when java heap options nil' do
+    it 'initial_heap_size not in setenv.sh' do
+      expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(/-Xms/)
+    end
+    it 'max_heap_size not in in setenv.sh' do
+      expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(/-Xmx1024m/)
+    end
+    it 'max_perm_size not in setenv.sh' do
+      expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(/-XX:MaxPermSize=/)
+    end
   end
 end

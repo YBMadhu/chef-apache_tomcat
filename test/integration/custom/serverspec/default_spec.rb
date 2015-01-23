@@ -4,6 +4,8 @@ set :backend, :exec
 
 describe file('/opt/tomcat7/bin/setenv.sh') do
   it { should be_file }
+  its(:content) { should match(/^CATALINA_OPTS=.*?-Xms256m/) }
+  its(:content) { should match(/^CATALINA_OPTS=.*?-Xmx512m/) }
 end
 
 describe file('/opt/tomcat7/conf/server.xml') do
