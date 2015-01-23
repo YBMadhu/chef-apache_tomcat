@@ -4,6 +4,8 @@ describe 'tomcat_bin::default' do
   let(:initial_heap_size) { nil }
   let(:max_heap_size) { nil }
   let(:max_perm_size) { nil }
+  let(:catalina_opts) { nil }
+  let(:java_opts) { nil }
   let(:log_dir) { 'logs' }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['tomcat_bin']) do |node|
@@ -19,6 +21,8 @@ describe 'tomcat_bin::default' do
       node.set['tomcat_bin']['initial_heap_size'] = initial_heap_size
       node.set['tomcat_bin']['max_heap_size'] = max_heap_size
       node.set['tomcat_bin']['max_perm_size'] = max_perm_size
+      node.set['tomcat_bin']['catalina_opts'] = catalina_opts
+      node.set['tomcat_bin']['java_opts'] = java_opts
     end.converge(described_recipe)
   end
 
@@ -156,6 +160,52 @@ describe 'tomcat_bin::default' do
         source: 'logrotate.erb')
   end
 
+  context 'when catalina_opts not set' do
+    it 'setenv.sh does not include CATALINA_OPTS' do
+      expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(/CATALINA_OPTS/)
+    end
+  end
+
+  context 'when catalina_opts is array' do
+    let(:catalina_opts) { %w(thing1 thing2) }
+    it 'renders correct CATALINA_OPTS' do
+      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(/^CATALINA_OPTS=\"thing1 thing2\"/)
+    end
+  end
+
+  context 'when catalina_opts is string' do
+    let(:catalina_opts) { 'thing3 thing4' }
+    it 'renders correct CATALINA_OPTS' do
+      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(/^CATALINA_OPTS=\"thing3 thing4\"/)
+    end
+  end
+
+  context 'when java_opts not set' do
+    it 'setenv.sh does not include JAVA_OPTS' do
+      expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(/JAVA_OPTS/)
+    end
+  end
+
+  context 'when java_opts is array' do
+    let(:java_opts) { %w(thing1 thing2) }
+    it 'renders correct JAVA_OPTS' do
+      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(/^JAVA_OPTS=\"thing1 thing2\"/)
+    end
+  end
+
+  context 'when java_opts is string' do
+    let(:java_opts) { 'thing3 thing4' }
+    it 'renders correct JAVA_OPTS' do
+      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(/^JAVA_OPTS=\"thing3 thing4\"/)
+    end
+  end
+
   context 'when java heap options set' do
     let(:initial_heap_size) { '384m' }
     let(:max_heap_size) { '1024m' }
@@ -182,7 +232,7 @@ describe 'tomcat_bin::default' do
     end
     it 'max_heap_size not in in setenv.sh' do
       expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
-        .with_content(/-Xmx1024m/)
+        .with_content(/-Xmx/)
     end
     it 'max_perm_size not in setenv.sh' do
       expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
