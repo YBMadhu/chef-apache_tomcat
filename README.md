@@ -26,6 +26,7 @@ Install and/or configure an instance of tomcat.
 * `service_name` - optional name of service (defaults to basename of `home`)
 * `user` - user running tomcat; default: `tomcat`
 * `group` - primary group of tomcat user; default: `tomcat`
+* `service_name` - optional name of service (defaults to basename of `home`)
 * `mirror` - url to apache tomcat mirror (defaults to node attribute)
 * `version` - version of tomcat to download/install (defaults to node attribute)
 * `checksum` - sha256 checksum of downloaded tarball (defaults to node attribute
