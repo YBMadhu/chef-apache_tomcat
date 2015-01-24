@@ -15,16 +15,8 @@ CATALINA_OUT="<%= @catalina_out_dir %>/catalina.out"
 JAVA_HOME="<%= @java_home %>"
 <% end %>
 <% unless @java_opts.nil? || @java_opts.empty? %>
-  <% if @java_opts.is_a?(Array) %>
-JAVA_OPTS="<%= @java_opts.join(' ') %>"
-  <% elsif @java_opts %>
 JAVA_OPTS="<%= @java_opts %>"
-  <% end %>
 <% end %>
 <% unless @catalina_opts.nil? || @catalina_opts.empty? %>
-  <% if @catalina_opts.is_a?(Array) %>
-CATALINA_OPTS="<%= @catalina_opts.join(' ') %>"
-  <% elsif @catalina_opts %>
 CATALINA_OPTS="<%= @catalina_opts %>"
-  <% end %>
 <% end %>

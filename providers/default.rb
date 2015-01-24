@@ -91,18 +91,13 @@ def access_log_valve
 end
 
 def catalina_opts
-  opts = []
-  {
+  opts = {
     '-Xms' => new_resource.initial_heap_size,
     '-Xmx' => new_resource.max_heap_size,
     '-XX:MaxPermSize=' => new_resource.max_perm_size
-  }.each { |k, v| opts << k + v unless v.nil? || v.empty? }
-  if new_resource.catalina_opts.is_a?(String)
-    opts.concat new_resource.catalina_opts.split(' ')
-  elsif new_resource.catalina_opts.is_a?(Array)
-    opts.concat new_resource.catalina_opts
-  end
-  opts
+  }.map { |k, v|  k + v unless v.nil? || v.empty? }
+  opts << new_resource.catalina_opts
+  opts.reject! { |o| o.nil? || o.empty? }.join(' ')
 end
 
 def logs_absolute?

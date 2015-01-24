@@ -167,14 +167,6 @@ describe 'tomcat_bin::default' do
     end
   end
 
-  context 'when catalina_opts is array' do
-    let(:catalina_opts) { %w(thing1 thing2) }
-    it 'renders correct CATALINA_OPTS' do
-      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
-        .with_content(/^CATALINA_OPTS=\"thing1 thing2\"/)
-    end
-  end
-
   context 'when catalina_opts is string' do
     let(:catalina_opts) { 'thing3 thing4' }
     it 'renders correct CATALINA_OPTS' do
@@ -187,14 +179,6 @@ describe 'tomcat_bin::default' do
     it 'setenv.sh does not include JAVA_OPTS' do
       expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
         .with_content(/JAVA_OPTS/)
-    end
-  end
-
-  context 'when java_opts is array' do
-    let(:java_opts) { %w(thing1 thing2) }
-    it 'renders correct JAVA_OPTS' do
-      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
-        .with_content(/^JAVA_OPTS=\"thing1 thing2\"/)
     end
   end
 
