@@ -36,7 +36,6 @@ tomcat_bin node['tomcat_bin']['home'] do
   jmx_authenticate node['tomcat_bin']['jmx_authenticate']
   jmx_monitor_password node['tomcat_bin']['jmx_monitor_password']
   jmx_control_password node['tomcat_bin']['jmx_control_password']
-  jmx_dir node['tomcat_bin']['jmx_dir']
   shutdown_port node['tomcat_bin']['shutdown_port']
   pool_enabled node['tomcat_bin']['pool_enabled']
   pool_additional node['tomcat_bin']['pool_additional']

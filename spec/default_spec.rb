@@ -1,3 +1,4 @@
+# rubocop:disable Metrics/LineLength
 require_relative 'spec_helper'
 
 describe 'tomcat_bin::default' do
@@ -9,7 +10,6 @@ describe 'tomcat_bin::default' do
   let(:jmx_monitor_password) { nil }
   let(:jmx_control_password) { nil }
   let(:jmx_authenticate) { true }
-  let(:jmx_dir) { nil }
   let(:java_opts) { nil }
   let(:log_dir) { 'logs' }
   let(:chef_run) do
@@ -32,7 +32,6 @@ describe 'tomcat_bin::default' do
       node.set['tomcat_bin']['jmx_authenticate'] = jmx_authenticate
       node.set['tomcat_bin']['jmx_monitor_password'] = jmx_monitor_password
       node.set['tomcat_bin']['jmx_control_password'] = jmx_control_password
-      node.set['tomcat_bin']['jmx_dir'] = jmx_dir
     end.converge(described_recipe)
   end
 
@@ -258,8 +257,7 @@ describe 'tomcat_bin::default' do
         .with(owner: 'tomcat', group: 'tomcat', mode: '0755')
     end
     it 'creates jmxremote.password template' do
-      expect(chef_run).to create_template(
-        '/var/tomcat7/conf/jmxremote.password').with(
+      expect(chef_run).to create_template('/var/tomcat7/conf/jmxremote.password').with(
         owner: 'tomcat',
         group: 'tomcat',
         mode: '0600')
@@ -272,15 +270,13 @@ describe 'tomcat_bin::default' do
       expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
         .with_content(' -Dcom.sun.management.jmxremote.ssl=false')
     end
-
-    context 'when jmx_dir set' do
-      let(:jmx_dir) { '/my/dir' }
-      it 'creates jmxremote.access template in correct directory' do
-        expect(chef_run).to create_template('/my/dir/jmxremote.access')
-      end
-      it 'creates jmxremote.password template in correct directory' do
-        expect(chef_run).to create_template('/my/dir/jmxremote.password')
-      end
+    it 'sets jmxremote.access.file in setenv.sh' do
+      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(' -Dcom.sun.management.jmxremote.access.file=/var/tomcat7/conf/jmxremote.access')
+    end
+    it 'sets jmxremote.password.file in setenv.sh' do
+      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(' -Dcom.sun.management.jmxremote.password.file=/var/tomcat7/conf/jmxremote.password')
     end
 
     context 'when jmx_authenticate false' do

@@ -90,10 +90,6 @@ def access_log_valve
   valve
 end
 
-def jmx_dir
-  new_resource.jmx_dir || ::File.join(new_resource.home, 'conf')
-end
-
 def logs_absolute?
   ::Pathname.new(log_dir).absolute?
 end
@@ -210,7 +206,7 @@ action :configure do
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
-  template ::File.join(jmx_dir, 'jmxremote.access') do
+  template ::File.join(new_resource.home, 'conf', 'jmxremote.access') do
     source 'jmxremote.access.erb'
     mode '0755'
     owner new_resource.user
@@ -223,7 +219,7 @@ action :configure do
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
-  template ::File.join(jmx_dir, 'jmxremote.password') do
+  template ::File.join(new_resource.home, 'conf', 'jmxremote.password') do
     source 'jmxremote.password.erb'
     mode '0600'
     owner new_resource.user

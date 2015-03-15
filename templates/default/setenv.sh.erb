@@ -34,8 +34,7 @@ CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.ssl=false"
 CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.port=<%= @config.jmx_port %>"
 CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.authenticate=<%= @config.jmx_authenticate %>"
   <% if @config.jmx_authenticate %>
-  <% jmx_dir = @config.jmx_dir || @config.home %>
-CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.access.file=<%= ::File.join(jmx_dir, 'jmxremote.access') %>"
-CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.access.file=<%= ::File.join(jmx_dir, 'jmxremote.password') %>"
+CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.access.file=<%= ::File.join(@config.home, 'conf', 'jmxremote.access') %>"
+CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.password.file=<%= ::File.join(@config.home, 'conf', 'jmxremote.password') %>"
   <% end %>
 <% end %>
