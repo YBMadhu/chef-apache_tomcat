@@ -18,7 +18,7 @@
 #
 # rubocop:disable Metrics/LineLength
 
-actions :install, :configure, :restart
+actions :install, :configure
 default_action :install
 
 attribute :home, kind_of: String, name_attribute: true, required: true
