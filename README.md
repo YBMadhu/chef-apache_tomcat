@@ -19,7 +19,6 @@ Install and/or configure an instance of tomcat.
 #### Actions
 * `install` - Default action. Download and install tomcat into `home`
 * `configure` - create user, configs, service, ulimits, etc. and start service
-* `restart` - restart service
 
 #### Attributes
 * `home` - required install directory of tomcat; default: name of resource block
@@ -29,31 +28,37 @@ Install and/or configure an instance of tomcat.
 * `service_name` - optional name of service (defaults to basename of `home`)
 * `mirror` - url to apache tomcat mirror (defaults to node attribute)
 * `version` - version of tomcat to download/install (defaults to node attribute)
-* `checksum` - sha256 checksum of downloaded tarball (defaults to node attribute
-* `log_dir` - directory for tomcat logs; default: 'logs'. Can be absolute or
-relative to `home`
-* `logs_rotatable` - sets tomcat rotatable flag; default: `false`. If false,
-tomcat will not rotate logs but logrotate will.
+* `checksum` - sha256 checksum of downloaded tarball (defaults to node attribute)
+* `log_dir` - directory for tomcat logs; default: 'logs'. Can be absolute or relative to `home`
+* `logs_rotatable` - sets tomcat rotatable flag; default: `false`.
+If false, tomcat will not rotate logs but logrotate will.
 (Also applies to access log if `access_log_enabled` is true)
 * `logrotate_frequency` - rotation frequency; default: `weekly`
 * `logrotate_count` - logrotate file count
-* `ulimit_nofile` - optional open file ulimit for tomcat user
-* `ulimit_nproc` - optional num procs ulimit for tomcat user
-* `kill_delay` - seconds to wait before kill -9 on service stop/restart; default: 45
+* `ulimit_nofile` - optional open file ulimit for tomcat user (integer)
+* `ulimit_nproc` - optional num procs ulimit for tomcat user (integer)
+* `kill_delay` - seconds to wait before kill -9 on service stop/restart; default: 45 (integer)
 * `initial_heap_size` - optional java initial heap size (-Xms) added to CATALINA_OPTS
 * `max_heap_size` - optional java max heap size (-Xmx) added to CATALINA_OPTS
-* `max_perm_size` - optional java max permanent size (-XX:MaxPermSize)
-added to CATALINA_OPTS
+* `max_perm_size` - optional java max permanent size (-XX:MaxPermSize) added to CATALINA_OPTS
 * `catalina_opts` - optional string or array of CATALINA_OPTS in setenv.sh
 * `java_opts` - optional string or array of JAVA_OPTS in setenv.sh
 * `java_home` - optional JAVA_HOME in setenv.sh
-* `setenv_additional` - optional additonal items in setenv.sh (docs TODO)
+* `jmx_port` - JMX report port (integer); default: `nil` (JMX management is disabled if `nil`)
+* `jmx_authenticate` - whether JMX authentication is enabled; default: `true`
+(ignored unless `jmx_port` set)
+* `jmx_monitor_password` - password for JMX readonly access; default: `nil`
+(ignored unless `jmx_port` set and `jmx_authenticate` true)
+* `jmx_control_password` - password for JMX readwrite access; default: `nil`
+(ignored unless `jmx_port` set and `jmx_authenticate` true)
+* `jmx_dir` - optional directory for jmxremote.password and jmxremote.access,
+defaults to `home`/conf
 * `shutdown_port` - tomcat shutdown port in server.xml; required
-* `http_port` - optional http port
-* `ajp_port` - optional ajp port
-* `ssl_port` - optional ssl port
+* `http_port` - optional http port (integer)
+* `ajp_port` - optional ajp port (integer)
+* `ssl_port` - optional ssl port (integer)
 * `pool_enabled` - enable shared executor (thread pool); default: `false`
-* `access_log_enabled` - whether to enable access log valve; default: false
+* `access_log_enabled` - whether to enable access log valve; default: `false`
 * `http_additional` - hash of additional http connector attributes
 * `ajp_additional` - hash of additional ajp connector attributes
 * `ssl_additional` - hash of addtional ssl connector attributes

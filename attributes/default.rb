@@ -28,6 +28,12 @@ default['tomcat_bin']['initial_heap_size'] = nil
 default['tomcat_bin']['max_heap_size'] = nil
 default['tomcat_bin']['max_perm_size'] = nil
 
+default['tomcat_bin']['jmx_port'] = nil
+default['tomcat_bin']['jmx_authenticate'] = true
+default['tomcat_bin']['jmx_monitor_password'] = nil
+default['tomcat_bin']['jmx_control_password'] = nil
+default['tomcat_bin']['jmx_dir'] = nil
+
 # Server.xml settings
 default['tomcat_bin']['shutdown_port'] = 8005
 default['tomcat_bin']['http_port'] = 8080

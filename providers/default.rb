@@ -90,14 +90,8 @@ def access_log_valve
   valve
 end
 
-def catalina_opts
-  opts = {
-    '-Xms' => new_resource.initial_heap_size,
-    '-Xmx' => new_resource.max_heap_size,
-    '-XX:MaxPermSize=' => new_resource.max_perm_size
-  }.map { |k, v|  k + v unless v.nil? || v.empty? }
-  opts << new_resource.catalina_opts
-  opts.reject! { |o| o.nil? || o.empty? }.join(' ')
+def jmx_dir
+  new_resource.jmx_dir || ::File.join(new_resource.home, 'conf')
 end
 
 def logs_absolute?
@@ -190,11 +184,8 @@ action :configure do
     owner new_resource.user
     group new_resource.group
     variables(
-      java_home: new_resource.java_home,
-      catalina_opts: catalina_opts,
-      java_opts: new_resource.java_opts,
-      additional: new_resource.setenv_opts,
-      catalina_out_dir: log_dir == 'logs' ? nil : absolute_log_dir
+      catalina_out_dir: log_dir == 'logs' ? nil : absolute_log_dir,
+      config: new_resource
     )
     cookbook new_resource.setenv_cookbook
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
@@ -216,6 +207,36 @@ action :configure do
       access_log_valve: access_log_valve
     )
     cookbook new_resource.server_xml_cookbook
+    notifies :create, "ruby_block[restart_#{service_name}]", :immediately
+  end
+
+  template ::File.join(jmx_dir, 'jmxremote.access') do
+    source 'jmxremote.access.erb'
+    mode '0755'
+    owner new_resource.user
+    group new_resource.group
+    if new_resource.jmx_port.nil? || new_resource.jmx_authenticate == false
+      action :delete
+    else
+      action :create
+    end
+    notifies :create, "ruby_block[restart_#{service_name}]", :immediately
+  end
+
+  template ::File.join(jmx_dir, 'jmxremote.password') do
+    source 'jmxremote.password.erb'
+    mode '0600'
+    owner new_resource.user
+    group new_resource.group
+    variables(
+      control_password: new_resource.jmx_control_password,
+      monitor_password: new_resource.jmx_monitor_password
+    )
+    if new_resource.jmx_port.nil? || new_resource.jmx_authenticate == false
+      action :delete
+    else
+      action :create
+    end
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
@@ -270,12 +291,5 @@ action :configure do
       r.action(a)
     end
     action :nothing
-  end
-end
-
-action :restart do
-  service service_name do
-    supports restart: true
-    action :restart
   end
 end

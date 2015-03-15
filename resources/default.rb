@@ -32,12 +32,17 @@ attribute :checksum, kind_of: String, default: node['tomcat_bin']['checksum']
 
 attribute :kill_delay, regex: /^[1-9][0-9]?$/
 attribute :java_home, kind_of: String
-attribute :catalina_opts, kind_of: String
+attribute :catalina_opts, kind_of: [String, Array]
 attribute :java_opts, kind_of: String
-attribute :setenv_opts, kind_of: Array
 attribute :initial_heap_size, kind_of: String
 attribute :max_heap_size, kind_of: String
 attribute :max_perm_size, kind_of: String
+
+attribute :jmx_port, kind_of: Integer
+attribute :jmx_authenticate, equal_to: [true, false], default: true
+attribute :jmx_monitor_password, kind_of: String
+attribute :jmx_control_password, kind_of: String
+attribute :jmx_dir, kind_of: String
 
 attribute :shutdown_port, kind_of: Integer, required: true
 attribute :pool_enabled, equal_to: [true, false], default: false

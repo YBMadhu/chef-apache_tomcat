@@ -5,6 +5,11 @@ describe 'tomcat_bin::default' do
   let(:max_heap_size) { nil }
   let(:max_perm_size) { nil }
   let(:catalina_opts) { nil }
+  let(:jmx_port) { nil }
+  let(:jmx_monitor_password) { nil }
+  let(:jmx_control_password) { nil }
+  let(:jmx_authenticate) { true }
+  let(:jmx_dir) { nil }
   let(:java_opts) { nil }
   let(:log_dir) { 'logs' }
   let(:chef_run) do
@@ -23,6 +28,11 @@ describe 'tomcat_bin::default' do
       node.set['tomcat_bin']['max_perm_size'] = max_perm_size
       node.set['tomcat_bin']['catalina_opts'] = catalina_opts
       node.set['tomcat_bin']['java_opts'] = java_opts
+      node.set['tomcat_bin']['jmx_port'] = jmx_port
+      node.set['tomcat_bin']['jmx_authenticate'] = jmx_authenticate
+      node.set['tomcat_bin']['jmx_monitor_password'] = jmx_monitor_password
+      node.set['tomcat_bin']['jmx_control_password'] = jmx_control_password
+      node.set['tomcat_bin']['jmx_dir'] = jmx_dir
     end.converge(described_recipe)
   end
 
@@ -160,18 +170,21 @@ describe 'tomcat_bin::default' do
         source: 'logrotate.erb')
   end
 
-  context 'when catalina_opts not set' do
-    it 'setenv.sh does not include CATALINA_OPTS' do
-      expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
-        .with_content(/CATALINA_OPTS/)
-    end
-  end
-
   context 'when catalina_opts is string' do
     let(:catalina_opts) { 'thing3 thing4' }
     it 'renders correct CATALINA_OPTS' do
       expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
-        .with_content(/^CATALINA_OPTS=\"thing3 thing4\"/)
+        .with_content('CATALINA_OPTS="${CATALINA_OPTS} thing3 thing4"')
+    end
+  end
+
+  context 'when catalina_opts is array' do
+    let(:catalina_opts) { %w(thing5 thing6) }
+    it 'renders correct CATALINA_OPTS' do
+      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content('CATALINA_OPTS="${CATALINA_OPTS} thing5"')
+      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content('CATALINA_OPTS="${CATALINA_OPTS} thing6"')
     end
   end
 
@@ -197,15 +210,15 @@ describe 'tomcat_bin::default' do
 
     it 'renders correct initial_heap_size in setenv.sh' do
       expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
-        .with_content(/CATALINA_OPTS=.*?-Xms384m/)
+        .with_content('CATALINA_OPTS="${CATALINA_OPTS} -Xms384m"')
     end
     it 'renders correct max_heap_size in setenv.sh' do
       expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
-        .with_content(/CATALINA_OPTS=.*?-Xmx1024m/)
+        .with_content('CATALINA_OPTS="${CATALINA_OPTS} -Xmx1024m"')
     end
     it 'renders correct max_perm_size in setenv.sh' do
       expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
-        .with_content(/^CATALINA_OPTS=.*?-XX:MaxPermSize=256m/)
+        .with_content('CATALINA_OPTS="${CATALINA_OPTS} -XX:MaxPermSize=256m"')
     end
   end
 
@@ -221,6 +234,77 @@ describe 'tomcat_bin::default' do
     it 'max_perm_size not in setenv.sh' do
       expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
         .with_content(/-XX:MaxPermSize=/)
+    end
+  end
+
+  context 'when jmx_port not specified' do
+    it 'deletes jmxremote.access template' do
+      expect(chef_run).to delete_template('/var/tomcat7/conf/jmxremote.access')
+    end
+    it 'deletes jmxremote.password template' do
+      expect(chef_run).to delete_template(
+        '/var/tomcat7/conf/jmxremote.password')
+    end
+    it 'does not render jmxremote content in setenv.sh' do
+      expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(/jmxremote/)
+    end
+  end
+
+  context 'when jmx_port specified' do
+    let(:jmx_port) { 8999 }
+    it 'creates jmxremote.access template' do
+      expect(chef_run).to create_template('/var/tomcat7/conf/jmxremote.access')
+        .with(owner: 'tomcat', group: 'tomcat', mode: '0755')
+    end
+    it 'creates jmxremote.password template' do
+      expect(chef_run).to create_template(
+        '/var/tomcat7/conf/jmxremote.password').with(
+        owner: 'tomcat',
+        group: 'tomcat',
+        mode: '0600')
+    end
+    it 'sets jmxremote.authenticate to true in setenv.sh' do
+      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(' -Dcom.sun.management.jmxremote.authenticate=true')
+    end
+    it 'sets jmxremote.ssl to false in setenv.sh' do
+      expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+        .with_content(' -Dcom.sun.management.jmxremote.ssl=false')
+    end
+
+    context 'when jmx_dir set' do
+      let(:jmx_dir) { '/my/dir' }
+      it 'creates jmxremote.access template in correct directory' do
+        expect(chef_run).to create_template('/my/dir/jmxremote.access')
+      end
+      it 'creates jmxremote.password template in correct directory' do
+        expect(chef_run).to create_template('/my/dir/jmxremote.password')
+      end
+    end
+
+    context 'when jmx_authenticate false' do
+      let(:jmx_authenticate) { false }
+      it 'deletes jmxremote.access template' do
+        expect(chef_run).to delete_template(
+          '/var/tomcat7/conf/jmxremote.access')
+      end
+      it 'deletes jmxremote.password template' do
+        expect(chef_run).to delete_template(
+          '/var/tomcat7/conf/jmxremote.password')
+      end
+      it 'sets jmxremote.authenticate to false in setenv.sh' do
+        expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+          .with_content(' -Dcom.sun.management.jmxremote.authenticate=false')
+      end
+      it 'does not set jmxremote.access.file in setenv.sh' do
+        expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
+          .with_content('jmxremote.access.file')
+      end
+      it 'does not set jmxremote.password.file in setenv.sh' do
+        expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
+          .with_content('jmxremote.password.file')
+      end
     end
   end
 end
