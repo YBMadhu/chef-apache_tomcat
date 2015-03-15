@@ -6,10 +6,16 @@ Install and configure Tomcat using Apache binaries.
 
 ## Recipes
 ### default
-Install and configure tomcat.
+Install and configure tomcat. Please note this recipe does NOT install Java.
+You should install Java earlier in your run list before including this recipe.
+For example...
+* [java](https://supermarket.chef.io/cookbooks/java) community cookbook
+* [oracle_jdk](https://github.com/bdclark/chef-oracle_jdk) - my cookbook dedicated
+to installing the Oracle JDK
+
 ### Attributes
 Uses the tomcat_bin resource (see below) to install and configure tomcat.
-See attributes/default.rb for default attribute settings.
+See the resource attributes listed below and attributes/default.rb for default settings.
 
 ## Resources and Providers
 
