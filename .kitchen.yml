@@ -7,6 +7,8 @@ provisioner:
 
 platforms:
   - name: ubuntu-14.04
+    run_list:
+      - 'recipe[apt]'
   - name: centos-7.0
 
 suites:
@@ -50,5 +52,8 @@ suites:
             internalProxies: 127\.0\.0\.1
             protocolHeader: x-forwarded-proto
             portHeader: x-forwarded-port
+        jmx_port: 9599
+        jmx_monitor_password: mymonitorpw
+        jmx_control_password: mycontrolpw
       java:
         jdk_version: '7'

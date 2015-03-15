@@ -6,6 +6,7 @@ cookbook  'ark',
 
 group :integration do
   cookbook 'java'
+  cookbook 'apt'
 end
 
 metadata

@@ -8,6 +8,9 @@ end
 
 describe file('/opt/tomcat/conf/server.xml') do
   it { should be_file }
+  its(:content) { should_not include '-Xms' }
+  its(:content) { should_not include '-Xmx' }
+  its(:content) { should_not include 'jmxremote' }
 end
 
 describe file('/opt/tomcat/conf/logging.properties') do
@@ -32,13 +35,13 @@ end
 
 describe file('/etc/logrotate.d/tomcat') do
   it { should be_file }
-  its(:content) { should match %r{/opt/tomcat/logs/catalina.out} }
-  its(:content) { should match %r{/opt/tomcat/logs/catalina.log} }
-  its(:content) { should match %r{/opt/tomcat/logs/manager.log} }
-  its(:content) { should match %r{/opt/tomcat/logs/localhost.log} }
-  its(:content) { should match %r{/opt/tomcat/logs/host-manager.log} }
-  its(:content) { should match(/rotate 4/) }
-  its(:content) { should match(/weekly/) }
+  its(:content) { should include '/opt/tomcat/logs/catalina.out' }
+  its(:content) { should include '/opt/tomcat/logs/catalina.log' }
+  its(:content) { should include '/opt/tomcat/logs/manager.log' }
+  its(:content) { should include '/opt/tomcat/logs/localhost.log' }
+  its(:content) { should include '/opt/tomcat/logs/host-manager.log' }
+  its(:content) { should include 'rotate 4' }
+  its(:content) { should include 'weekly' }
 end
 
 describe file('/opt/tomcat/logs/catalina.out') do
@@ -67,4 +70,16 @@ end
 
 describe file('/var/run/tomcat/tomcat.pid') do
   it { should be_file }
+end
+
+describe file('/opt/tomcat/conf/server.xml') do
+  its(:content) { should_not include 'jmxremote' }
+end
+
+describe file('/opt/tomcat7/conf/jmxremote.access') do
+  it { should_not be_file }
+end
+
+describe file('/opt/tomcat7/conf/jmxremote.password') do
+  it { should_not be_file }
 end
