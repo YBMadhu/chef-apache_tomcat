@@ -7,6 +7,5 @@ long_description 'Installs/Configures tomcat_bin'
 version          '0.1.0'
 
 depends 'ark'
-depends 'java'
 depends 'logrotate'
 depends 'ulimit', '>= 0.1.2'
