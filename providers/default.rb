@@ -216,6 +216,7 @@ action :configure do
     else
       action :create
     end
+    cookbook 'tomcat_bin'
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
@@ -233,6 +234,7 @@ action :configure do
     else
       action :create
     end
+    cookbook 'tomcat_bin'
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
