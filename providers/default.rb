@@ -139,14 +139,6 @@ action :install do
 end
 
 action :configure do
-  nofiles = new_resource.ulimit_nofile
-  nprocs = new_resource.ulimit_nproc
-  user_ulimit new_resource.user do
-    filehandle_limit nofiles
-    process_limit nprocs
-    only_if { nofiles || nprocs }
-  end
-
   setenv_sh = ::File.join(new_resource.home, 'bin', 'setenv.sh')
   server_xml = ::File.join(new_resource.home, 'conf', 'server.xml')
   logging_properties =

@@ -63,9 +63,6 @@ attribute :logs_rotatable, equal_to: [true, false], default: false
 attribute :logrotate_count, kind_of: Integer, default: 4
 attribute :logrotate_frequency, kind_of: String, default: 'weekly'
 
-attribute :ulimit_nofile, kind_of: Integer
-attribute :ulimit_nproc, kind_of: Integer
-
 attribute :init_cookbook, kind_of: String, default: 'tomcat_bin'
 attribute :setenv_cookbook, kind_of: String, default: 'tomcat_bin'
 attribute :server_xml_cookbook, kind_of: String, default: 'tomcat_bin'

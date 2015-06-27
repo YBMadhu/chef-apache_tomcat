@@ -24,7 +24,7 @@ Install and/or configure an instance of tomcat.
 
 #### Actions
 * `install` - Default action. Download and install tomcat into `home`
-* `configure` - create user, configs, service, ulimits, etc. and start service
+* `configure` - create user, configs, service, etc. and start service
 
 #### Attributes
 * `home` - required install directory of tomcat; default: name of resource block
@@ -41,8 +41,6 @@ If false, tomcat will not rotate logs but logrotate will.
 (Also applies to access log if `access_log_enabled` is true)
 * `logrotate_frequency` - rotation frequency; default: `weekly`
 * `logrotate_count` - logrotate file count
-* `ulimit_nofile` - optional open file ulimit for tomcat user (integer)
-* `ulimit_nproc` - optional num procs ulimit for tomcat user (integer)
 * `kill_delay` - seconds to wait before kill -9 on service stop/restart; default: 45 (integer)
 * `initial_heap_size` - optional java initial heap size (-Xms) added to CATALINA_OPTS
 * `max_heap_size` - optional java max heap size (-Xmx) added to CATALINA_OPTS

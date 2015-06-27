@@ -3,9 +3,6 @@
 default['tomcat_bin']['user'] = 'tomcat'
 default['tomcat_bin']['group'] = 'tomcat'
 
-default['tomcat_bin']['ulimit_nofile'] = 20_000
-default['tomcat_bin']['ulimit_nproc'] = 50_000
-
 default['tomcat_bin']['mirror']  = 'https://repository.apache.org/content/repositories/releases/org/apache/tomcat/tomcat'
 default['tomcat_bin']['version'] = '7.0.56'
 default['tomcat_bin']['checksum'] = 'c0ca44be20bccebbb043ccd7ab5ea4d94060fdde6bb84812f3da363955dae5bb'
