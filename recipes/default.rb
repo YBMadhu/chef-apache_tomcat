@@ -50,7 +50,6 @@ tomcat_bin node['tomcat_bin']['home'] do
   access_log_enabled node['tomcat_bin']['access_log_enabled']
   access_log_additional node['tomcat_bin']['access_log_additional']
   log_dir node['tomcat_bin']['log_dir']
-  logs_rotatable node['tomcat_bin']['logs_rotatable']
   logrotate_count node['tomcat_bin']['logrotate_count']
   logrotate_frequency node['tomcat_bin']['logrotate_frequency']
 end
