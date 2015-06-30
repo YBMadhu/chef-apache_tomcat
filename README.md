@@ -23,8 +23,7 @@ See the resource attributes listed below and attributes/default.rb for default s
 Install and/or configure an instance of tomcat.
 
 #### Actions
-* `install` - Default action. Download and install tomcat into `home`
-* `configure` - create user, configs, service, etc. and start service
+* `create` - Default action. Install and configure tomcat into `home`
 
 #### Attributes
 * `home` - required install directory of tomcat; default: name of resource block
@@ -35,10 +34,7 @@ Install and/or configure an instance of tomcat.
 * `mirror` - url to apache tomcat mirror (defaults to node attribute)
 * `version` - version of tomcat to download/install (defaults to node attribute)
 * `checksum` - sha256 checksum of downloaded tarball (defaults to node attribute)
-* `log_dir` - directory for tomcat logs; default: 'logs'. Can be absolute or relative to `home`
-* `logs_rotatable` - sets tomcat rotatable flag; default: `false`.
-If false, tomcat will not rotate logs but logrotate will.
-(Also applies to access log if `access_log_enabled` is true)
+* `log_dir` - optional directory for tomcat logs; must be absolute
 * `logrotate_frequency` - rotation frequency; default: `weekly`
 * `logrotate_count` - logrotate file count
 * `kill_delay` - seconds to wait before kill -9 on service stop/restart; default: 45 (integer)
