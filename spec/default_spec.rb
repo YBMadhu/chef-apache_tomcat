@@ -11,7 +11,7 @@ describe 'tomcat_bin::default' do
   let(:jmx_control_password) { nil }
   let(:jmx_authenticate) { true }
   let(:java_opts) { nil }
-  let(:log_dir) { 'my_logs' }
+  let(:log_dir) { nil }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['tomcat_bin'],
                              file_cache_path: '/var/chef') do |node|
@@ -104,9 +104,17 @@ describe 'tomcat_bin::default' do
       owner: 'root', group: 'tomcat', mode: '0775')
   end
 
+  context 'when log_dir is nil' do
+    it 'creates local logs dir' do
+      expect(chef_run).to create_directory('/var/tomcat7/logs').with(
+        owner: 'tomcat', group: 'tomcat', mode: '0755')
+    end
+  end
+
   context 'when log_dir is relative' do
-    it 'creates log_dir relative to tomcat home' do
-      expect(chef_run).to create_directory('/var/tomcat7/my_logs')
+    let(:log_dir) { 'logs' }
+    it 'raises error' do
+      expect { chef_run }.to raise_error
     end
   end
 
@@ -114,6 +122,11 @@ describe 'tomcat_bin::default' do
     let(:log_dir) { '/var/log/my_tomcat_logs' }
     it 'creates absolute log_dir' do
       expect(chef_run).to create_directory('/var/log/my_tomcat_logs')
+    end
+
+    it 'creates link from logs dir to absolute dir' do
+      expect(chef_run).to create_link('/var/tomcat7/logs').with(
+        to: '/var/log/my_tomcat_logs')
     end
   end
 
@@ -273,13 +286,13 @@ describe 'tomcat_bin::default' do
     let(:jmx_port) { 8999 }
     it 'creates jmxremote.access template' do
       expect(chef_run).to create_template('/var/tomcat7/conf/jmxremote.access')
-        .with(owner: 'root', group: 'tomcat', mode: '0640')
+        .with(owner: 'tomcat', group: 'tomcat', mode: '0600')
     end
     it 'creates jmxremote.password template' do
       expect(chef_run).to create_template('/var/tomcat7/conf/jmxremote.password').with(
-        owner: 'root',
+        owner: 'tomcat',
         group: 'tomcat',
-        mode: '0640')
+        mode: '0600')
     end
     it 'sets jmxremote.authenticate to true in setenv.sh' do
       expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')

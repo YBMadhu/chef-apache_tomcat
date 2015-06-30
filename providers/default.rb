@@ -79,27 +79,32 @@ def access_log_valve
   return unless new_resource.access_log_enabled
   valve = {
     'className' => 'org.apache.catalina.valves.AccessLogValve',
-    'prefix' => 'localhost_access_log.',
+    'prefix' => 'localhost_access_log',
     'suffix' => '.log',
-    'pattern' => 'common'
+    'rotatable' => 'false',
+    'pattern' => 'common',
+    'directory' => 'logs'
   }
-  valve['rotatable'] = new_resource.logs_rotatable
-  valve['prefix'].chomp!('.') unless new_resource.logs_rotatable
   valve.merge!(new_resource.access_log_additional || {})
-  valve['directory'] = log_dir
   valve
 end
 
-def log_dir
-  new_resource.log_dir || 'logs'
-end
-
-def absolute_log_dir
-  return log_dir if ::Pathname.new(log_dir).absolute?
-  ::File.join(new_resource.home, log_dir)
-end
-
 action :create do
+  catalina_home = new_resource.home
+  version = new_resource.version
+  url = "#{node['tomcat_bin']['mirror']}/#{version}/tomcat-#{version}.tar.gz"
+  tarball_name = ::File.basename(url)
+  download_path = ::File.join(Chef::Config[:file_cache_path], tarball_name)
+
+  if new_resource.log_dir
+    unless ::Pathname.new(new_resource.log_dir).absolute?
+      fail 'log_dir must be absolute if specified'
+    end
+    log_dir = new_resource.log_dir
+  else
+    log_dir = ::File.join(new_resource.home, 'logs')
+  end
+
   group new_resource.group do
     system true
   end
@@ -109,12 +114,6 @@ action :create do
     group new_resource.group
     shell '/bin/false'
   end
-
-  catalina_home = new_resource.home
-  version = new_resource.version
-  url = "#{node['tomcat_bin']['mirror']}/#{version}/tomcat-#{version}.tar.gz"
-  tarball_name = ::File.basename(url)
-  download_path = ::File.join(Chef::Config[:file_cache_path], tarball_name)
 
   remote_file download_path do
     source url
@@ -168,16 +167,17 @@ action :create do
     end
   end
 
-  directory absolute_log_dir do
+  directory log_dir do
     recursive true
     owner new_resource.user
     group new_resource.group
     mode '0755'
   end
 
-  link ::File.join(new_resource.home, 'logs') do
-    to absolute_log_dir
-    not_if { log_dir == 'logs' }
+  link "link_logs_#{new_resource.name}" do
+    target_file ::File.join(new_resource.home, 'logs')
+    to new_resource.log_dir
+    not_if { new_resource.log_dir.nil? }
   end
 
   template "/etc/init.d/#{service_name}" do
@@ -200,10 +200,7 @@ action :create do
     mode '0750'
     owner 'root'
     group new_resource.group
-    variables(
-      catalina_out_dir: log_dir == 'logs' ? nil : absolute_log_dir,
-      config: new_resource
-    )
+    variables(config: new_resource)
     cookbook new_resource.setenv_cookbook
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
@@ -229,8 +226,8 @@ action :create do
 
   template ::File.join(new_resource.home, 'conf', 'jmxremote.access') do
     source 'jmxremote.access.erb'
-    mode '0640'
-    owner 'root'
+    mode '0600'
+    owner new_resource.user
     group new_resource.group
     if new_resource.jmx_port.nil? || new_resource.jmx_authenticate == false
       action :delete
@@ -243,8 +240,8 @@ action :create do
 
   template ::File.join(new_resource.home, 'conf', 'jmxremote.password') do
     source 'jmxremote.password.erb'
-    mode '0640'
-    owner 'root'
+    mode '0600'
+    owner new_resource.user
     group new_resource.group
     variables(
       control_password: new_resource.jmx_control_password,
@@ -264,26 +261,16 @@ action :create do
     mode '0640'
     owner 'root'
     group new_resource.group
-    variables(
-      rotatable: new_resource.logs_rotatable,
-      log_dir: if ::Pathname.new(log_dir).absolute?
-                 absolute_log_dir
-               else
-                 "${catalina.base}/#{log_dir}"
-               end
-    )
     cookbook new_resource.logging_properties_cookbook
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
-  logs = %w(catalina.out)
-  unless new_resource.logs_rotatable
-    logs.concat %w(catalina.log manager.log host-manager.log localhost.log)
-  end
-  log_paths = logs.map { |log| ::File.join(absolute_log_dir, log) }
+  logs = %w(catalina.out catalina.log manager.log
+            host-manager.log localhost.log)
+  log_paths = logs.map { |log| ::File.join(new_resource.home, 'logs', log) }
   if access_log_valve
     fname = access_log_valve['prefix'] + access_log_valve['suffix']
-    log_paths << ::File.join(absolute_log_dir, fname)
+    log_paths << ::File.join(new_resource.home, 'logs', fname)
   end
 
   template "/etc/logrotate.d/#{service_name}" do

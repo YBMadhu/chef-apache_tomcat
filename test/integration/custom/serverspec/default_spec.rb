@@ -39,11 +39,11 @@ end
 
 describe file('/etc/logrotate.d/tomcat7') do
   it { should be_file }
-  its(:content) { should include '/var/log/tomcat7/catalina.out' }
-  its(:content) { should include '/var/log/tomcat7/catalina.log' }
-  its(:content) { should include '/var/log/tomcat7/manager.log' }
-  its(:content) { should include '/var/log/tomcat7/localhost.log' }
-  its(:content) { should include '/var/log/tomcat7/host-manager.log' }
+  its(:content) { should include '/opt/tomcat7/logs/catalina.out' }
+  its(:content) { should include '/opt/tomcat7/logs/catalina.log' }
+  its(:content) { should include '/opt/tomcat7/logs/manager.log' }
+  its(:content) { should include '/opt/tomcat7/logs/localhost.log' }
+  its(:content) { should include '/opt/tomcat7/logs/host-manager.log' }
   its(:content) { should include 'rotate 12' }
   its(:content) { should include 'monthly' }
 end

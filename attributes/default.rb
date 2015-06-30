@@ -10,7 +10,7 @@ default['tomcat_bin']['home'] = '/opt/tomcat'
 default['tomcat_bin']['service_name'] = nil
 
 # Logging settings
-default['tomcat_bin']['log_dir'] = 'logs'
+default['tomcat_bin']['log_dir'] = nil
 default['tomcat_bin']['logs_rotatable'] = false
 default['tomcat_bin']['logrotate_frequency'] = 'weekly'
 default['tomcat_bin']['logrotate_count'] = 4
