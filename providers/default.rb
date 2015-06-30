@@ -99,7 +99,7 @@ def absolute_log_dir
   ::File.join(new_resource.home, log_dir)
 end
 
-action :install do
+action :create do
   group new_resource.group do
     system true
   end
@@ -167,13 +167,6 @@ action :install do
       mode '0755'
     end
   end
-end
-
-action :configure do
-  setenv_sh = ::File.join(new_resource.home, 'bin', 'setenv.sh')
-  server_xml = ::File.join(new_resource.home, 'conf', 'server.xml')
-  logging_properties =
-    ::File.join(new_resource.home, 'conf', 'logging.properties')
 
   directory absolute_log_dir do
     recursive true
@@ -202,7 +195,7 @@ action :configure do
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
-  template setenv_sh do
+  template ::File.join(new_resource.home, 'bin', 'setenv.sh') do
     source 'setenv.sh.erb'
     mode '0750'
     owner 'root'
@@ -215,7 +208,7 @@ action :configure do
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
-  template server_xml do
+  template ::File.join(new_resource.home, 'conf', 'server.xml') do
     source 'server.xml.erb'
     mode '0640'
     owner 'root'
@@ -266,7 +259,7 @@ action :configure do
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
   end
 
-  template logging_properties do
+  template ::File.join(new_resource.home, 'conf', 'logging.properties') do
     source 'logging.properties.erb'
     mode '0640'
     owner 'root'

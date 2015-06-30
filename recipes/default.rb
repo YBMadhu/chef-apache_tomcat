@@ -53,5 +53,4 @@ tomcat_bin node['tomcat_bin']['home'] do
   logs_rotatable node['tomcat_bin']['logs_rotatable']
   logrotate_count node['tomcat_bin']['logrotate_count']
   logrotate_frequency node['tomcat_bin']['logrotate_frequency']
-  action [:install, :configure]
 end

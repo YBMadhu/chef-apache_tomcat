@@ -18,8 +18,8 @@
 #
 # rubocop:disable Metrics/LineLength
 
-actions :install, :configure
-default_action :install
+actions :create
+default_action :create
 
 attribute :home, kind_of: String, name_attribute: true, required: true
 attribute :service_name, kind_of: String
