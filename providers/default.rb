@@ -90,10 +90,6 @@ def access_log_valve
   valve
 end
 
-def logs_absolute?
-  ::Pathname.new(log_dir).absolute?
-end
-
 def log_dir
   new_resource.log_dir || 'logs'
 end
@@ -103,17 +99,7 @@ def absolute_log_dir
   ::File.join(new_resource.home, log_dir)
 end
 
-def absolute_log_path(file, dir = log_dir)
-  if logs_absolute?
-    ::File.join(dir, file)
-  else
-    ::File.join(new_resource.home, dir, file)
-  end
-end
-
 action :install do
-  package 'gzip'
-
   group new_resource.group do
     system true
   end
@@ -121,20 +107,65 @@ action :install do
   user new_resource.user do
     system true
     group new_resource.group
-    shell '/bin/bash'
+    shell '/bin/false'
   end
 
+  catalina_home = new_resource.home
   version = new_resource.version
-  name = ::File.basename(new_resource.home)
+  url = "#{node['tomcat_bin']['mirror']}/#{version}/tomcat-#{version}.tar.gz"
+  tarball_name = ::File.basename(url)
+  download_path = ::File.join(Chef::Config[:file_cache_path], tarball_name)
 
-  ark name do
-    url "#{new_resource.mirror}/#{version}/tomcat-#{version}.tar.gz"
-    checksum new_resource.checksum
-    version version
-    path ::File.dirname(new_resource.home)
-    owner new_resource.user
+  remote_file download_path do
+    source url
+    owner 'root'
+    group 'root'
+    checksum node['tomcat_bin']['checksum']
+  end
+
+  directory catalina_home do
+    owner 'root'
+    group 'root'
+    mode '0755'
+    recursive true
+  end
+
+  bash 'extract tomcat' do
+    user 'root'
+    cwd Chef::Config[:file_cache_path]
+    code <<-EOH
+    tar xzf #{tarball_name} --strip-components 1 -C "#{catalina_home}"
+    cd "#{catalina_home}"
+    rm -rf logs temp work
+    rm -rf bin/*.bat
+    rm -rf webapps/ROOT webapps/docs webapps/examples
+    chown root:#{new_resource.group} bin/* conf/* lib/* webapps/*
+    chmod 0640 conf/* lib/* bin/*.jar
+    chmod 0750 bin/*.sh webapps/*
+    EOH
+    not_if { ::File.directory?(::File.join(catalina_home, 'webapps')) }
+  end
+
+  %w(bin conf lib).each do |dir|
+    directory ::File.join(catalina_home, dir) do
+      owner 'root'
+      group new_resource.group
+      mode '0755'
+    end
+  end
+
+  directory ::File.join(catalina_home, 'webapps') do
+    owner 'root'
     group new_resource.group
-    action :put
+    mode '0775'
+  end
+
+  %w(temp work).each do |dir|
+    directory ::File.join(catalina_home, dir) do
+      owner new_resource.user
+      group new_resource.group
+      mode '0755'
+    end
   end
 end
 
@@ -145,10 +176,15 @@ action :configure do
     ::File.join(new_resource.home, 'conf', 'logging.properties')
 
   directory absolute_log_dir do
-    not_if { log_dir == 'logs' }
     recursive true
     owner new_resource.user
     group new_resource.group
+    mode '0755'
+  end
+
+  link ::File.join(new_resource.home, 'logs') do
+    to absolute_log_dir
+    not_if { log_dir == 'logs' }
   end
 
   template "/etc/init.d/#{service_name}" do
@@ -159,7 +195,7 @@ action :configure do
       tomcat_name: service_name,
       kill_delay: new_resource.kill_delay
     )
-    mode 0755
+    mode '0755'
     owner 'root'
     group 'root'
     cookbook new_resource.init_cookbook
@@ -168,8 +204,8 @@ action :configure do
 
   template setenv_sh do
     source 'setenv.sh.erb'
-    mode 0755
-    owner new_resource.user
+    mode '0750'
+    owner 'root'
     group new_resource.group
     variables(
       catalina_out_dir: log_dir == 'logs' ? nil : absolute_log_dir,
@@ -181,8 +217,8 @@ action :configure do
 
   template server_xml do
     source 'server.xml.erb'
-    mode 0755
-    owner new_resource.user
+    mode '0640'
+    owner 'root'
     group new_resource.group
     variables(
       shutdown_port: new_resource.shutdown_port,
@@ -200,8 +236,8 @@ action :configure do
 
   template ::File.join(new_resource.home, 'conf', 'jmxremote.access') do
     source 'jmxremote.access.erb'
-    mode '0755'
-    owner new_resource.user
+    mode '0640'
+    owner 'root'
     group new_resource.group
     if new_resource.jmx_port.nil? || new_resource.jmx_authenticate == false
       action :delete
@@ -214,8 +250,8 @@ action :configure do
 
   template ::File.join(new_resource.home, 'conf', 'jmxremote.password') do
     source 'jmxremote.password.erb'
-    mode '0600'
-    owner new_resource.user
+    mode '0640'
+    owner 'root'
     group new_resource.group
     variables(
       control_password: new_resource.jmx_control_password,
@@ -232,12 +268,16 @@ action :configure do
 
   template logging_properties do
     source 'logging.properties.erb'
-    mode 0755
-    owner new_resource.user
+    mode '0640'
+    owner 'root'
     group new_resource.group
     variables(
       rotatable: new_resource.logs_rotatable,
-      log_dir: logs_absolute? ? absolute_log_dir : "${catalina.base}/#{log_dir}"
+      log_dir: if ::Pathname.new(log_dir).absolute?
+                 absolute_log_dir
+               else
+                 "${catalina.base}/#{log_dir}"
+               end
     )
     cookbook new_resource.logging_properties_cookbook
     notifies :create, "ruby_block[restart_#{service_name}]", :immediately
@@ -255,7 +295,7 @@ action :configure do
 
   template "/etc/logrotate.d/#{service_name}" do
     source 'logrotate.erb'
-    mode 0644
+    mode '0644'
     owner 'root'
     group 'root'
     variables(

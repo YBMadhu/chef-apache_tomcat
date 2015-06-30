@@ -11,12 +11,12 @@ describe 'tomcat_bin::default' do
   let(:jmx_control_password) { nil }
   let(:jmx_authenticate) { true }
   let(:java_opts) { nil }
-  let(:log_dir) { 'logs' }
+  let(:log_dir) { 'my_logs' }
   let(:chef_run) do
-    ChefSpec::SoloRunner.new(step_into: ['tomcat_bin']) do |node|
+    ChefSpec::SoloRunner.new(step_into: ['tomcat_bin'],
+                             file_cache_path: '/var/chef') do |node|
       node.set['tomcat_bin']['mirror'] = 'https://getstuff.org/blah'
-      node.set['tomcat_bin']['checksum'] =
-        'c0ca44be20bccebbb043ccd7ab5ea4d94060fdde6bb84812f3da363955dae5bb'
+      node.set['tomcat_bin']['checksum'] = 'mychecksum'
       node.set['tomcat_bin']['version'] = '7.7.77'
       node.set['tomcat_bin']['home'] = '/var/tomcat7'
       node.set['tomcat_bin']['logs_rotatable'] = false
@@ -62,30 +62,53 @@ describe 'tomcat_bin::default' do
     expect(chef_run).to configure_tomcat_bin('/var/tomcat7')
   end
 
-  it 'installs the gzip package' do
-    expect(chef_run).to install_package('gzip')
+  it 'creates tomcat home directory' do
+    expect(chef_run).to create_directory('/var/tomcat7').with(
+      owner: 'root', group: 'root', mode: '0755')
   end
 
-  it 'puts tomcat binaries with ark' do
-    expect(chef_run).to put_ark('tomcat7').with(
-      url: 'https://getstuff.org/blah/7.7.77/tomcat-7.7.77.tar.gz',
-      checksum:
-        'c0ca44be20bccebbb043ccd7ab5ea4d94060fdde6bb84812f3da363955dae5bb',
-      version: '7.7.77',
-      path: '/var',
-      owner: 'tomcat',
-      group: 'tomcat')
+  it 'downloads tomcat' do
+    expect(chef_run).to create_remote_file('/var/chef/tomcat-7.7.77.tar.gz')
+      .with(owner: 'root', group: 'root',
+            checksum: 'mychecksum',
+            source: 'https://getstuff.org/blah/7.7.77/tomcat-7.7.77.tar.gz')
   end
 
-  context 'when log_dir is logs' do
-    let(:log_dir) { 'logs' }
-    it 'does not create log directory' do
-      expect(chef_run).not_to create_directory('/var/tomcat7/logs')
+  it 'does not extract tomcat if already installed' do
+    allow(File).to receive(:directory?).and_call_original
+    allow(File).to receive(:directory?)
+      .with('/var/tomcat7/webapps').and_return(true)
+    expect(chef_run).not_to run_bash('extract tomcat')
+  end
+
+  it 'extracts tomcat if not installed' do
+    allow(File).to receive(:directory?).and_call_original
+    allow(File).to receive(:directory?)
+      .with('/var/tomcat7/webapps').and_return(false)
+    expect(chef_run).to run_bash('extract tomcat').with(
+      user: 'root', cwd: '/var/chef')
+  end
+
+  %w(bin conf lib).each do |dir|
+    it "creates tomcat #{dir} directory" do
+      expect(chef_run).to create_directory("/var/tomcat7/#{dir}").with(
+        owner: 'root', group: 'tomcat', mode: '0755')
     end
   end
 
+  %w(temp work).each do |dir|
+    it "creates tomcat #{dir} directory" do
+      expect(chef_run).to create_directory("/var/tomcat7/#{dir}").with(
+        owner: 'tomcat', group: 'tomcat', mode: '0755')
+    end
+  end
+
+  it 'creates tomcat webapps directory' do
+    expect(chef_run).to create_directory('/var/tomcat7/webapps').with(
+      owner: 'root', group: 'tomcat', mode: '0775')
+  end
+
   context 'when log_dir is relative' do
-    let(:log_dir) { 'my_logs' }
     it 'creates log_dir relative to tomcat home' do
       expect(chef_run).to create_directory('/var/tomcat7/my_logs')
     end
@@ -100,7 +123,7 @@ describe 'tomcat_bin::default' do
 
   it 'creates tomcat init template' do
     expect(chef_run).to create_template('/etc/init.d/tomcat7').with(
-      mode: 0755,
+      mode: '0755',
       owner: 'root',
       group: 'root',
       source: 'tomcat.init.erb')
@@ -112,8 +135,8 @@ describe 'tomcat_bin::default' do
 
   it 'creates setenv.sh template' do
     expect(chef_run).to create_template('/var/tomcat7/bin/setenv.sh').with(
-      mode: 0755,
-      owner: 'tomcat',
+      mode: '0750',
+      owner: 'root',
       group: 'tomcat',
       source: 'setenv.sh.erb')
   end
@@ -124,8 +147,8 @@ describe 'tomcat_bin::default' do
 
   it 'creates server.xml template' do
     expect(chef_run).to create_template('/var/tomcat7/conf/server.xml').with(
-      mode: 0755,
-      owner: 'tomcat',
+      mode: '0640',
+      owner: 'root',
       group: 'tomcat',
       source: 'server.xml.erb')
   end
@@ -137,8 +160,8 @@ describe 'tomcat_bin::default' do
   it 'creates logging.properties template' do
     expect(chef_run).to create_template('/var/tomcat7/conf/logging.properties')
       .with(
-        mode: 0755,
-        owner: 'tomcat',
+        mode: '0640',
+        owner: 'root',
         group: 'tomcat',
         source: 'logging.properties.erb')
   end
@@ -163,7 +186,7 @@ describe 'tomcat_bin::default' do
   it 'creates logrotate template' do
     expect(chef_run).to create_template('/etc/logrotate.d/tomcat7')
       .with(
-        mode: 0644,
+        mode: '0644',
         owner: 'root',
         group: 'root',
         source: 'logrotate.erb')
@@ -254,13 +277,13 @@ describe 'tomcat_bin::default' do
     let(:jmx_port) { 8999 }
     it 'creates jmxremote.access template' do
       expect(chef_run).to create_template('/var/tomcat7/conf/jmxremote.access')
-        .with(owner: 'tomcat', group: 'tomcat', mode: '0755')
+        .with(owner: 'root', group: 'tomcat', mode: '0640')
     end
     it 'creates jmxremote.password template' do
       expect(chef_run).to create_template('/var/tomcat7/conf/jmxremote.password').with(
-        owner: 'tomcat',
+        owner: 'root',
         group: 'tomcat',
-        mode: '0600')
+        mode: '0640')
     end
     it 'sets jmxremote.authenticate to true in setenv.sh' do
       expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')

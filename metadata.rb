@@ -6,5 +6,4 @@ description      'Installs/Configures tomcat_bin'
 long_description 'Installs/Configures tomcat_bin'
 version          '0.2.0'
 
-depends 'ark'
 depends 'logrotate'
