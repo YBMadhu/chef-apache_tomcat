@@ -286,9 +286,10 @@ action :create do
     cookbook new_resource.logrotate_cookbook
   end
 
-  service service_name do
+  service service_name do # ~FC021 http://acrmp.github.io/foodcritic/#FC021
     supports restart: true, start: true, stop: true, status: true
-    action [:enable, :start]
+    action new_resource.start_service ? [:enable, :start] : :nothing
+    only_if { new_resource.start_service == true }
   end
 
   # Hack to prevent mulptiple starts/restarts on first-run
@@ -301,5 +302,6 @@ action :create do
       r.action(a)
     end
     action :nothing
+    only_if { new_resource.start_service == true }
   end
 end

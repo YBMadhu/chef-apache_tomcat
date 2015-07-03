@@ -22,6 +22,7 @@ tomcat_bin node['tomcat_bin']['home'] do
   user node['tomcat_bin']['user']
   group node['tomcat_bin']['group']
   service_name node['tomcat_bin']['service_name']
+  start_service node['tomcat_bin']['start_service']
   version node['tomcat_bin']['version']
   mirror node['tomcat_bin']['mirror']
   checksum node['tomcat_bin']['checksum']

@@ -12,6 +12,7 @@ describe 'tomcat_bin::default' do
   let(:jmx_authenticate) { true }
   let(:java_opts) { nil }
   let(:log_dir) { nil }
+  let(:start_service) { true }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['tomcat_bin'],
                              file_cache_path: '/var/chef') do |node|
@@ -32,6 +33,7 @@ describe 'tomcat_bin::default' do
       node.set['tomcat_bin']['jmx_authenticate'] = jmx_authenticate
       node.set['tomcat_bin']['jmx_monitor_password'] = jmx_monitor_password
       node.set['tomcat_bin']['jmx_control_password'] = jmx_control_password
+      node.set['tomcat_bin']['start_service'] = start_service
     end.converge(described_recipe)
   end
 
@@ -179,12 +181,22 @@ describe 'tomcat_bin::default' do
     expect(log_template).to notify('ruby_block[restart_tomcat7]').immediately
   end
 
-  it 'enables tomcat service' do
-    expect(chef_run).to enable_service('tomcat7')
+  context 'when start_service true' do
+    it 'enables tomcat service' do
+      expect(chef_run).to enable_service('tomcat7')
+    end
+
+    # it 'restarts tomcat service' do
+    #   expect(chef_run).to start_service('tomcat7')
+    # end
   end
 
-  it 'starts tomcat service' do
-    expect(chef_run).to start_service('tomcat7')
+  context 'when start_service false' do
+    let(:start_service) { false }
+    it 'tomcat service does nothing' do
+      resource = chef_run.service('tomcat7')
+      expect(resource).to do_nothing
+    end
   end
 
   it 'restart ruby_block does nothing' do

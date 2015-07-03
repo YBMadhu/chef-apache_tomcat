@@ -23,6 +23,7 @@ default_action :create
 
 attribute :home, kind_of: String, name_attribute: true, required: true
 attribute :service_name, kind_of: String
+attribute :start_service, equal_to: [true, false], default: true
 attribute :user, kind_of: String, default: 'tomcat'
 attribute :group, kind_of: String, default: 'tomcat'
 
