@@ -37,7 +37,7 @@ require_root() {
 
 tomcat_start() {
     require_root
-    [ -d "$DIRECTORY" ] || mkdir -p $PID_DIR
+    [ -d "$PID_DIR" ] || mkdir -p $PID_DIR
     chown $RUNAS: "$PID_DIR"
     /bin/su -p -s /bin/sh -c "$CATALINA_HOME/bin/catalina.sh start" $RUNAS
 }
