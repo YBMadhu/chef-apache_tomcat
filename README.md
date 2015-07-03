@@ -28,15 +28,15 @@ Install and/or configure an instance of tomcat.
 #### Attributes
 * `home` - required install directory of tomcat; default: name of resource block
 * `service_name` - optional name of service (defaults to basename of `home`)
+* `start_service` - whether to start/enable service; default: `true`
 * `user` - user running tomcat; default: `tomcat`
 * `group` - primary group of tomcat user; default: `tomcat`
-* `service_name` - optional name of service (defaults to basename of `home`)
 * `mirror` - url to apache tomcat mirror (defaults to node attribute)
 * `version` - version of tomcat to download/install (defaults to node attribute)
 * `checksum` - sha256 checksum of downloaded tarball (defaults to node attribute)
-* `log_dir` - optional directory for tomcat logs; must be absolute
+* `log_dir` - optional directory for tomcat logs; must be absolute if specified
 * `logrotate_frequency` - rotation frequency; default: `weekly`
-* `logrotate_count` - logrotate file count
+* `logrotate_count` - logrotate file count; default: `4`
 * `kill_delay` - seconds to wait before kill -9 on service stop/restart; default: 45 (integer)
 * `initial_heap_size` - optional java initial heap size (-Xms) added to CATALINA_OPTS
 * `max_heap_size` - optional java max heap size (-Xmx) added to CATALINA_OPTS
