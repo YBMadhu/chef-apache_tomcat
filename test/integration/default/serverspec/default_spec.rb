@@ -44,9 +44,9 @@ describe file('/etc/logrotate.d/tomcat') do
   its(:content) { should include 'weekly' }
 end
 
-describe file('/opt/tomcat/logs/catalina.out') do
-  it { should be_file }
-end
+# describe file('/opt/tomcat/logs/catalina.out') do
+#   it { should be_file }
+# end
 
 describe file('/opt/tomcat/logs/catalina.log') do
   it { should be_file }
@@ -66,10 +66,6 @@ end
 
 describe file('/opt/tomcat/logs/localhost_access_log.log') do
   it { should_not be_file }
-end
-
-describe file('/var/run/tomcat/tomcat.pid') do
-  it { should be_file }
 end
 
 describe file('/opt/tomcat/conf/server.xml') do

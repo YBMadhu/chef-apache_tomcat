@@ -48,9 +48,9 @@ describe file('/etc/logrotate.d/tomcat7') do
   its(:content) { should include 'monthly' }
 end
 
-describe file('/var/log/tomcat7/catalina.out') do
-  it { should be_file }
-end
+# describe file('/var/log/tomcat7/catalina.out') do
+#   it { should be_file }
+# end
 
 describe file('/var/log/tomcat7/catalina.log') do
   it { should be_file }
@@ -69,10 +69,6 @@ describe file('/var/log/tomcat7/localhost.log') do
 end
 
 describe file('/var/log/tomcat7/localhost_access_log.log') do
-  it { should be_file }
-end
-
-describe file('/var/run/tomcat7/tomcat7.pid') do
   it { should be_file }
 end
 
