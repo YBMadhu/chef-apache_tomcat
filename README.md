@@ -79,8 +79,7 @@ defaults to `home`/conf
 
 Additionally, the following attributes allow you override the included templates
 with your own. Use `name` to reference a template in the calling cookbook or
-`cookbook:name` to reference a template in another cookbook.
-  cookbook):
+`cookbook:name` to reference a template in another cookbook:
 * `setenv_template` - bin/setenv.sh
 * `server_xml_template` - conf/server.xml
 * `logging_properties_template` - conf/logging.properties
