@@ -53,4 +53,8 @@ tomcat_bin node['tomcat_bin']['home'] do
   log_dir node['tomcat_bin']['log_dir']
   logrotate_count node['tomcat_bin']['logrotate_count']
   logrotate_frequency node['tomcat_bin']['logrotate_frequency']
+  setenv_template node['tomcat_bin']['setenv_template']
+  server_xml_template node['tomcat_bin']['server_xml_template']
+  logging_properties_template node['tomcat_bin']['logging_properties_template']
+  logrotate_template node['tomcat_bin']['logrotate_template']
 end

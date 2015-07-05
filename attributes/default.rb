@@ -45,3 +45,9 @@ default['tomcat_bin']['pool_additional'] = Mash.new
 default['tomcat_bin']['access_log_additional'] = Mash.new
 default['tomcat_bin']['engine_valves'] = Mash.new
 default['tomcat_bin']['host_valves'] = Mash.new
+
+# custom templates - template or cookbook:template
+default['tomcat_bin']['setenv_template'] = nil
+default['tomcat_bin']['server_xml_template'] = nil
+default['tomcat_bin']['logging_properties_template'] = nil
+default['tomcat_bin']['logrotate_template'] = nil

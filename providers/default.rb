@@ -89,6 +89,16 @@ def access_log_valve
   valve
 end
 
+def template_source(template_attrib, default)
+  return 'tomcat_bin', default unless template_attrib
+  parts = template_attrib.split(/:/, 2)
+  if parts.length == 2
+    return parts
+  else
+    return new_resource.cookbook_name.to_s, parts.first
+  end
+end
+
 action :create do
   catalina_home = new_resource.home
   version = new_resource.version
@@ -181,19 +191,22 @@ action :create do
   end
 
   template ::File.join(new_resource.home, 'bin', 'setenv.sh') do
-    source 'setenv.sh.erb'
+    cb, src = template_source(new_resource.setenv_template, 'setenv.sh.erb')
+    source src
+    cookbook cb
     mode '0750'
     owner 'root'
     group new_resource.group
     variables(config: new_resource)
-    cookbook new_resource.setenv_cookbook
     if new_resource.enable_service
       notifies :restart, "poise_service[#{service_name}]"
     end
   end
 
   template ::File.join(new_resource.home, 'conf', 'server.xml') do
-    source 'server.xml.erb'
+    cb, src = template_source(new_resource.server_xml_template, 'server.xml.erb')
+    source src
+    cookbook cb
     mode '0640'
     owner 'root'
     group new_resource.group
@@ -207,7 +220,6 @@ action :create do
       host_valves: new_resource.host_valves || {},
       access_log_valve: access_log_valve
     )
-    cookbook new_resource.server_xml_cookbook
     if new_resource.enable_service
       notifies :restart, "poise_service[#{service_name}]"
     end
@@ -250,11 +262,13 @@ action :create do
   end
 
   template ::File.join(new_resource.home, 'conf', 'logging.properties') do
-    source 'logging.properties.erb'
+    cb, src = template_source(new_resource.logging_properties_template,
+                              'logging.properties.erb')
+    source src
+    cookbook cb
     mode '0640'
     owner 'root'
     group new_resource.group
-    cookbook new_resource.logging_properties_cookbook
     if new_resource.enable_service
       notifies :restart, "poise_service[#{service_name}]"
     end
@@ -269,7 +283,9 @@ action :create do
   end
 
   template "/etc/logrotate.d/#{service_name}" do
-    source 'logrotate.erb'
+    cb, src = template_source(new_resource.logrotate_template, 'logrotate.erb')
+    source src
+    cookbook cb
     mode '0644'
     owner 'root'
     group 'root'
@@ -278,7 +294,6 @@ action :create do
       frequency: new_resource.logrotate_frequency,
       rotate: new_resource.logrotate_count
     )
-    cookbook new_resource.logrotate_cookbook
   end
 
   poise_service service_name do # ~FC021

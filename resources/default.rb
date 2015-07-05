@@ -64,8 +64,7 @@ attribute :logs_rotatable, equal_to: [true, false], default: false
 attribute :logrotate_count, kind_of: Integer, default: 4
 attribute :logrotate_frequency, kind_of: String, default: 'weekly'
 
-attribute :init_cookbook, kind_of: String, default: 'tomcat_bin'
-attribute :setenv_cookbook, kind_of: String, default: 'tomcat_bin'
-attribute :server_xml_cookbook, kind_of: String, default: 'tomcat_bin'
-attribute :logging_properties_cookbook, kind_of: String, default: 'tomcat_bin'
-attribute :logrotate_cookbook, kind_of: String, default: 'tomcat_bin'
+attribute :setenv_template, kind_of: String
+attribute :server_xml_template, kind_of: String
+attribute :logging_properties_template, kind_of: String
+attribute :logrotate_template, kind_of: String

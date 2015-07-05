@@ -13,6 +13,10 @@ describe 'tomcat_bin::default' do
   let(:java_opts) { nil }
   let(:log_dir) { nil }
   let(:enable_service) { true }
+  let(:setenv_template) { nil }
+  let(:server_xml_template) { nil }
+  let(:logging_properties_template) { nil }
+  let(:logrotate_template) { nil }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['tomcat_bin'],
                              file_cache_path: '/var/chef') do |node|
@@ -34,14 +38,19 @@ describe 'tomcat_bin::default' do
       node.set['tomcat_bin']['jmx_monitor_password'] = jmx_monitor_password
       node.set['tomcat_bin']['jmx_control_password'] = jmx_control_password
       node.set['tomcat_bin']['enable_service'] = enable_service
+      node.set['tomcat_bin']['setenv_template'] = setenv_template
+      node.set['tomcat_bin']['server_xml_template'] = server_xml_template
+      node.set['tomcat_bin']['logging_properties_template'] = logging_properties_template
+      node.set['tomcat_bin']['logrotate_template'] = logrotate_template
     end.converge(described_recipe)
   end
 
-  let(:setenv_template) { chef_run.template('/var/tomcat7/bin/setenv.sh') }
-  let(:server_template) { chef_run.template('/var/tomcat7/conf/server.xml') }
-  let(:log_template) { chef_run.template('/var/tomcat7/conf/logging.properties') }
-  let(:jmxaccess_template) { chef_run.template('/var/tomcat7/conf/jmxremote.access') }
-  let(:jmxpassword_template) { chef_run.template('/var/tomcat7/conf/jmxremote.password') }
+  let(:setenv_resource) { chef_run.template('/var/tomcat7/bin/setenv.sh') }
+  let(:serverxml_resource) { chef_run.template('/var/tomcat7/conf/server.xml') }
+  let(:logprop_resource) { chef_run.template('/var/tomcat7/conf/logging.properties') }
+  let(:jmxaccess_resource) { chef_run.template('/var/tomcat7/conf/jmxremote.access') }
+  let(:jmxpassword_resource) { chef_run.template('/var/tomcat7/conf/jmxremote.password') }
+  let(:logrotate_resource) { chef_run.template('/etc/logrotate.d/tomcat7') }
 
   it 'includes the logrotate recipe' do
     expect(chef_run).to include_recipe('logrotate::default')
@@ -136,7 +145,8 @@ describe 'tomcat_bin::default' do
       mode: '0750',
       owner: 'root',
       group: 'tomcat',
-      source: 'setenv.sh.erb')
+      source: 'setenv.sh.erb',
+      cookbook: 'tomcat_bin')
   end
 
   it 'creates server.xml template' do
@@ -144,16 +154,82 @@ describe 'tomcat_bin::default' do
       mode: '0640',
       owner: 'root',
       group: 'tomcat',
-      source: 'server.xml.erb')
+      source: 'server.xml.erb',
+      cookbook: 'tomcat_bin')
   end
 
   it 'creates logging.properties template' do
-    expect(chef_run).to create_template('/var/tomcat7/conf/logging.properties')
-      .with(
-        mode: '0640',
-        owner: 'root',
-        group: 'tomcat',
-        source: 'logging.properties.erb')
+    expect(chef_run).to create_template('/var/tomcat7/conf/logging.properties').with(
+      mode: '0640',
+      owner: 'root',
+      group: 'tomcat',
+      source: 'logging.properties.erb',
+      cookbook: 'tomcat_bin')
+  end
+
+  it 'creates logrotate template' do
+    expect(chef_run).to create_template('/etc/logrotate.d/tomcat7').with(
+      mode: '0644',
+      owner: 'root',
+      group: 'root',
+      source: 'logrotate.erb',
+      cookbook: 'tomcat_bin')
+  end
+
+  context 'with custom templates' do
+    context 'when template name only' do
+      let(:setenv_template) { 'my_setenv.erb' }
+      let(:server_xml_template) { 'my_server_xml.erb' }
+      let(:logging_properties_template) { 'my_logging_properties.erb' }
+      let(:logrotate_template) { 'my_logrotate.erb' }
+
+      it 'setenv.sh template uses correct source and cookbook' do
+        expect(setenv_resource.source).to eq('my_setenv.erb')
+        expect(setenv_resource.cookbook).to eq('tomcat_bin')
+      end
+
+      it 'server.xml template uses correct source and cookbook' do
+        expect(serverxml_resource.source).to eq('my_server_xml.erb')
+        expect(serverxml_resource.cookbook).to eq('tomcat_bin')
+      end
+
+      it 'logging.properties template uses correct source and cookbook' do
+        expect(logprop_resource.source).to eq('my_logging_properties.erb')
+        expect(logprop_resource.cookbook).to eq('tomcat_bin')
+      end
+
+      it 'logrotate template uses correct source and cookbook' do
+        expect(logrotate_resource.source).to eq('my_logrotate.erb')
+        expect(logrotate_resource.cookbook).to eq('tomcat_bin')
+      end
+    end
+
+    context 'when cookbook:template' do
+      let(:setenv_template) { 'bar:your_setenv.erb' }
+      let(:server_xml_template) { 'foo:your_server_xml.erb' }
+      let(:logging_properties_template) { 'baz:your_log_prop.erb' }
+      let(:logrotate_template) { 'bing:your_logrotate.erb' }
+
+      it 'setenv.sh template uses correct source and cookbook' do
+        expect(setenv_resource.source).to eq('your_setenv.erb')
+        expect(setenv_resource.cookbook).to eq('bar')
+      end
+
+      it 'server.xml template uses correct source and cookbook' do
+        expect(serverxml_resource.source).to eq('your_server_xml.erb')
+        expect(serverxml_resource.cookbook).to eq('foo')
+      end
+
+      it 'logging.properties template uses correct source and cookbook' do
+        expect(logprop_resource.source).to eq('your_log_prop.erb')
+        expect(logprop_resource.cookbook).to eq('baz')
+      end
+
+      it 'logrotate template uses correct source and cookbook' do
+        expect(logrotate_resource.source).to eq('your_logrotate.erb')
+        expect(logrotate_resource.cookbook).to eq('bing')
+      end
+    end
   end
 
   context 'when enable_service true' do
@@ -169,23 +245,23 @@ describe 'tomcat_bin::default' do
     end
 
     it 'setenv.sh template notifies service restart' do
-      expect(setenv_template).to notify('poise_service[tomcat7]').to(:restart)
+      expect(setenv_resource).to notify('poise_service[tomcat7]').to(:restart)
     end
 
     it 'server.xml template notifies service restart' do
-      expect(server_template).to notify('poise_service[tomcat7]').to(:restart)
+      expect(serverxml_resource).to notify('poise_service[tomcat7]').to(:restart)
     end
 
     it 'logging.properties template notifies service restart' do
-      expect(log_template).to notify('poise_service[tomcat7]').to(:restart)
+      expect(logprop_resource).to notify('poise_service[tomcat7]').to(:restart)
     end
 
     it 'jmxremote.access template notifies service restart' do
-      expect(jmxaccess_template).to notify('poise_service[tomcat7]').to(:restart)
+      expect(jmxaccess_resource).to notify('poise_service[tomcat7]').to(:restart)
     end
 
     it 'jmxremote.password template notifies service restart' do
-      expect(jmxpassword_template).to notify('poise_service[tomcat7]').to(:restart)
+      expect(jmxpassword_resource).to notify('poise_service[tomcat7]').to(:restart)
     end
   end
 
@@ -196,33 +272,24 @@ describe 'tomcat_bin::default' do
     end
 
     it 'setenv.sh template does not notify service' do
-      expect(setenv_template).not_to notify('poise_service[tomcat7]')
+      expect(setenv_resource).not_to notify('poise_service[tomcat7]')
     end
 
     it 'server.xml template does not notify service' do
-      expect(server_template).not_to notify('poise_service[tomcat7]')
+      expect(serverxml_resource).not_to notify('poise_service[tomcat7]')
     end
 
     it 'logging.properties template does not notify service' do
-      expect(log_template).not_to notify('poise_service[tomcat7]')
+      expect(logprop_resource).not_to notify('poise_service[tomcat7]')
     end
 
     it 'jmxremote.access template does not notify service' do
-      expect(jmxaccess_template).not_to notify('poise_service[tomcat7]')
+      expect(jmxaccess_resource).not_to notify('poise_service[tomcat7]')
     end
 
     it 'jmxremote.password template does not notify service' do
-      expect(jmxpassword_template).not_to notify('poise_service[tomcat7]')
+      expect(jmxpassword_resource).not_to notify('poise_service[tomcat7]')
     end
-  end
-
-  it 'creates logrotate template' do
-    expect(chef_run).to create_template('/etc/logrotate.d/tomcat7')
-      .with(
-        mode: '0644',
-        owner: 'root',
-        group: 'root',
-        source: 'logrotate.erb')
   end
 
   context 'when catalina_opts is string' do

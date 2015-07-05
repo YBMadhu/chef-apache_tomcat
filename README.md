@@ -77,6 +77,15 @@ defaults to `home`/conf
 * `engine_valves` - nested hash of one or more engine valves
 * `host_valves` - nested hash of one or more host valves
 
+Additionally, the following attributes allow you override the included templates
+with your own. Use `name` to reference a template in the calling cookbook or
+`cookbook:name` to reference a template in another cookbook.
+  cookbook):
+* `setenv_template` - bin/setenv.sh
+* `server_xml_template` - conf/server.xml
+* `logging_properties_template` - conf/logging.properties
+* `logrotate_template` - /etc/logrotate.d/`service_name`
+
 ## License and Authors
 - Author:: Brian Clark (brian@clark.zone)
 
