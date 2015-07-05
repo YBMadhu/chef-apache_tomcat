@@ -4,20 +4,30 @@ Install and configure Tomcat using Apache binaries.
 
 **This cookbook and documentation are under construction.**
 
-## Recipes
-### default
-Install and configure tomcat. Please note this recipe does NOT install Java.
-You should install Java earlier in your run list before including this recipe.
-For example...
+## Requirements
+### Dependencies
+* `logrotate` - used by the `default` recipe to install logrotate (see below)
+* `poise-service` - this cookbook uses the [poise-service](https://supermarket.chef.io/cookbooks/poise-service)
+cookbook to manage tomcat service(s)
+
+### Java
+This cookbook does not install Java.  You should install Java earlier in your
+runlist before consuming recipes/resources in this cookbook. For example...
 * [java](https://supermarket.chef.io/cookbooks/java) community cookbook
 * [oracle_jdk](https://github.com/bdclark/chef-oracle_jdk) - my cookbook dedicated
 to installing the Oracle JDK
 
-### Attributes
-Uses the tomcat_bin resource (see below) to install and configure tomcat.
+### Logrotate
+This cookbook depends on the [logrotate](https://supermarket.chef.io/cookbooks/logrotate)
+cookbook but will only install logrotate when using the `default` recipe. If you
+are using the `tomcat_bin` LWRP you'll need to install logrotate on your own.
+
+## Recipes
+### default
+Installs and configures a single instance of tomcat based on node attributes.
 See the resource attributes listed below and attributes/default.rb for default settings.
 
-## Resources and Providers
+## Resources / Providers
 
 ### tomcat_bin
 Install and/or configure an instance of tomcat.
@@ -28,7 +38,7 @@ Install and/or configure an instance of tomcat.
 #### Attributes
 * `home` - required install directory of tomcat; default: name of resource block
 * `service_name` - optional name of service (defaults to basename of `home`)
-* `start_service` - whether to start/enable service; default: `true`
+* `enable_service` - whether to start/enable service; default: `true`
 * `user` - user running tomcat; default: `tomcat`
 * `group` - primary group of tomcat user; default: `tomcat`
 * `mirror` - url to apache tomcat mirror (defaults to node attribute)
