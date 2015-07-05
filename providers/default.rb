@@ -180,21 +180,6 @@ action :create do
     not_if { new_resource.log_dir.nil? }
   end
 
-  template "/etc/init.d/#{service_name}" do
-    source 'tomcat.init.erb'
-    variables(
-      tomcat_home: new_resource.home,
-      tomcat_user: new_resource.user,
-      tomcat_name: service_name,
-      kill_delay: new_resource.kill_delay
-    )
-    mode '0755'
-    owner 'root'
-    group 'root'
-    cookbook new_resource.init_cookbook
-    notifies :create, "ruby_block[restart_#{service_name}]", :immediately
-  end
-
   template ::File.join(new_resource.home, 'bin', 'setenv.sh') do
     source 'setenv.sh.erb'
     mode '0750'
@@ -202,7 +187,9 @@ action :create do
     group new_resource.group
     variables(config: new_resource)
     cookbook new_resource.setenv_cookbook
-    notifies :create, "ruby_block[restart_#{service_name}]", :immediately
+    if new_resource.start_service
+      notifies :restart, "poise_service[#{service_name}]"
+    end
   end
 
   template ::File.join(new_resource.home, 'conf', 'server.xml') do
@@ -221,7 +208,9 @@ action :create do
       access_log_valve: access_log_valve
     )
     cookbook new_resource.server_xml_cookbook
-    notifies :create, "ruby_block[restart_#{service_name}]", :immediately
+    if new_resource.start_service
+      notifies :restart, "poise_service[#{service_name}]"
+    end
   end
 
   template ::File.join(new_resource.home, 'conf', 'jmxremote.access') do
@@ -235,7 +224,9 @@ action :create do
       action :create
     end
     cookbook 'tomcat_bin'
-    notifies :create, "ruby_block[restart_#{service_name}]", :immediately
+    if new_resource.start_service
+      notifies :restart, "poise_service[#{service_name}]"
+    end
   end
 
   template ::File.join(new_resource.home, 'conf', 'jmxremote.password') do
@@ -253,7 +244,9 @@ action :create do
       action :create
     end
     cookbook 'tomcat_bin'
-    notifies :create, "ruby_block[restart_#{service_name}]", :immediately
+    if new_resource.start_service
+      notifies :restart, "poise_service[#{service_name}]"
+    end
   end
 
   template ::File.join(new_resource.home, 'conf', 'logging.properties') do
@@ -262,7 +255,9 @@ action :create do
     owner 'root'
     group new_resource.group
     cookbook new_resource.logging_properties_cookbook
-    notifies :create, "ruby_block[restart_#{service_name}]", :immediately
+    if new_resource.start_service
+      notifies :restart, "poise_service[#{service_name}]"
+    end
   end
 
   logs = %w(catalina.out catalina.log manager.log
@@ -286,22 +281,15 @@ action :create do
     cookbook new_resource.logrotate_cookbook
   end
 
-  service service_name do # ~FC021 http://acrmp.github.io/foodcritic/#FC021
-    supports restart: true, start: true, stop: true, status: true
-    action new_resource.start_service ? [:enable, :start] : :nothing
-    only_if { new_resource.start_service == true }
-  end
-
-  # Hack to prevent mulptiple starts/restarts on first-run
-  ruby_block "restart_#{service_name}" do
-    block do
-      r = resources(service: service_name)
-      a = Array.new(r.action)
-      a << :restart unless a.include?(:restart)
-      a.delete(:start) if a.include?(:restart)
-      r.action(a)
-    end
-    action :nothing
-    only_if { new_resource.start_service == true }
+  poise_service service_name do # ~FC021
+    command "#{new_resource.home}/bin/catalina.sh run"
+    directory new_resource.home
+    provider :sysvinit if platform_family?('rhel')
+    user new_resource.user
+    environment(
+      CATALINA_HOME: new_resource.home,
+      CATALINA_BASE: new_resource.home)
+    options :sysvinit, template: 'sysvinit.erb'
+    action new_resource.start_service ? :enable : :disable
   end
 end

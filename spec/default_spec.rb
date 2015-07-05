@@ -37,12 +37,11 @@ describe 'tomcat_bin::default' do
     end.converge(described_recipe)
   end
 
-  let(:init_template) { chef_run.template('/etc/init.d/tomcat7') }
   let(:setenv_template) { chef_run.template('/var/tomcat7/bin/setenv.sh') }
   let(:server_template) { chef_run.template('/var/tomcat7/conf/server.xml') }
-  let(:log_template) do
-    chef_run.template('/var/tomcat7/conf/logging.properties')
-  end
+  let(:log_template) { chef_run.template('/var/tomcat7/conf/logging.properties') }
+  let(:jmxaccess_template) { chef_run.template('/var/tomcat7/conf/jmxremote.access') }
+  let(:jmxpassword_template) { chef_run.template('/var/tomcat7/conf/jmxremote.password') }
 
   it 'includes the logrotate recipe' do
     expect(chef_run).to include_recipe('logrotate::default')
@@ -132,18 +131,6 @@ describe 'tomcat_bin::default' do
     end
   end
 
-  it 'creates tomcat init template' do
-    expect(chef_run).to create_template('/etc/init.d/tomcat7').with(
-      mode: '0755',
-      owner: 'root',
-      group: 'root',
-      source: 'tomcat.init.erb')
-  end
-
-  it 'init template notifies restart ruby_block' do
-    expect(init_template).to notify('ruby_block[restart_tomcat7]').immediately
-  end
-
   it 'creates setenv.sh template' do
     expect(chef_run).to create_template('/var/tomcat7/bin/setenv.sh').with(
       mode: '0750',
@@ -152,20 +139,12 @@ describe 'tomcat_bin::default' do
       source: 'setenv.sh.erb')
   end
 
-  it 'setenv.sh template notifies restart ruby_block' do
-    expect(setenv_template).to notify('ruby_block[restart_tomcat7]').immediately
-  end
-
   it 'creates server.xml template' do
     expect(chef_run).to create_template('/var/tomcat7/conf/server.xml').with(
       mode: '0640',
       owner: 'root',
       group: 'tomcat',
       source: 'server.xml.erb')
-  end
-
-  it 'server.xml template notifies restart ruby_block' do
-    expect(server_template).to notify('ruby_block[restart_tomcat7]').immediately
   end
 
   it 'creates logging.properties template' do
@@ -177,31 +156,64 @@ describe 'tomcat_bin::default' do
         source: 'logging.properties.erb')
   end
 
-  it 'logging.properties template notifies restart ruby_block' do
-    expect(log_template).to notify('ruby_block[restart_tomcat7]').immediately
-  end
-
   context 'when start_service true' do
-    it 'enables tomcat service' do
-      expect(chef_run).to enable_service('tomcat7')
+    it 'enables poise-service' do
+      expect(chef_run).to enable_poise_service('tomcat7').with(
+        command: '/var/tomcat7/bin/catalina.sh run',
+        directory: '/var/tomcat7',
+        user: 'tomcat',
+        environment: {
+          CATALINA_HOME: '/var/tomcat7',
+          CATALINA_BASE: '/var/tomcat7'
+        })
     end
 
-    # it 'restarts tomcat service' do
-    #   expect(chef_run).to start_service('tomcat7')
-    # end
+    it 'setenv.sh template notifies service restart' do
+      expect(setenv_template).to notify('poise_service[tomcat7]').to(:restart)
+    end
+
+    it 'server.xml template notifies service restart' do
+      expect(server_template).to notify('poise_service[tomcat7]').to(:restart)
+    end
+
+    it 'logging.properties template notifies service restart' do
+      expect(log_template).to notify('poise_service[tomcat7]').to(:restart)
+    end
+
+    it 'jmxremote.access template notifies service restart' do
+      expect(jmxaccess_template).to notify('poise_service[tomcat7]').to(:restart)
+    end
+
+    it 'jmxremote.password template notifies service restart' do
+      expect(jmxpassword_template).to notify('poise_service[tomcat7]').to(:restart)
+    end
   end
 
   context 'when start_service false' do
     let(:start_service) { false }
-    it 'tomcat service does nothing' do
-      resource = chef_run.service('tomcat7')
-      expect(resource).to do_nothing
+    it 'poise-service is disabled' do
+      expect(chef_run).to disable_poise_service('tomcat7')
     end
-  end
 
-  it 'restart ruby_block does nothing' do
-    resource = chef_run.ruby_block('restart_tomcat7')
-    expect(resource).to do_nothing
+    it 'setenv.sh template does not notify service' do
+      expect(setenv_template).not_to notify('poise_service[tomcat7]')
+    end
+
+    it 'server.xml template does not notify service' do
+      expect(server_template).not_to notify('poise_service[tomcat7]')
+    end
+
+    it 'logging.properties template does not notify service' do
+      expect(log_template).not_to notify('poise_service[tomcat7]')
+    end
+
+    it 'jmxremote.access template does not notify service' do
+      expect(jmxaccess_template).not_to notify('poise_service[tomcat7]')
+    end
+
+    it 'jmxremote.password template does not notify service' do
+      expect(jmxpassword_template).not_to notify('poise_service[tomcat7]')
+    end
   end
 
   it 'creates logrotate template' do
@@ -285,8 +297,7 @@ describe 'tomcat_bin::default' do
       expect(chef_run).to delete_template('/var/tomcat7/conf/jmxremote.access')
     end
     it 'deletes jmxremote.password template' do
-      expect(chef_run).to delete_template(
-        '/var/tomcat7/conf/jmxremote.password')
+      expect(chef_run).to delete_template('/var/tomcat7/conf/jmxremote.password')
     end
     it 'does not render jmxremote content in setenv.sh' do
       expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
@@ -330,8 +341,7 @@ describe 'tomcat_bin::default' do
           '/var/tomcat7/conf/jmxremote.access')
       end
       it 'deletes jmxremote.password template' do
-        expect(chef_run).to delete_template(
-          '/var/tomcat7/conf/jmxremote.password')
+        expect(chef_run).to delete_template('/var/tomcat7/conf/jmxremote.password')
       end
       it 'sets jmxremote.authenticate to false in setenv.sh' do
         expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# /etc/init.d/<%= @tomcat_name %> -- Startup/shutdown script for Tomcat
+# /etc/init.d/<%= @name %> -- Startup/shutdown script for Tomcat
 #
 #
 ### BEGIN INIT INFO
@@ -15,13 +15,15 @@
 # Short-Description: Start and stop Tomcat
 ### END INIT INFO
 
-RUNAS=<%= @tomcat_user %>
-PID_DIR=/var/run/<%= @tomcat_name %>
-KILL_WAIT=<%= @kill_delay || 45 %>
-
-export CATALINA_HOME=<%= @tomcat_home %>
-export CATALINA_BASE=<%= @tomcat_home %>
-export CATALINA_PID="$PID_DIR/<%= @tomcat_name %>.pid"
+RUNAS=<%= @user %>
+KILL_WAIT=<%= @environment['KILL_WAIT'] || 45 %>
+export CATALINA_HOME=<%= @environment['CATALINA_HOME'] || @directory %>
+export CATALINA_BASE=<%= @environment['CATALINA_BASE'] || @directory %>
+export CATALINA_PID=<%= @pid_file %>
+<%- @environment.each do |key, val| -%>
+<%- next if %w(CATALINA_HOME CATALINA_BASE CATALINA_PID KILL_WAIT).include? key %>
+export <%= key %>="<%= val %>"
+<%- end -%>
 
 if [ -z "$CATALINA_HOME" ]; then
     echo "CATALINA_HOME must be set!"
@@ -37,8 +39,10 @@ require_root() {
 
 tomcat_start() {
     require_root
+    PID_DIR=$(dirname $CATALINA_PID)
     [ -d "$PID_DIR" ] || mkdir -p $PID_DIR
-    chown $RUNAS: "$PID_DIR"
+    touch $CATALINA_PID
+    chown $RUNAS: $CATALINA_PID
     /bin/su -p -s /bin/sh -c "$CATALINA_HOME/bin/catalina.sh start" $RUNAS
 }
 

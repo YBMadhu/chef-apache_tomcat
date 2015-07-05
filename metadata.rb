@@ -7,3 +7,4 @@ long_description 'Installs/Configures tomcat_bin'
 version          '0.2.0'
 
 depends 'logrotate'
+depends 'poise-service', '~> 1.0'
