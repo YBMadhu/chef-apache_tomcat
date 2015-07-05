@@ -15,18 +15,18 @@ suites:
   - name: default
     run_list:
       - 'recipe[java]'
-      - 'recipe[tomcat_bin::default]'
+      - 'recipe[apache_tomcat::default]'
     attributes:
-      tomcat_bin:
+      apache_tomcat:
         install_java: true
       java:
         jdk_version: '7'
   - name: custom
     run_list:
       - 'recipe[java]'
-      - 'recipe[tomcat_bin::default]'
+      - 'recipe[apache_tomcat::default]'
     attributes:
-      tomcat_bin:
+      apache_tomcat:
         install_java: true
         home: '/opt/tomcat7'
         log_dir: '/var/log/tomcat7'

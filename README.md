@@ -1,4 +1,4 @@
-# tomcat_bin cookbook
+# apache_tomcat cookbook
 
 Install and configure Tomcat using Apache binaries.
 
@@ -20,7 +20,7 @@ to installing the Oracle JDK
 ### Logrotate
 This cookbook depends on the [logrotate](https://supermarket.chef.io/cookbooks/logrotate)
 cookbook but will only install logrotate when using the `default` recipe. If you
-are using the `tomcat_bin` LWRP you'll need to install logrotate on your own.
+are using the `apache_tomcat` LWRP you'll need to install logrotate on your own.
 
 ## Recipes
 ### default
@@ -29,7 +29,7 @@ See the resource attributes listed below and attributes/default.rb for default s
 
 ## Resources / Providers
 
-### tomcat_bin
+### apache_tomcat
 Install and/or configure an instance of tomcat.
 
 #### Actions

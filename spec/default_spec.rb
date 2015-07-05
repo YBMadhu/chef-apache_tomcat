@@ -1,7 +1,7 @@
 # rubocop:disable Metrics/LineLength
 require_relative 'spec_helper'
 
-describe 'tomcat_bin::default' do
+describe 'apache_tomcat::default' do
   let(:initial_heap_size) { nil }
   let(:max_heap_size) { nil }
   let(:max_perm_size) { nil }
@@ -18,30 +18,30 @@ describe 'tomcat_bin::default' do
   let(:logging_properties_template) { nil }
   let(:logrotate_template) { nil }
   let(:chef_run) do
-    ChefSpec::SoloRunner.new(step_into: ['tomcat_bin'],
+    ChefSpec::SoloRunner.new(step_into: ['apache_tomcat'],
                              file_cache_path: '/var/chef') do |node|
-      node.set['tomcat_bin']['mirror'] = 'https://getstuff.org/blah'
-      node.set['tomcat_bin']['checksum'] = 'mychecksum'
-      node.set['tomcat_bin']['version'] = '7.7.77'
-      node.set['tomcat_bin']['home'] = '/var/tomcat7'
-      node.set['tomcat_bin']['logs_rotatable'] = false
-      node.set['tomcat_bin']['logrotate_frequency'] = 'daily'
-      node.set['tomcat_bin']['logrotate_rotate'] = 7
-      node.set['tomcat_bin']['log_dir'] = log_dir
-      node.set['tomcat_bin']['initial_heap_size'] = initial_heap_size
-      node.set['tomcat_bin']['max_heap_size'] = max_heap_size
-      node.set['tomcat_bin']['max_perm_size'] = max_perm_size
-      node.set['tomcat_bin']['catalina_opts'] = catalina_opts
-      node.set['tomcat_bin']['java_opts'] = java_opts
-      node.set['tomcat_bin']['jmx_port'] = jmx_port
-      node.set['tomcat_bin']['jmx_authenticate'] = jmx_authenticate
-      node.set['tomcat_bin']['jmx_monitor_password'] = jmx_monitor_password
-      node.set['tomcat_bin']['jmx_control_password'] = jmx_control_password
-      node.set['tomcat_bin']['enable_service'] = enable_service
-      node.set['tomcat_bin']['setenv_template'] = setenv_template
-      node.set['tomcat_bin']['server_xml_template'] = server_xml_template
-      node.set['tomcat_bin']['logging_properties_template'] = logging_properties_template
-      node.set['tomcat_bin']['logrotate_template'] = logrotate_template
+      node.set['apache_tomcat']['mirror'] = 'https://getstuff.org/blah'
+      node.set['apache_tomcat']['checksum'] = 'mychecksum'
+      node.set['apache_tomcat']['version'] = '7.7.77'
+      node.set['apache_tomcat']['home'] = '/var/tomcat7'
+      node.set['apache_tomcat']['logs_rotatable'] = false
+      node.set['apache_tomcat']['logrotate_frequency'] = 'daily'
+      node.set['apache_tomcat']['logrotate_rotate'] = 7
+      node.set['apache_tomcat']['log_dir'] = log_dir
+      node.set['apache_tomcat']['initial_heap_size'] = initial_heap_size
+      node.set['apache_tomcat']['max_heap_size'] = max_heap_size
+      node.set['apache_tomcat']['max_perm_size'] = max_perm_size
+      node.set['apache_tomcat']['catalina_opts'] = catalina_opts
+      node.set['apache_tomcat']['java_opts'] = java_opts
+      node.set['apache_tomcat']['jmx_port'] = jmx_port
+      node.set['apache_tomcat']['jmx_authenticate'] = jmx_authenticate
+      node.set['apache_tomcat']['jmx_monitor_password'] = jmx_monitor_password
+      node.set['apache_tomcat']['jmx_control_password'] = jmx_control_password
+      node.set['apache_tomcat']['enable_service'] = enable_service
+      node.set['apache_tomcat']['setenv_template'] = setenv_template
+      node.set['apache_tomcat']['server_xml_template'] = server_xml_template
+      node.set['apache_tomcat']['logging_properties_template'] = logging_properties_template
+      node.set['apache_tomcat']['logrotate_template'] = logrotate_template
     end.converge(described_recipe)
   end
 
@@ -65,7 +65,7 @@ describe 'tomcat_bin::default' do
   end
 
   it 'creates tomcat instance' do
-    expect(chef_run).to create_tomcat_bin('/var/tomcat7')
+    expect(chef_run).to create_apache_tomcat('/var/tomcat7')
   end
 
   it 'creates tomcat home directory' do
@@ -146,7 +146,7 @@ describe 'tomcat_bin::default' do
       owner: 'root',
       group: 'tomcat',
       source: 'setenv.sh.erb',
-      cookbook: 'tomcat_bin')
+      cookbook: 'apache_tomcat')
   end
 
   it 'creates server.xml template' do
@@ -155,7 +155,7 @@ describe 'tomcat_bin::default' do
       owner: 'root',
       group: 'tomcat',
       source: 'server.xml.erb',
-      cookbook: 'tomcat_bin')
+      cookbook: 'apache_tomcat')
   end
 
   it 'creates logging.properties template' do
@@ -164,7 +164,7 @@ describe 'tomcat_bin::default' do
       owner: 'root',
       group: 'tomcat',
       source: 'logging.properties.erb',
-      cookbook: 'tomcat_bin')
+      cookbook: 'apache_tomcat')
   end
 
   it 'creates logrotate template' do
@@ -173,7 +173,7 @@ describe 'tomcat_bin::default' do
       owner: 'root',
       group: 'root',
       source: 'logrotate.erb',
-      cookbook: 'tomcat_bin')
+      cookbook: 'apache_tomcat')
   end
 
   context 'with custom templates' do
@@ -185,22 +185,22 @@ describe 'tomcat_bin::default' do
 
       it 'setenv.sh template uses correct source and cookbook' do
         expect(setenv_resource.source).to eq('my_setenv.erb')
-        expect(setenv_resource.cookbook).to eq('tomcat_bin')
+        expect(setenv_resource.cookbook).to eq('apache_tomcat')
       end
 
       it 'server.xml template uses correct source and cookbook' do
         expect(serverxml_resource.source).to eq('my_server_xml.erb')
-        expect(serverxml_resource.cookbook).to eq('tomcat_bin')
+        expect(serverxml_resource.cookbook).to eq('apache_tomcat')
       end
 
       it 'logging.properties template uses correct source and cookbook' do
         expect(logprop_resource.source).to eq('my_logging_properties.erb')
-        expect(logprop_resource.cookbook).to eq('tomcat_bin')
+        expect(logprop_resource.cookbook).to eq('apache_tomcat')
       end
 
       it 'logrotate template uses correct source and cookbook' do
         expect(logrotate_resource.source).to eq('my_logrotate.erb')
-        expect(logrotate_resource.cookbook).to eq('tomcat_bin')
+        expect(logrotate_resource.cookbook).to eq('apache_tomcat')
       end
     end
 

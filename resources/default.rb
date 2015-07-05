@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: tomcat_bin
+# Cookbook Name:: apache_tomcat
 # Resource:: default
 #
 # Copyright 2014 Brian Clark
@@ -27,9 +27,9 @@ attribute :enable_service, equal_to: [true, false], default: true
 attribute :user, kind_of: String, default: 'tomcat'
 attribute :group, kind_of: String, default: 'tomcat'
 
-attribute :version, kind_of: String, default: node['tomcat_bin']['version']
-attribute :mirror, kind_of: String, default: node['tomcat_bin']['mirror']
-attribute :checksum, kind_of: String, default: node['tomcat_bin']['checksum']
+attribute :version, kind_of: String, default: node['apache_tomcat']['version']
+attribute :mirror, kind_of: String, default: node['apache_tomcat']['mirror']
+attribute :checksum, kind_of: String, default: node['apache_tomcat']['checksum']
 
 attribute :kill_delay, regex: /^[1-9][0-9]?$/
 attribute :java_home, kind_of: String

@@ -1,9 +1,9 @@
-name             'tomcat_bin'
+name             'apache_tomcat'
 maintainer       'Brian Clark'
 maintainer_email 'brian@clark.zone'
 license          'apache2'
-description      'Installs/Configures tomcat_bin'
-long_description 'Installs/Configures tomcat_bin'
+description      'Installs/Configures apache_tomcat'
+long_description 'Installs/Configures apache_tomcat'
 version          '0.2.0'
 
 depends 'logrotate'

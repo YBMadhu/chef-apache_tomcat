@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: tomcat_bin
+# Cookbook Name:: apache_tomcat
 # Provider:: default
 #
 # Copyright 2014 Brian Clark
@@ -90,7 +90,7 @@ def access_log_valve
 end
 
 def template_source(template_attrib, default)
-  return 'tomcat_bin', default unless template_attrib
+  return 'apache_tomcat', default unless template_attrib
   parts = template_attrib.split(/:/, 2)
   if parts.length == 2
     return parts
@@ -102,7 +102,7 @@ end
 action :create do
   catalina_home = new_resource.home
   version = new_resource.version
-  url = "#{node['tomcat_bin']['mirror']}/#{version}/tomcat-#{version}.tar.gz"
+  url = "#{node['apache_tomcat']['mirror']}/#{version}/tomcat-#{version}.tar.gz"
   tarball_name = ::File.basename(url)
   download_path = ::File.join(Chef::Config[:file_cache_path], tarball_name)
 
@@ -129,7 +129,7 @@ action :create do
     source url
     owner 'root'
     group 'root'
-    checksum node['tomcat_bin']['checksum']
+    checksum node['apache_tomcat']['checksum']
   end
 
   directory catalina_home do
@@ -235,7 +235,7 @@ action :create do
     else
       action :create
     end
-    cookbook 'tomcat_bin'
+    cookbook 'apache_tomcat'
     if new_resource.enable_service
       notifies :restart, "poise_service[#{service_name}]"
     end
@@ -255,7 +255,7 @@ action :create do
     else
       action :create
     end
-    cookbook 'tomcat_bin'
+    cookbook 'apache_tomcat'
     if new_resource.enable_service
       notifies :restart, "poise_service[#{service_name}]"
     end
