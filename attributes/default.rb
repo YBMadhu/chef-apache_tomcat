@@ -8,7 +8,7 @@ default['tomcat_bin']['version'] = '7.0.56'
 default['tomcat_bin']['checksum'] = 'c0ca44be20bccebbb043ccd7ab5ea4d94060fdde6bb84812f3da363955dae5bb'
 default['tomcat_bin']['home'] = '/opt/tomcat'
 default['tomcat_bin']['service_name'] = nil
-default['tomcat_bin']['start_service'] = true
+default['tomcat_bin']['enable_service'] = true
 
 # Logging settings
 default['tomcat_bin']['log_dir'] = nil

@@ -187,7 +187,7 @@ action :create do
     group new_resource.group
     variables(config: new_resource)
     cookbook new_resource.setenv_cookbook
-    if new_resource.start_service
+    if new_resource.enable_service
       notifies :restart, "poise_service[#{service_name}]"
     end
   end
@@ -208,7 +208,7 @@ action :create do
       access_log_valve: access_log_valve
     )
     cookbook new_resource.server_xml_cookbook
-    if new_resource.start_service
+    if new_resource.enable_service
       notifies :restart, "poise_service[#{service_name}]"
     end
   end
@@ -224,7 +224,7 @@ action :create do
       action :create
     end
     cookbook 'tomcat_bin'
-    if new_resource.start_service
+    if new_resource.enable_service
       notifies :restart, "poise_service[#{service_name}]"
     end
   end
@@ -244,7 +244,7 @@ action :create do
       action :create
     end
     cookbook 'tomcat_bin'
-    if new_resource.start_service
+    if new_resource.enable_service
       notifies :restart, "poise_service[#{service_name}]"
     end
   end
@@ -255,7 +255,7 @@ action :create do
     owner 'root'
     group new_resource.group
     cookbook new_resource.logging_properties_cookbook
-    if new_resource.start_service
+    if new_resource.enable_service
       notifies :restart, "poise_service[#{service_name}]"
     end
   end
@@ -290,6 +290,6 @@ action :create do
       CATALINA_HOME: new_resource.home,
       CATALINA_BASE: new_resource.home)
     options :sysvinit, template: 'sysvinit.erb'
-    action new_resource.start_service ? :enable : :disable
+    action new_resource.enable_service ? :enable : :disable
   end
 end

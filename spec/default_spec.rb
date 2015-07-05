@@ -12,7 +12,7 @@ describe 'tomcat_bin::default' do
   let(:jmx_authenticate) { true }
   let(:java_opts) { nil }
   let(:log_dir) { nil }
-  let(:start_service) { true }
+  let(:enable_service) { true }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['tomcat_bin'],
                              file_cache_path: '/var/chef') do |node|
@@ -33,7 +33,7 @@ describe 'tomcat_bin::default' do
       node.set['tomcat_bin']['jmx_authenticate'] = jmx_authenticate
       node.set['tomcat_bin']['jmx_monitor_password'] = jmx_monitor_password
       node.set['tomcat_bin']['jmx_control_password'] = jmx_control_password
-      node.set['tomcat_bin']['start_service'] = start_service
+      node.set['tomcat_bin']['enable_service'] = enable_service
     end.converge(described_recipe)
   end
 
@@ -156,7 +156,7 @@ describe 'tomcat_bin::default' do
         source: 'logging.properties.erb')
   end
 
-  context 'when start_service true' do
+  context 'when enable_service true' do
     it 'enables poise-service' do
       expect(chef_run).to enable_poise_service('tomcat7').with(
         command: '/var/tomcat7/bin/catalina.sh run',
@@ -189,8 +189,8 @@ describe 'tomcat_bin::default' do
     end
   end
 
-  context 'when start_service false' do
-    let(:start_service) { false }
+  context 'when enable_service false' do
+    let(:enable_service) { false }
     it 'poise-service is disabled' do
       expect(chef_run).to disable_poise_service('tomcat7')
     end
