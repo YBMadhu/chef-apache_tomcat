@@ -64,7 +64,7 @@ Install and/or configure an instance of tomcat.
 * `jmx_dir` - optional directory for jmxremote.password and jmxremote.access,
 defaults to `home`/conf
 * `shutdown_port` - tomcat shutdown port in server.xml; required
-* `http_port` - optional http port (integer)
+* `http_port` - optional http port (integer), http connector undef
 * `ajp_port` - optional ajp port (integer)
 * `ssl_port` - optional ssl port (integer)
 * `pool_enabled` - enable shared executor (thread pool); default: `false`
@@ -76,6 +76,7 @@ defaults to `home`/conf
 * `access_log_additional` - hash of additional access log valve attributes
 * `engine_valves` - nested hash of one or more engine valves
 * `host_valves` - nested hash of one or more host valves
+* `tomcat_users` - optional array of tomcat-users (see below for expected format)
 
 Additionally, the following attributes allow you override the included templates
 with your own. Use `name` to reference a template in the calling cookbook or
@@ -83,8 +84,96 @@ with your own. Use `name` to reference a template in the calling cookbook or
 * `setenv_template` - bin/setenv.sh
 * `server_xml_template` - conf/server.xml
 * `logging_properties_template` - conf/logging.properties
+* `tomcat_users_template` - conf/tomcat-users.xml
 * `logrotate_template` - /etc/logrotate.d/`service_name`
 
+## Usage and examples
+
+#### HTTP Connector
+To define a non-SSL HTTP Connector, set `http_port` to a port number. If `nil` the
+connector will not be created in server.xml. To specify additional attributes
+for this connector, specify them using `http_additional`. For example:
+```
+node['apache_tomcat']['http_port'] = 8080
+```
+will generate the following connector using cookbook defaults:
+```
+<Connector port="8080"
+           protocol="HTTP/1.1"
+           connectionTimeout="20000"
+           URIEncoding="UTF-8"
+           />
+```
+To override connector attributes, or to add additional ones, use `http_additional`:
+```
+node['apache_tomcat']['http_port'] = 8080
+node['apache_tomcat']['http_additional']['protocol'] = 'org.apache.coyote.http11.Http11NioProtocol'
+node['apache_tomcat']['http_additional']['connectionTimeout'] = '15000'
+node['apache_tomcat']['http_additional']['address'] = '10.0.0.5'
+```
+creates the following connector:
+```
+<!-- Define a non-SSL HTTP Connector on port 8080 -->
+<Connector port="8080"
+           protocol="org.apache.coyote.http11.Http11NioProtocol"
+           connectionTimeout="15000"
+           URIEncoding="UTF-8"
+           address="10.0.0.5"
+           />
+```
+Of course if desired it can also be specified with a raw hash:
+```
+node['apache_tomcat']['http_additional'] = {
+  'protocol' => 'org.apache.coyote.http11.Http11NioProtocol',
+  'connectionTimeout' => '15000',
+  'address' => '10.0.0.5'
+}
+```
+
+#### SSL Connector
+An SSL connector can be specified in much the same way as the HTTP connector
+examples shown above, using `ssl_port` and `ssl_additional`. If only `ssl_port`
+is specified, the default settings for the connector are:
+```
+<!-- Define an SSL Connector on port xxxx -->
+<Connector port="xxxx"
+           protocol="HTTP/1.1"
+           connectionTimeout="20000"
+           URIEncoding="UTF-8"
+           SSLEnabled="true"
+           scheme="https"
+           secure="true"
+           sslProtocol="TLS"
+           clientAuth="false"
+           />
+```
+If desired these can be overridden with `ssl_additional`.
+
+*NOTE:* If the ssl connector is enabled, it will by default add the `redirectPort`
+attribute to the http connector (and the ajp connector if enabled) with the value
+set to the `ssl_port`.
+
+#### AJP Connector
+TODO
+#### Thread Pool
+TODO
+
+#### tomcat users
+The `tomcat_users` attribute accepts an array of user hashes like so:
+```
+[
+  {
+    'id' => 'frank',
+    'password' => 'bacon',
+    'roles' => ['admin']
+  },
+  {
+    'id' => 'bob',
+    'password' => 'eggs',
+    'roles' => ['admin', 'foo']
+  }
+]
+```
 ## License and Authors
 - Author:: Brian Clark (brian@clark.zone)
 
