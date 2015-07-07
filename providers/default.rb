@@ -203,6 +203,22 @@ action :create do
     end
   end
 
+  cb, src = template_source(new_resource.tomcat_users_template, 'tomcat-users.xml.erb')
+  template ::File.join(catalina_home, 'conf', 'tomcat-users.xml') do
+    source src
+    cookbook cb
+    mode '640'
+    owner 'root'
+    group new_resource.group
+    variables(
+      roles: new_resource.tomcat_users.map { |item| item['roles'] }.flatten.uniq,
+      users: new_resource.tomcat_users
+    )
+    if new_resource.enable_service
+      notifies :restart, "poise_service[#{service_name}]"
+    end
+  end
+
   logs = %w(catalina.out catalina.log manager.log
             host-manager.log localhost.log)
   log_paths = logs.map { |log| ::File.join(catalina_home, 'logs', log) }

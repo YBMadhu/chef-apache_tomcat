@@ -13,10 +13,12 @@ describe 'apache_tomcat::default' do
   let(:java_opts) { nil }
   let(:log_dir) { nil }
   let(:enable_service) { true }
+  let(:tomcat_users) { nil }
   let(:setenv_template) { nil }
   let(:server_xml_template) { nil }
   let(:logging_properties_template) { nil }
   let(:logrotate_template) { nil }
+  let(:tomcat_users_template) { nil }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['apache_tomcat'],
                              file_cache_path: '/var/chef') do |node|
@@ -38,16 +40,19 @@ describe 'apache_tomcat::default' do
       node.set['apache_tomcat']['jmx_monitor_password'] = jmx_monitor_password
       node.set['apache_tomcat']['jmx_control_password'] = jmx_control_password
       node.set['apache_tomcat']['enable_service'] = enable_service
+      node.set['apache_tomcat']['tomcat_users'] = tomcat_users
       node.set['apache_tomcat']['setenv_template'] = setenv_template
       node.set['apache_tomcat']['server_xml_template'] = server_xml_template
       node.set['apache_tomcat']['logging_properties_template'] = logging_properties_template
       node.set['apache_tomcat']['logrotate_template'] = logrotate_template
+      node.set['apache_tomcat']['tomcat_users_template'] = tomcat_users_template
     end.converge(described_recipe)
   end
 
   let(:setenv_resource) { chef_run.template('/var/tomcat7/bin/setenv.sh') }
   let(:serverxml_resource) { chef_run.template('/var/tomcat7/conf/server.xml') }
   let(:logprop_resource) { chef_run.template('/var/tomcat7/conf/logging.properties') }
+  let(:tomcat_users_resource) { chef_run.template('/var/tomcat7/conf/tomcat-users.xml') }
   let(:jmxaccess_resource) { chef_run.template('/var/tomcat7/conf/jmxremote.access') }
   let(:jmxpassword_resource) { chef_run.template('/var/tomcat7/conf/jmxremote.password') }
   let(:logrotate_resource) { chef_run.template('/etc/logrotate.d/tomcat7') }
@@ -176,12 +181,47 @@ describe 'apache_tomcat::default' do
       cookbook: 'apache_tomcat')
   end
 
+  it 'creates tomcat-users.xml template' do
+    expect(chef_run).to create_template('/var/tomcat7/conf/tomcat-users.xml').with(
+      mode: '640',
+      owner: 'root',
+      group: 'tomcat')
+  end
+
+  context 'with no tomcat_users' do
+    it 'tomcat-users.xml has no users or roles' do
+      expect(chef_run).to render_file('/var/tomcat7/conf/tomcat-users.xml')
+        .with_content("<tomcat-users>\n</tomcat-users>")
+    end
+  end
+
+  context 'with specified tomcat_users' do
+    let(:tomcat_users) do
+      [
+        { 'id' => 'bill', 'password' => 'eggs', 'roles' => %w(admin) },
+        { 'id' => 'bob', 'password' => 'bacon', 'roles' => %w(admin foo) }
+      ]
+    end
+    it 'tomcat-users.xml has roles' do
+      expect(chef_run).to render_file('/var/tomcat7/conf/tomcat-users.xml')
+        .with_content("<role rolename=\"admin\" />\n<role rolename=\"foo\" />")
+    end
+
+    it 'tomcat-users.xml has users' do
+      expect(chef_run).to render_file('/var/tomcat7/conf/tomcat-users.xml')
+        .with_content('<user username="bill" password="eggs" roles="admin" />')
+      expect(chef_run).to render_file('/var/tomcat7/conf/tomcat-users.xml')
+        .with_content('<user username="bob" password="bacon" roles="admin, foo" />')
+    end
+  end
+
   context 'with custom templates' do
     context 'when template name only' do
       let(:setenv_template) { 'my_setenv.erb' }
       let(:server_xml_template) { 'my_server_xml.erb' }
       let(:logging_properties_template) { 'my_logging_properties.erb' }
       let(:logrotate_template) { 'my_logrotate.erb' }
+      let(:tomcat_users_template) { 'my_tomcat_users.erb' }
 
       it 'setenv.sh template uses correct source and cookbook' do
         expect(setenv_resource.source).to eq('my_setenv.erb')
@@ -202,6 +242,11 @@ describe 'apache_tomcat::default' do
         expect(logrotate_resource.source).to eq('my_logrotate.erb')
         expect(logrotate_resource.cookbook).to eq('apache_tomcat')
       end
+
+      it 'tomcat-users template uses correct source and cookbook' do
+        expect(tomcat_users_resource.source).to eq('my_tomcat_users.erb')
+        expect(tomcat_users_resource.cookbook).to eq('apache_tomcat')
+      end
     end
 
     context 'when cookbook:template' do
@@ -209,6 +254,7 @@ describe 'apache_tomcat::default' do
       let(:server_xml_template) { 'foo:your_server_xml.erb' }
       let(:logging_properties_template) { 'baz:your_log_prop.erb' }
       let(:logrotate_template) { 'bing:your_logrotate.erb' }
+      let(:tomcat_users_template) { 'bacon:your_tomcat_users.erb' }
 
       it 'setenv.sh template uses correct source and cookbook' do
         expect(setenv_resource.source).to eq('your_setenv.erb')
@@ -228,6 +274,11 @@ describe 'apache_tomcat::default' do
       it 'logrotate template uses correct source and cookbook' do
         expect(logrotate_resource.source).to eq('your_logrotate.erb')
         expect(logrotate_resource.cookbook).to eq('bing')
+      end
+
+      it 'tomcat-users template uses correct source and cookbook' do
+        expect(tomcat_users_resource.source).to eq('your_tomcat_users.erb')
+        expect(tomcat_users_resource.cookbook).to eq('bacon')
       end
     end
   end

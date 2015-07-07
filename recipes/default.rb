@@ -50,6 +50,7 @@ apache_tomcat node['apache_tomcat']['home'] do
   host_valves node['apache_tomcat']['host_valves']
   access_log_enabled node['apache_tomcat']['access_log_enabled']
   access_log_additional node['apache_tomcat']['access_log_additional']
+  tomcat_users node['apache_tomcat']['tomcat_users']
   log_dir node['apache_tomcat']['log_dir']
   logrotate_count node['apache_tomcat']['logrotate_count']
   logrotate_frequency node['apache_tomcat']['logrotate_frequency']
@@ -57,4 +58,5 @@ apache_tomcat node['apache_tomcat']['home'] do
   server_xml_template node['apache_tomcat']['server_xml_template']
   logging_properties_template node['apache_tomcat']['logging_properties_template']
   logrotate_template node['apache_tomcat']['logrotate_template']
+  tomcat_users_template node['apache_tomcat']['tomcat_users_template']
 end

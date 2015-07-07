@@ -46,8 +46,12 @@ default['apache_tomcat']['access_log_additional'] = Mash.new
 default['apache_tomcat']['engine_valves'] = Mash.new
 default['apache_tomcat']['host_valves'] = Mash.new
 
+# Tomcat-users.xml settings
+default['apache_tomcat']['tomcat_users'] = []
+
 # custom templates - template or cookbook:template
 default['apache_tomcat']['setenv_template'] = nil
 default['apache_tomcat']['server_xml_template'] = nil
 default['apache_tomcat']['logging_properties_template'] = nil
+default['apache_tomcat']['tomcat_users_template'] = nil
 default['apache_tomcat']['logrotate_template'] = nil

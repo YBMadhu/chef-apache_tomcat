@@ -45,6 +45,8 @@ attribute :jmx_monitor_password, kind_of: String
 attribute :jmx_control_password, kind_of: String
 attribute :jmx_dir, kind_of: String
 
+attribute :tomcat_users, kind_of: Array
+
 attribute :shutdown_port, kind_of: Integer, required: true
 attribute :pool_enabled, equal_to: [true, false], default: false
 attribute :pool_additional, kind_of: Hash
@@ -67,4 +69,5 @@ attribute :logrotate_frequency, kind_of: String, default: 'weekly'
 attribute :setenv_template, kind_of: String
 attribute :server_xml_template, kind_of: String
 attribute :logging_properties_template, kind_of: String
+attribute :tomcat_users_template, kind_of: String
 attribute :logrotate_template, kind_of: String
