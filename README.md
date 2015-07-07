@@ -174,6 +174,13 @@ The `tomcat_users` attribute accepts an array of user hashes like so:
   }
 ]
 ```
+While it's possible to set `node['apache_tomcat']['tomcat_users']` node attribute
+for use with the default recipe, it's probably not a good idea. The attribute
+is more suited for `apache_tomcat` LWRP consumers, setting the LWRP attribute
+from a data bag or some other means in a wrapper cookbook. Support for setting
+tomcat_users from a data bag (or even run_state) for use with the default recipe
+may be added in the future.
+
 ## License and Authors
 - Author:: Brian Clark (brian@clark.zone)
 
