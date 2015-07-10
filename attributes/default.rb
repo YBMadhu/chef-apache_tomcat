@@ -10,6 +10,7 @@ default['apache_tomcat']['install_path'] = '/usr/local/tomcat'
 default['apache_tomcat']['instance_path'] = '/var/lib/tomcat'
 default['apache_tomcat']['service_name'] = nil
 default['apache_tomcat']['enable_service'] = true
+default['apache_tomcat']['webapps_mode'] = nil
 
 # Logging settings
 default['apache_tomcat']['log_dir'] = nil

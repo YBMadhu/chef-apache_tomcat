@@ -20,6 +20,7 @@ describe 'apache_tomcat::_instance' do
   let(:logrotate_template) { nil }
   let(:tomcat_users_template) { nil }
   let(:install_path) { '/opt/tomcat7' }
+  let(:webapps_mode) { nil }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['apache_tomcat_instance'],
                              file_cache_path: '/var/chef') do |node|
@@ -45,6 +46,7 @@ describe 'apache_tomcat::_instance' do
       node.set['apache_tomcat']['logging_properties_template'] = logging_properties_template
       node.set['apache_tomcat']['logrotate_template'] = logrotate_template
       node.set['apache_tomcat']['tomcat_users_template'] = tomcat_users_template
+      node.set['apache_tomcat']['webapps_mode'] = webapps_mode
     end.converge(described_recipe)
   end
 
@@ -76,6 +78,13 @@ describe 'apache_tomcat::_instance' do
   it 'creates webapps directory' do
     expect(chef_run).to create_directory('/var/tomcat7/webapps').with(
       owner: 'root', group: 'tomcat', mode: '0775')
+  end
+
+  context 'with specified webapps_mode' do
+    let(:webapps_mode) { '0666' }
+    it 'webapps directory has correct mode' do
+      expect(chef_run).to create_directory('/var/tomcat7/webapps').with(mode: '0666')
+    end
   end
 
   %w(bin conf lib).each do |dir|

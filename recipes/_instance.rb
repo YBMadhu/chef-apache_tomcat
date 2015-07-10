@@ -20,6 +20,7 @@ apache_tomcat_instance node['apache_tomcat']['instance_path'] do
   home node['apache_tomcat']['install_path']
   user node['apache_tomcat']['user']
   group node['apache_tomcat']['group']
+  webapps_mode node['apache_tomcat']['webapps_mode']
   service_name node['apache_tomcat']['service_name']
   enable_service node['apache_tomcat']['enable_service']
   kill_delay node['apache_tomcat']['kill_delay']
