@@ -12,12 +12,12 @@ Style/SingleSpaceBeforeFirstArg:
   Enabled: false
 
 Metrics/AbcSize:
-  Max: 20
+  Enabled: false
 
 Metrics/LineLength:
   Max: 90
 
 Metrics/MethodLength:
-  Max: 20
+  Enabled: false
 
 #inherit_from: .rubocop_todo.yml
