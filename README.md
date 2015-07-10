@@ -23,27 +23,42 @@ cookbook but will only install logrotate when using the `default` recipe. If you
 are using the `apache_tomcat` LWRP you'll need to install logrotate on your own.
 
 ## Recipes
+
 ### default
 Installs and configures a single instance of tomcat based on node attributes.
+This recipe uses the `apache_tomcat` and `apache_tomcat_instance` LWRPs.
 See the resource attributes listed below and attributes/default.rb for default settings.
 
 ## Resources / Providers
 
 ### apache_tomcat
+Install or remove Tomcat binaries.
+
+#### Actions
+* `install` - Default action. Install tomcat binaries into `path`
+* `remove` - Uninstalls tomcat binaries from `path`
+
+#### Attributes
+* `path` - Directory to install tomcat binaries; default: name of resource block
+* `mirror` - url to apache tomcat mirror (defaults to node attribute)
+* `version` - version of tomcat to download/install (defaults to node attribute)
+* `checksum` - sha256 checksum of downloaded tarball (defaults to node attribute)
+
+### apache_tomcat_instance
 Install and/or configure an instance of tomcat.
 
 #### Actions
 * `create` - Default action. Install and configure tomcat into `home`
 
 #### Attributes
-* `home` - required install directory of tomcat; default: name of resource block
-* `service_name` - optional name of service (defaults to basename of `home`)
-* `enable_service` - whether to start/enable service; default: `true`
+* `base` - required directory to create this tomcat instance; default: name of
+resource block (equiv. to CATALINA_BASE)
+* `home` - required path to existing apahe binaries (equiv. to CATALINA_HOME)
+* `service_name` - optional name of service (defaults to basename of `base`)
+* `enable_service` - whether to enable/start service; default: `true`
 * `user` - user running tomcat; default: `tomcat`
 * `group` - primary group of tomcat user; default: `tomcat`
-* `mirror` - url to apache tomcat mirror (defaults to node attribute)
-* `version` - version of tomcat to download/install (defaults to node attribute)
-* `checksum` - sha256 checksum of downloaded tarball (defaults to node attribute)
+* `webapps_mode` - optional permissions for webapps directory; default: `0775`
 * `log_dir` - optional directory for tomcat logs; must be absolute if specified
 * `logrotate_frequency` - rotation frequency; default: `weekly`
 * `logrotate_count` - logrotate file count; default: `4`
@@ -88,6 +103,22 @@ with your own. Use `name` to reference a template in the calling cookbook or
 * `logrotate_template` - /etc/logrotate.d/`service_name`
 
 ## Usage and examples
+Install Tomcat 7.0.56 binaries in /usr/local/tomcat7; create an instance in /var/lib/tomat1 with service tomcat1 running as user tomcat:
+```
+apache_tomcat '/usr/local/tomcat7' do
+  version '7.0.56'
+end
+
+apache_tomcat_instance '/var/lib/tomcat1' do
+  home 'usr/local/tomcat7'
+  user 'tomcat'
+  group 'tomcat'
+  http_port 8080
+end
+```
+The example above will use `/usr/local/tomcat7` as CATALINA_HOME and
+`/var/lib/tomcat1` as CATALINA_BASE.
+
 
 #### HTTP Connector
 To define a non-SSL HTTP Connector, set `http_port` to a port number. If `nil` the
