@@ -86,7 +86,17 @@ end
 
 describe service('tomcat') do
   it { should be_enabled }
-  it { should be_running }
+  case os[:family]
+  when 'centos', 'redhat'
+    case os[:release]
+    when '7.0'
+      it { should be_running.under('systemd') }
+    else
+      it { should be_running.under('init') }
+    end
+  when 'ubuntu'
+    it { should be_running.under('upstart') }
+  end
 end
 
 describe port(8005) do
@@ -111,10 +121,6 @@ describe file('/etc/logrotate.d/tomcat') do
   its(:content) { should include 'rotate 4' }
   its(:content) { should include 'weekly' }
 end
-
-# describe file('/opt/tomcat/logs/catalina.out') do
-#   it { should be_file }
-# end
 
 describe file('/var/lib/tomcat/logs/catalina.log') do
   it { should be_file }

@@ -3,23 +3,49 @@
 Install and configure Tomcat using official Apache binaries. Multiple instances
 are supported.
 
-## Requirements
-### Dependencies
-* `logrotate` - used by the `default` recipe to install logrotate (see below)
-* `poise-service` - this cookbook uses the [poise-service](https://supermarket.chef.io/cookbooks/poise-service)
-cookbook to manage Tomcat service(s)
+This cookbook does NOT use or depend on OS packages for Tomcat, nor does it
+expect to play well with them. If using OS packages, use the
+[tomcat](https://supermarket.chef.io/cookbooks/tomcat) cookbook instead.
 
-### Java
+## Requirements
+
+### Platforms
+This cookbook has been tested with the following platforms and service providers.
+Other combinations of compatible platforms and service providers will likely
+work with proper tweaking, but have not been tested:
+* CentOS (6.6 - sysvinit, 7.0 - systemd)
+* Ubuntu (14.04 - upstart)
+
+### Dependencies
+Required:
+* [logrotate](https://supermarket.chef.io/cookbooks/logrotate)- used by the
+`default` recipe to install logrotate
+* [poise-service](https://supermarket.chef.io/cookbooks/poise-service) -
+used to manage Tomcat service(s)
+
+Suggested:
+* `java` (see below)
+
+#### Java
 This cookbook does not install Java.  You should install Java earlier in your
 runlist before consuming recipes/resources in this cookbook. For example...
 * [java](https://supermarket.chef.io/cookbooks/java) community cookbook
-* [oracle_jdk](https://github.com/bdclark/chef-oracle_jdk) - my cookbook dedicated
+* [oracle_jdk](https://github.com/bdclark/chef-oracle_jdk) - a cookbook dedicated
 to installing the Oracle JDK
 
-### Logrotate
+#### Logrotate
 This cookbook depends on the [logrotate](https://supermarket.chef.io/cookbooks/logrotate)
 cookbook but will only install logrotate when using the `default` recipe. If you
 are using the `apache_tomcat_instance` LWRP you'll need to install logrotate on your own.
+
+#### Poise-Service
+This cookbook depends on [poise-service](https://supermarket.chef.io/cookbooks/poise-service)
+to create and manage Tomcat service(s). On RHEl-based platforms < 7.0 (and Amazon
+Linux), this cookbook defaults to the `:sysvinit` provider and includes a suitable
+init template instead of using the poise-service default. The poise-service cookbook
+allows a considerable amount of flexibility for setting/overriding service behavior,
+init scripts, etc.  Refer to that cookbook's documentation for implementation
+details.
 
 ## Recipes
 
@@ -30,7 +56,7 @@ recipe to ensure logrotate is installed.
 
 Tomcat is installed in `node['apache_tomcat']['install_path']` and becomes
 CATALINA_HOME. An instances is created in `node['apache_tomcat']['instance_path']`
-and becomes CATALINA_BASE. While not the default behaviour, these two attributes
+and becomes CATALINA_BASE. While not the default behavior, these two attributes
 can be set to the same path if desired to install and run Tomcat from a single
 directory.
 

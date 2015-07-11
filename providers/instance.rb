@@ -251,7 +251,9 @@ action :create do
   poise_service service_name do # ~FC021
     command "#{catalina_home}/bin/catalina.sh run"
     directory catalina_base
-    provider :sysvinit if platform_family?('rhel')
+    if node['apache_tomcat']['init_provider']
+      provider node['apache_tomcat']['init_provider']
+    end
     user new_resource.user
     environment(
       CATALINA_HOME: catalina_home,

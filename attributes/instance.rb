@@ -53,3 +53,12 @@ default['apache_tomcat']['server_xml_template'] = nil
 default['apache_tomcat']['logging_properties_template'] = nil
 default['apache_tomcat']['tomcat_users_template'] = nil
 default['apache_tomcat']['logrotate_template'] = nil
+
+default['apache_tomcat']['init_provider'] = value_for_platform(
+  %w(centos redhat) => {
+    '< 7.0' => :sysvinit
+  },
+  'amazon' => {
+    'default' => :sysvinit
+  }
+)
