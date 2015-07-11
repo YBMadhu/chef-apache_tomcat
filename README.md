@@ -55,7 +55,7 @@ and `configure` recipes explained below. Also includes the `logrotate` default
 recipe to ensure logrotate is installed.
 
 Tomcat is installed in `node['apache_tomcat']['install_path']` and becomes
-CATALINA_HOME. An instances is created in `node['apache_tomcat']['instance_path']`
+CATALINA_HOME. An instance is created in `node['apache_tomcat']['instance_path']`
 and becomes CATALINA_BASE. While not the default behavior, these two attributes
 can be set to the same path if desired to install and run Tomcat from a single
 directory.
