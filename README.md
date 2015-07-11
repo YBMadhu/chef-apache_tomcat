@@ -1,14 +1,13 @@
 # apache_tomcat cookbook
 
-Install and configure Tomcat using Apache binaries.
-
-**This cookbook and documentation are under construction.**
+Install and configure Tomcat using official Apache binaries. Multiple instances
+are supported.
 
 ## Requirements
 ### Dependencies
 * `logrotate` - used by the `default` recipe to install logrotate (see below)
 * `poise-service` - this cookbook uses the [poise-service](https://supermarket.chef.io/cookbooks/poise-service)
-cookbook to manage tomcat service(s)
+cookbook to manage Tomcat service(s)
 
 ### Java
 This cookbook does not install Java.  You should install Java earlier in your
@@ -20,48 +19,81 @@ to installing the Oracle JDK
 ### Logrotate
 This cookbook depends on the [logrotate](https://supermarket.chef.io/cookbooks/logrotate)
 cookbook but will only install logrotate when using the `default` recipe. If you
-are using the `apache_tomcat` LWRP you'll need to install logrotate on your own.
+are using the `apache_tomcat_instance` LWRP you'll need to install logrotate on your own.
 
 ## Recipes
 
 ### default
-Installs and configures a single instance of tomcat based on node attributes.
-This recipe uses the `apache_tomcat` and `apache_tomcat_instance` LWRPs.
-See the resource attributes listed below and attributes/default.rb for default settings.
+Installs and configures a single instance of Tomcat by including the `install`
+and `configure` recipes explained below. Also includes the `logrotate` default
+recipe to ensure logrotate is installed.
+
+Tomcat is installed in `node['apache_tomcat']['install_path']` and becomes
+CATALINA_HOME. An instances is created in `node['apache_tomcat']['instance_path']`
+and becomes CATALINA_BASE. While not the default behaviour, these two attributes
+can be set to the same path if desired to install and run Tomcat from a single
+directory.
+
+### install
+Only installs Tomcat binaries, and uses the following node attributes. See
+`attributes/default.rb` for default values.
+
+* `node['apache_tomcat']['install_path']` - directory to install Tomcat binaries
+* `node['apache_tomcat']['mirror']` - url to apache Tomcat mirror
+* `node['apache_tomcat']['version']` - Tomcat version
+* `node['apache_tomcat']['checksum']` - sha256 checksum of downloaded tarball
+
+Use this recipe to create a CATALINA_HOME as the basis for single or multiple instance of Tomcat.
+
+### configure
+Configures a single Tomcat instance in `node['apache_tomcat']['instance_path']`.
+This recipe expects Tomcat to already be installed in `node['apache_tomcat']['install_path']`.
+
+This recipe uses the `apache_tomcat_instance` LWRP to configure Tomcat. Node
+attributes are exposed for most all of the LWRP's configurable attributes. See
+below for an explanation of the `apache_tomcat_instance` attributes and `attributes/instance.rb`
+for the default values used in this recipe.
+
+Use this recipe to configure Tomcat after installing with the `install` recipe,
+or to configure Tomcat installed by some other means (e.g. an application
+delivered with an embedded version of Tomcat).
 
 ## Resources / Providers
 
 ### apache_tomcat
-Install or remove Tomcat binaries.
+Install or remove Tomcat binaries. In typical applications this is used to
+create a CATALINA_HOME for one or more instances of Tomcat.
 
 #### Actions
-* `install` - Default action. Install tomcat binaries into `path`
-* `remove` - Uninstalls tomcat binaries from `path`
+* `install` - Default action. Install Tomcat binaries into `path`
+* `remove` - Uninstalls Tomcat binaries from `path`
 
 #### Attributes
-* `path` - Directory to install tomcat binaries; default: name of resource block
-* `mirror` - url to apache tomcat mirror (defaults to node attribute)
-* `version` - version of tomcat to download/install (defaults to node attribute)
+* `path` - Directory to install Tomcat binaries; default: name of resource block
+* `mirror` - url to apache Tomcat mirror (defaults to node attribute)
+* `version` - version of Tomcat to download/install (defaults to node attribute)
 * `checksum` - sha256 checksum of downloaded tarball (defaults to node attribute)
 
 ### apache_tomcat_instance
-Install and/or configure an instance of tomcat.
+Install and/or configure an instance of Tomcat. In typical applications this is
+used to create one or more instances of Tomcat (CATALINA_BASE) after installing
+Tomcat with the `apache_tomcat` LWRP.
 
 #### Actions
-* `create` - Default action. Install and configure tomcat into `home`
+* `create` - Default action. Install and configure Tomcat instance in `base`
 
 #### Attributes
-* `base` - required directory to create this tomcat instance; default: name of
+* `base` - required directory to create this Tomcat instance; default: name of
 resource block (equiv. to CATALINA_BASE)
 * `home` - required path to existing apahe binaries (equiv. to CATALINA_HOME)
 * `service_name` - optional name of service (defaults to basename of `base`)
 * `enable_service` - whether to enable/start service; default: `true`
-* `user` - user running tomcat; default: `tomcat`
-* `group` - primary group of tomcat user; default: `tomcat`
+* `user` - user running Tomcat; default: `tomcat`
+* `group` - primary group of Tomcat user; default: `tomcat`
 * `webapps_mode` - optional permissions for webapps directory; default: `0775`
 * `enable_manager` - whether to enable manager webapp by copying from `home`
 to `base`; default: `false`
-* `log_dir` - optional directory for tomcat logs; must be absolute if specified
+* `log_dir` - optional directory for Tomcat logs; must be absolute if specified
 * `logrotate_frequency` - rotation frequency; default: `weekly`
 * `logrotate_count` - logrotate file count; default: `4`
 * `kill_delay` - seconds to wait before kill -9 on service stop/restart; default: 45 (integer)
@@ -80,7 +112,7 @@ to `base`; default: `false`
 (ignored unless `jmx_port` set and `jmx_authenticate` true)
 * `jmx_dir` - optional directory for jmxremote.password and jmxremote.access,
 defaults to `home`/conf
-* `shutdown_port` - tomcat shutdown port in server.xml; required
+* `shutdown_port` - Tomcat shutdown port in server.xml; required
 * `http_port` - optional http port (integer), http connector undef
 * `ajp_port` - optional ajp port (integer)
 * `ssl_port` - optional ssl port (integer)
@@ -93,7 +125,7 @@ defaults to `home`/conf
 * `access_log_additional` - hash of additional access log valve attributes
 * `engine_valves` - nested hash of one or more engine valves
 * `host_valves` - nested hash of one or more host valves
-* `tomcat_users` - optional array of tomcat-users (see below for expected format)
+* `tomcat_users` - optional array of Tomcat-users (see below for expected format)
 
 Additionally, the following attributes allow you override the included templates
 with your own. Use `name` to reference a template in the calling cookbook or
@@ -105,7 +137,7 @@ with your own. Use `name` to reference a template in the calling cookbook or
 * `logrotate_template` - /etc/logrotate.d/`service_name`
 
 ## Usage and examples
-Install Tomcat 7.0.56 binaries in /usr/local/tomcat7; create an instance in /var/lib/tomat1 with service tomcat1 running as user tomcat:
+Install Tomcat 7.0.56 binaries in /usr/local/tomcat7; create an instance in /var/lib/tomat1 with service Tomcat1 running as user Tomcat:
 ```
 apache_tomcat '/usr/local/tomcat7' do
   version '7.0.56'
@@ -191,7 +223,7 @@ TODO
 #### Thread Pool
 TODO
 
-#### tomcat users
+#### Tomcat users
 The `tomcat_users` attribute accepts an array of user hashes like so:
 ```
 [
@@ -208,11 +240,11 @@ The `tomcat_users` attribute accepts an array of user hashes like so:
 ]
 ```
 While it's possible to set `node['apache_tomcat']['tomcat_users']` node attribute
-for use with the default recipe, it's probably not a good idea. The attribute
-is more suited for `apache_tomcat` LWRP consumers, setting the LWRP attribute
-from a data bag or some other means in a wrapper cookbook. Support for setting
-tomcat_users from a data bag (or even run_state) for use with the default recipe
-may be added in the future.
+for use with the `default` or `configure` recipes, it's probably not a good idea.
+The attribute is more suited for `apache_tomcat_instance` LWRP consumers...
+setting the LWRP attribute from a data bag or some other means in a wrapper cookbook.
+Support for setting tomcat_users from a data bag (or even run_state) for use with
+the default and configure recipes may be considered in the future.
 
 ## License and Authors
 - Author:: Brian Clark (brian@clark.zone)
