@@ -59,6 +59,8 @@ resource block (equiv. to CATALINA_BASE)
 * `user` - user running tomcat; default: `tomcat`
 * `group` - primary group of tomcat user; default: `tomcat`
 * `webapps_mode` - optional permissions for webapps directory; default: `0775`
+* `enable_manager` - whether to enable manager webapp by copying from `home`
+to `base`; default: `false`
 * `log_dir` - optional directory for tomcat logs; must be absolute if specified
 * `logrotate_frequency` - rotation frequency; default: `weekly`
 * `logrotate_count` - logrotate file count; default: `4`

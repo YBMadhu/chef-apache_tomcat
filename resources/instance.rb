@@ -28,7 +28,7 @@ attribute :enable_service, equal_to: [true, false], default: true
 attribute :user, kind_of: String, default: 'tomcat'
 attribute :group, kind_of: String, default: 'tomcat'
 attribute :webapps_mode, kind_of: String
-
+attribute :enable_manager, equal_to: [true, false], default: false
 attribute :kill_delay, regex: /^[1-9][0-9]?$/
 attribute :java_home, kind_of: String
 attribute :catalina_opts, kind_of: [String, Array]

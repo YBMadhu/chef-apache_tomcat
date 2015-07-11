@@ -23,6 +23,7 @@ apache_tomcat_instance node['apache_tomcat']['instance_path'] do
   webapps_mode node['apache_tomcat']['webapps_mode']
   service_name node['apache_tomcat']['service_name']
   enable_service node['apache_tomcat']['enable_service']
+  enable_manager node['apache_tomcat']['enable_manager']
   kill_delay node['apache_tomcat']['kill_delay']
   java_home node['apache_tomcat']['java_home']
   initial_heap_size node['apache_tomcat']['initial_heap_size']

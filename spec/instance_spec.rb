@@ -21,6 +21,7 @@ describe 'apache_tomcat::_instance' do
   let(:tomcat_users_template) { nil }
   let(:install_path) { '/opt/tomcat7' }
   let(:webapps_mode) { nil }
+  let(:enable_manager) { false }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['apache_tomcat_instance'],
                              file_cache_path: '/var/chef') do |node|
@@ -47,6 +48,7 @@ describe 'apache_tomcat::_instance' do
       node.set['apache_tomcat']['logrotate_template'] = logrotate_template
       node.set['apache_tomcat']['tomcat_users_template'] = tomcat_users_template
       node.set['apache_tomcat']['webapps_mode'] = webapps_mode
+      node.set['apache_tomcat']['enable_manager'] = enable_manager
     end.converge(described_recipe)
   end
 
@@ -119,6 +121,68 @@ describe 'apache_tomcat::_instance' do
     %w(catalina.policy catalina.properties web.xml context.xml).each do |file|
       it "creates link to #{file}" do
         expect(chef_run).to create_link("/var/tomcat7/conf/#{file}")
+      end
+    end
+  end
+
+  context 'with enable_manager' do
+    context 'when false' do
+      let(:enable_manager) { false }
+
+      context 'when manager dir does not exist' do
+        before do
+          allow(File).to receive(:directory?).and_call_original
+          allow(File).to receive(:directory?).with('/var/tomcat7/webapps/manager')
+            .and_return(false)
+        end
+
+        it 'does not delete or copy manager webapp' do
+          expect(chef_run).not_to run_ruby_block('/var/tomcat7-delete_manager')
+          expect(chef_run).not_to run_ruby_block('/var/tomcat7-copy_manager')
+        end
+      end
+
+      context 'when manager dir exists' do
+        before do
+          allow(File).to receive(:directory?).and_call_original
+          allow(File).to receive(:directory?).with('/var/tomcat7/webapps/manager')
+            .and_return(true)
+        end
+
+        it 'deletes and does not copy manager webapp' do
+          expect(chef_run).to run_ruby_block('/var/tomcat7-delete_manager')
+          expect(chef_run).not_to run_ruby_block('/var/tomcat7-copy_manager')
+        end
+      end
+    end
+
+    context 'when true' do
+      let(:enable_manager) { true }
+
+      context 'when manager dir does not exist' do
+        before do
+          allow(File).to receive(:directory?).and_call_original
+          allow(File).to receive(:directory?).with('/var/tomcat7/webapps/manager')
+            .and_return(false)
+        end
+
+        it 'copies and does not delete manager webapp' do
+          expect(chef_run).to run_ruby_block('/var/tomcat7-copy_manager')
+          expect(chef_run).not_to run_ruby_block('/var/tomcat7-delete_manager')
+        end
+      end
+
+      context 'when manager dir exists' do
+        before do
+          allow(File).to receive(:directory?).and_call_original
+          allow(File).to receive(:directory?).with('/var/tomcat7/webapps/manager')
+            .and_return(true)
+        end
+
+        it 'does not copy or delete manager webapp' do
+          expect(chef_run).not_to run_ruby_block('/var/tomcat7-copy_manager')
+          expect(chef_run).not_to run_ruby_block('/var/tomcat7-delete_manager')
+        end
       end
     end
   end

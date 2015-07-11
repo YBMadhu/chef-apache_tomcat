@@ -96,6 +96,31 @@ action :create do
     not_if { new_resource.log_dir.nil? }
   end
 
+  ruby_block "#{new_resource.name}-copy_manager" do
+    block do
+      ::FileUtils.cp_r("#{catalina_home}/webapps/manager", "#{catalina_base}/webapps/")
+      ::FileUtils.chown_R('root', new_resource.group, "#{catalina_base}/webapps/manager")
+    end
+    not_if { catalina_home == catalina_base }
+    only_if { new_resource.enable_manager }
+    not_if { ::File.directory?("#{catalina_base}/webapps/manager") }
+    if new_resource.enable_service
+      notifies :restart, "poise_service[#{service_name}]"
+    end
+  end
+
+  ruby_block "#{new_resource.name}-delete_manager" do
+    block do
+      ::FileUtils.rm_r("#{catalina_base}/webapps/manager")
+    end
+    not_if { catalina_home == catalina_base }
+    not_if { new_resource.enable_manager }
+    only_if { ::File.directory?("#{catalina_base}/webapps/manager") }
+    if new_resource.enable_service
+      notifies :restart, "poise_service[#{service_name}]"
+    end
+  end
+
   cb, src = template_source(new_resource.setenv_template, 'setenv.sh.erb')
   template ::File.join(catalina_base, 'bin', 'setenv.sh') do
     source src
