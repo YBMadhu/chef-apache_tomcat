@@ -112,7 +112,7 @@ describe port(9443) do
   it { should be_listening }
 end
 
-describe file('/etc/logrotate.d/tomcat') do
+describe file('/etc/logrotate.d/tomcat-default') do
   it { should be_file }
   its(:content) { should include '/var/tomcat/logs/catalina.out' }
   its(:content) { should include '/var/tomcat/logs/catalina.log' }
