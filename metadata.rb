@@ -6,5 +6,8 @@ description      'Installs/Configures Apache Tomcat'
 long_description 'Installs/Configures Apache Tomcat'
 version          '0.1.0'
 
+supports 'ubuntu'
+supports 'centos'
+
 depends 'logrotate'
 depends 'poise-service', '~> 1.0'

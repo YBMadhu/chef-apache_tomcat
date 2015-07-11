@@ -51,7 +51,7 @@ end
 %w(catalina.policy catalina.properties web.xml context.xml).each do |conf_file|
   describe file("/var/lib/tomcat/conf/#{conf_file}") do
     it { should be_file }
-    it { should be_linked_to "/usr/local/tomcat/conf/#{conf_file}"}
+    it { should be_linked_to "/usr/local/tomcat/conf/#{conf_file}" }
   end
 end
 
