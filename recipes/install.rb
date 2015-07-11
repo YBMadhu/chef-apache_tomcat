@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_recipe 'logrotate'
-include_recipe 'apache_tomcat::install'
-include_recipe 'apache_tomcat::configure'
+apache_tomcat node['apache_tomcat']['install_path'] do
+  mirror node['apache_tomcat']['mirror']
+  version node['apache_tomcat']['version']
+  checksum node['apache_tomcat']['checksum']
+end
