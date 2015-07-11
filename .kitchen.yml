@@ -22,6 +22,18 @@ suites:
         version: 7.0.56
       java:
         jdk_version: '7'
+  - name: base
+    run_list:
+      - 'recipe[java]'
+      - 'recipe[apache_tomcat::default]'
+    attributes:
+      apache_tomcat:
+        install_java: true
+        version: 7.0.56
+        install_path: '/opt/tomcat'
+        instance_path: '/opt/tomcat'
+      java:
+        jdk_version: '7'
   - name: custom
     run_list:
       - 'recipe[java]'
@@ -29,6 +41,7 @@ suites:
     attributes:
       apache_tomcat:
         install_java: true
+        version: 7.0.56
         install_path: '/opt/tomcat7'
         instance_path: '/var/tomcat'
         service_name: 'tomcat-default'
