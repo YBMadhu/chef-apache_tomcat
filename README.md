@@ -40,7 +40,7 @@ are using the `apache_tomcat_instance` LWRP you'll need to install logrotate on 
 
 #### Poise-Service
 This cookbook depends on [poise-service](https://supermarket.chef.io/cookbooks/poise-service)
-to create and manage Tomcat service(s). On RHEl-based platforms < 7.0 (and Amazon
+to create and manage Tomcat service(s). On RHEL platforms < 7.0 (and Amazon
 Linux), this cookbook defaults to the `:sysvinit` provider and includes a suitable
 init template instead of using the poise-service default. The poise-service cookbook
 allows a considerable amount of flexibility for setting/overriding service behavior,
