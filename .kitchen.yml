@@ -19,6 +19,7 @@ suites:
     attributes:
       apache_tomcat:
         install_java: true
+        version: 7.0.56
       java:
         jdk_version: '7'
   - name: custom
@@ -28,7 +29,11 @@ suites:
     attributes:
       apache_tomcat:
         install_java: true
-        home: '/opt/tomcat7'
+        install_path: '/opt/tomcat7'
+        instance_path: '/var/tomcat'
+        service_name: 'tomcat-default'
+        enable_manager: true
+        webapps_mode: '0755'
         log_dir: '/var/log/tomcat7'
         logrotate_frequency: monthly
         logrotate_count: 12
@@ -55,5 +60,10 @@ suites:
         jmx_port: 9599
         jmx_monitor_password: mymonitorpw
         jmx_control_password: mycontrolpw
+        tomcat_users:
+          - id: joedirt
+            password: mullet
+            roles:
+              -  manager-gui
       java:
         jdk_version: '7'
