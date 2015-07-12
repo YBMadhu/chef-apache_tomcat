@@ -16,6 +16,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+group node['apache_tomcat']['group'] do
+  system true
+end
+
+user node['apache_tomcat']['user'] do
+  system true
+  group node['apache_tomcat']['group']
+  shell '/bin/false'
+end
+
 apache_tomcat_instance node['apache_tomcat']['instance_path'] do
   home node['apache_tomcat']['install_path']
   user node['apache_tomcat']['user']

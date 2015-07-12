@@ -36,16 +36,6 @@ action :create do
     log_dir = ::File.join(catalina_base, 'logs')
   end
 
-  group new_resource.group do
-    system true
-  end
-
-  user new_resource.user do
-    system true
-    group new_resource.group
-    shell '/bin/false'
-  end
-
   directory catalina_base do
     owner new_resource.user
     group new_resource.group

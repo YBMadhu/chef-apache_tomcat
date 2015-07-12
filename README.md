@@ -72,8 +72,9 @@ Only installs Tomcat binaries, and uses the following node attributes. See
 Use this recipe to create a CATALINA_HOME as the basis for single or multiple instance of Tomcat.
 
 ### configure
-Configures a single Tomcat instance in `node['apache_tomcat']['instance_path']`.
-This recipe expects Tomcat to already be installed in `node['apache_tomcat']['install_path']`.
+Creates Tomcat service user/group and configures a single Tomcat instance in
+`node['apache_tomcat']['instance_path']`. This recipe expects Tomcat to already
+be installed in `node['apache_tomcat']['install_path']`.
 
 This recipe uses the `apache_tomcat_instance` LWRP to configure Tomcat. Node
 attributes are exposed for most all of the LWRP's configurable attributes. See
@@ -114,8 +115,8 @@ resource block (equiv. to CATALINA_BASE)
 * `home` - required path to existing apahe binaries (equiv. to CATALINA_HOME)
 * `service_name` - optional name of service (defaults to basename of `base`)
 * `enable_service` - whether to enable/start service; default: `true`
-* `user` - user running Tomcat; default: `tomcat`
-* `group` - primary group of Tomcat user; default: `tomcat`
+* `user` - Tomcat service user; default: `tomcat`
+* `group` - Tomcat service group; default: `tomcat`
 * `webapps_mode` - optional permissions for webapps directory; default: `0775`
 * `enable_manager` - whether to enable manager webapp by copying from `home`
 to `base`; default: `false`
