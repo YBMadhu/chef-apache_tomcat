@@ -24,6 +24,12 @@ end
 
 [:install, :remove].each do |a|
   action a do
+    [:version, :mirror, :checksum].each do |attrib|
+      unless new_resource.instance_variable_get("@#{attrib}")
+        new_resource.instance_variable_set("@#{attrib}", node['apache_tomcat'][attrib])
+      end
+    end
+
     tomcat_resource(a)
   end
 end

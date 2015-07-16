@@ -22,6 +22,6 @@ actions :install, :remove
 default_action :install
 
 attribute :path, kind_of: String, name_attribute: true, required: true
-attribute :version, kind_of: String, default: node['apache_tomcat']['version']
-attribute :mirror, kind_of: String, default: node['apache_tomcat']['mirror']
-attribute :checksum, kind_of: String, default: node['apache_tomcat']['checksum']
+attribute :version, kind_of: String
+attribute :mirror, kind_of: String
+attribute :checksum, kind_of: String
