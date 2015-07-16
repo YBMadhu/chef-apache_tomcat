@@ -2,6 +2,7 @@
 require_relative 'spec_helper'
 
 describe 'apache_tomcat::install' do
+  let(:create_service_user) { true }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['apache_tomcat'],
                              file_cache_path: '/var/chef') do |node|
@@ -9,6 +10,7 @@ describe 'apache_tomcat::install' do
       node.set['apache_tomcat']['checksum'] = 'mychecksum'
       node.set['apache_tomcat']['version'] = '7.7.77'
       node.set['apache_tomcat']['home'] = '/opt/tomcat7'
+      node.set['apache_tomcat']['create_service_user'] = create_service_user
     end.converge(described_recipe)
   end
 
@@ -45,5 +47,27 @@ describe 'apache_tomcat::install' do
   it 'links install dir to extracted dir' do
     expect(chef_run).to create_link('/opt/tomcat7').with(
       to: '/opt/tomcat-7.7.77')
+  end
+
+  context 'when create_service_user true' do
+    it 'creates tomcat user' do
+      expect(chef_run).to create_user('tomcat')
+    end
+
+    it 'creates tomcat group' do
+      expect(chef_run).to create_group('tomcat')
+    end
+  end
+
+  context 'when create_service_user false' do
+    let(:create_service_user) { false }
+
+    it 'does not create tomcat user' do
+      expect(chef_run).not_to create_user('tomcat')
+    end
+
+    it 'does not create tomcat group' do
+      expect(chef_run).not_to create_group('tomcat')
+    end
   end
 end
