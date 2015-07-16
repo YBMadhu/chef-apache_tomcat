@@ -1,7 +1,7 @@
 # rubocop:disable Metrics/LineLength
 require_relative '../spec_helper'
 
-describe 'tomcat_test::install' do
+describe 'tomcat_test::install_lwrp' do
   let(:mirror) { 'https://getstuff.org/blah' }
   let(:checksum) { 'mychecksum' }
   let(:version) { '7.7.77' }
