@@ -54,8 +54,8 @@ Installs and configures a single instance of Tomcat by including the `install`
 and `configure` recipes explained below. Also includes the `logrotate` default
 recipe to ensure logrotate is installed.
 
-Tomcat is installed in `node['apache_tomcat']['install_path']` and becomes
-CATALINA_HOME. An instance is created in `node['apache_tomcat']['instance_path']`
+Tomcat is installed in `node['apache_tomcat']['home']` and becomes
+CATALINA_HOME. An instance is created in `node['apache_tomcat']['base']`
 and becomes CATALINA_BASE. While not the default behavior, these two attributes
 can be set to the same path if desired to install and run Tomcat from a single
 directory.
@@ -64,7 +64,7 @@ directory.
 Only installs Tomcat binaries, and uses the following node attributes. See
 `attributes/default.rb` for default values.
 
-* `node['apache_tomcat']['install_path']` - directory to install Tomcat binaries
+* `node['apache_tomcat']['home']` - directory to install Tomcat binaries
 * `node['apache_tomcat']['mirror']` - url to apache Tomcat mirror
 * `node['apache_tomcat']['version']` - Tomcat version
 * `node['apache_tomcat']['checksum']` - sha256 checksum of downloaded tarball
@@ -73,8 +73,8 @@ Use this recipe to create a CATALINA_HOME as the basis for single or multiple in
 
 ### configure
 Creates Tomcat service user/group and configures a single Tomcat instance in
-`node['apache_tomcat']['instance_path']`. This recipe expects Tomcat to already
-be installed in `node['apache_tomcat']['install_path']`.
+`node['apache_tomcat']['base']`. This recipe expects Tomcat to already
+be installed in `node['apache_tomcat']['home']`.
 
 This recipe uses the `apache_tomcat_instance` LWRP to configure Tomcat. Node
 attributes are exposed for most all of the LWRP's configurable attributes. See

@@ -19,14 +19,14 @@ describe 'apache_tomcat::configure' do
   let(:logging_properties_template) { nil }
   let(:logrotate_template) { nil }
   let(:tomcat_users_template) { nil }
-  let(:install_path) { '/opt/tomcat7' }
-  let(:webapps_mode) { nil }
+  let(:tomcat_home) { '/opt/tomcat7' }
+  let(:webapps_mode) { '0775' }
   let(:enable_manager) { false }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['apache_tomcat_instance'],
                              file_cache_path: '/var/chef') do |node|
-      node.set['apache_tomcat']['install_path'] = install_path
-      node.set['apache_tomcat']['instance_path'] = '/var/tomcat7'
+      node.set['apache_tomcat']['home'] = tomcat_home
+      node.set['apache_tomcat']['base'] = '/var/tomcat7'
       node.set['apache_tomcat']['logs_rotatable'] = false
       node.set['apache_tomcat']['logrotate_frequency'] = 'daily'
       node.set['apache_tomcat']['logrotate_rotate'] = 7
@@ -104,7 +104,7 @@ describe 'apache_tomcat::configure' do
   end
 
   context 'when home = base' do
-    let(:install_path) { '/var/tomcat7' }
+    let(:tomcat_home) { '/var/tomcat7' }
 
     %w(catalina.policy catalina.properties web.xml context.xml).each do |file|
       it "does not create link to #{file}" do
@@ -358,7 +358,7 @@ describe 'apache_tomcat::configure' do
         directory: '/var/tomcat7',
         user: 'tomcat',
         environment: {
-          CATALINA_HOME: install_path,
+          CATALINA_HOME: tomcat_home,
           CATALINA_BASE: '/var/tomcat7'
         })
     end

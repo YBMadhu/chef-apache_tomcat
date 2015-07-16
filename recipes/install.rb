@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apache_tomcat node['apache_tomcat']['install_path'] do
+apache_tomcat node['apache_tomcat']['home'] do
   mirror node['apache_tomcat']['mirror']
   version node['apache_tomcat']['version']
   checksum node['apache_tomcat']['checksum']

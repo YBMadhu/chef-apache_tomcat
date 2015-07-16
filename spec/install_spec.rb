@@ -8,7 +8,7 @@ describe 'apache_tomcat::install' do
       node.set['apache_tomcat']['mirror'] = 'https://getstuff.org/blah'
       node.set['apache_tomcat']['checksum'] = 'mychecksum'
       node.set['apache_tomcat']['version'] = '7.7.77'
-      node.set['apache_tomcat']['install_path'] = '/opt/tomcat7'
+      node.set['apache_tomcat']['home'] = '/opt/tomcat7'
     end.converge(described_recipe)
   end
 

@@ -5,7 +5,7 @@ default['apache_tomcat']['user'] = 'tomcat'
 default['apache_tomcat']['group'] = 'tomcat'
 default['apache_tomcat']['service_name'] = nil
 default['apache_tomcat']['enable_service'] = true
-default['apache_tomcat']['webapps_mode'] = nil
+default['apache_tomcat']['webapps_mode'] = '0775'
 default['apache_tomcat']['enable_manager'] = false
 
 # Logging settings

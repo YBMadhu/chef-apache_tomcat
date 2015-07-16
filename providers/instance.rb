@@ -23,6 +23,49 @@ def whyrun_supported?
 end
 
 action :create do
+  [
+    :home,
+    :enable_service,
+    :user,
+    :group,
+    :webapps_mode,
+    :enable_manager,
+    :kill_delay,
+    :java_home,
+    :catalina_opts,
+    :java_opts,
+    :initial_heap_size,
+    :max_heap_size,
+    :max_perm_size,
+    :jmx_authenticate,
+    :jmx_monitor_password,
+    :jmx_control_password,
+    :jmx_dir,
+    :tomcat_users,
+    :pool_enabled,
+    :pool_additional,
+    :http_additional,
+    :ssl_additional,
+    :ajp_additional,
+    :engine_valves,
+    :host_valves,
+    :access_log_enabled,
+    :access_log_additional,
+    :log_dir,
+    :logs_rotatable,
+    :logrotate_count,
+    :logrotate_frequency,
+    :setenv_template,
+    :server_xml_template,
+    :logging_properties_template,
+    :tomcat_users_template,
+    :logrotate_template
+  ].each do |attrib|
+    unless new_resource.instance_variable_get("@#{attrib}")
+      new_resource.instance_variable_set("@#{attrib}", node['apache_tomcat'][attrib])
+    end
+  end
+
   catalina_home = new_resource.home
   catalina_base = new_resource.base
   service_name = new_resource.service_name || ::File.basename(catalina_base)
@@ -47,7 +90,7 @@ action :create do
   directory ::File.join(catalina_base, 'webapps') do
     owner 'root'
     group new_resource.group
-    mode new_resource.webapps_mode || '0775'
+    mode new_resource.webapps_mode
   end
 
   %w(bin conf lib).each do |dir|
