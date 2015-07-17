@@ -16,6 +16,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_recipe 'logrotate'
-include_recipe 'apache_tomcat::install'
-include_recipe 'apache_tomcat::configure'
+apache_tomcat node['apache_tomcat']['home'] do
+  mirror node['apache_tomcat']['mirror']
+  version node['apache_tomcat']['version']
+  checksum node['apache_tomcat']['checksum']
+end
+
+group node['apache_tomcat']['group'] do
+  system true
+  only_if { node['apache_tomcat']['create_service_user'] }
+end
+
+user node['apache_tomcat']['user'] do
+  comment 'Tomcat Service User'
+  system true
+  group node['apache_tomcat']['group']
+  shell '/bin/false'
+  only_if { node['apache_tomcat']['create_service_user'] }
+end
+
+instance = node['apache_tomcat']['base_instance'] ||
+           ::File.basename(node['apache_tomcat']['base'])
+
+apache_tomcat_instance instance do
+  base  node['apache_tomcat']['base']
+  jmx_port node['apache_tomcat']['jmx_port']
+  shutdown_port node['apache_tomcat']['shutdown_port']
+  http_port node['apache_tomcat']['http_port']
+  ssl_port node['apache_tomcat']['ssl_port']
+  ajp_port node['apache_tomcat']['ajp_port']
+  only_if { node['apache_tomcat']['run_base_instance'] }
+end

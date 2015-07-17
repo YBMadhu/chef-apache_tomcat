@@ -21,9 +21,9 @@
 actions :create
 default_action :create
 
-attribute :base, kind_of: String, name_attribute: true, required: true
+attribute :service_name, kind_of: String, name_attribute: true, required: true
 attribute :home, kind_of: String, required: true
-attribute :service_name, kind_of: String
+attribute :base, kind_of: String
 
 attribute :shutdown_port, kind_of: Integer
 attribute :http_port, kind_of: Integer
