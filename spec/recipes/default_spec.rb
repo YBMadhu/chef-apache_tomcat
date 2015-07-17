@@ -44,15 +44,16 @@ describe 'apache_tomcat::default' do
   context 'with run_base_instance' do
     context 'when true' do
       let(:run_base_instance) { true }
-      it 'creates tomcat instance' do
-        expect(chef_run).to create_apache_tomcat_instance('tomcat')
+      it 'creates base instance' do
+        expect(chef_run).to create_apache_tomcat_instance('base').with(
+          base: '/var/lib/tomcat')
       end
     end
 
     context 'when false' do
       let(:run_base_instance) { false }
-      it 'does not create tomcat instance' do
-        expect(chef_run).not_to create_apache_tomcat_instance('tomcat')
+      it 'does not create base instance' do
+        expect(chef_run).not_to create_apache_tomcat_instance('base')
       end
     end
   end

@@ -66,9 +66,18 @@ action :create do
     end
   end
 
+  if new_resource.instance_name == 'base'
+    instance_name = node['apache_tomcat']['base_instance'] ||
+                    ::File.basename(node['apache_tomcat']['base'])
+  else
+    instance_name = new_resource.instance_name
+  end
+  unless new_resource.base
+    path = ::File.join(::File.dirname(node['apache_tomcat']['base']), instance_name)
+    new_resource.instance_variable_set('@base', path)
+  end
   catalina_home = new_resource.home
   catalina_base = new_resource.base
-  service_name = new_resource.service_name || ::File.basename(catalina_base)
 
   if new_resource.log_dir
     unless ::Pathname.new(new_resource.log_dir).absolute?
@@ -138,7 +147,7 @@ action :create do
     only_if { new_resource.enable_manager }
     not_if { ::File.directory?("#{catalina_base}/webapps/manager") }
     if new_resource.enable_service
-      notifies :restart, "poise_service[#{service_name}]"
+      notifies :restart, "poise_service[#{instance_name}]"
     end
   end
 
@@ -150,7 +159,7 @@ action :create do
     not_if { new_resource.enable_manager }
     only_if { ::File.directory?("#{catalina_base}/webapps/manager") }
     if new_resource.enable_service
-      notifies :restart, "poise_service[#{service_name}]"
+      notifies :restart, "poise_service[#{instance_name}]"
     end
   end
 
@@ -163,7 +172,7 @@ action :create do
     group new_resource.group
     variables(config: new_resource)
     if new_resource.enable_service
-      notifies :restart, "poise_service[#{service_name}]"
+      notifies :restart, "poise_service[#{instance_name}]"
     end
   end
 
@@ -190,7 +199,7 @@ action :create do
       access_log_valve: access_log_valve_
     )
     if new_resource.enable_service
-      notifies :restart, "poise_service[#{service_name}]"
+      notifies :restart, "poise_service[#{instance_name}]"
     end
   end
 
@@ -206,7 +215,7 @@ action :create do
     end
     cookbook 'apache_tomcat'
     if new_resource.enable_service
-      notifies :restart, "poise_service[#{service_name}]"
+      notifies :restart, "poise_service[#{instance_name}]"
     end
   end
 
@@ -226,7 +235,7 @@ action :create do
     end
     cookbook 'apache_tomcat'
     if new_resource.enable_service
-      notifies :restart, "poise_service[#{service_name}]"
+      notifies :restart, "poise_service[#{instance_name}]"
     end
   end
 
@@ -239,7 +248,7 @@ action :create do
     owner 'root'
     group new_resource.group
     if new_resource.enable_service
-      notifies :restart, "poise_service[#{service_name}]"
+      notifies :restart, "poise_service[#{instance_name}]"
     end
   end
 
@@ -255,7 +264,7 @@ action :create do
       users: new_resource.tomcat_users
     )
     if new_resource.enable_service
-      notifies :restart, "poise_service[#{service_name}]"
+      notifies :restart, "poise_service[#{instance_name}]"
     end
   end
 
@@ -268,7 +277,7 @@ action :create do
   end
 
   cb, src = template_source(new_resource.logrotate_template, 'logrotate.erb')
-  template "/etc/logrotate.d/#{service_name}" do
+  template "/etc/logrotate.d/#{instance_name}" do
     source src
     cookbook cb
     mode '0644'
@@ -281,7 +290,7 @@ action :create do
     )
   end
 
-  poise_service service_name do # ~FC021
+  poise_service instance_name do # ~FC021
     command "#{catalina_home}/bin/catalina.sh run"
     directory catalina_base
     if node['apache_tomcat']['init_provider']

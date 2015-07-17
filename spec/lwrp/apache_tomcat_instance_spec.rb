@@ -22,6 +22,7 @@ describe 'tomcat_test::instance_lwrp' do
   let(:tomcat_home) { '/opt/tomcat7' }
   let(:webapps_mode) { '0775' }
   let(:enable_manager) { false }
+  let(:instance_name) { nil }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['apache_tomcat_instance'],
                              file_cache_path: '/var/chef') do |node|
@@ -49,6 +50,7 @@ describe 'tomcat_test::instance_lwrp' do
       node.set['apache_tomcat']['tomcat_users_template'] = tomcat_users_template
       node.set['apache_tomcat']['webapps_mode'] = webapps_mode
       node.set['apache_tomcat']['enable_manager'] = enable_manager
+      node.set['tomcat_test']['instance_name'] = instance_name
     end.converge(described_recipe)
   end
 
@@ -62,6 +64,22 @@ describe 'tomcat_test::instance_lwrp' do
 
   it 'creates tomcat instance' do
     expect(chef_run).to create_apache_tomcat_instance('tomcat-test')
+  end
+
+  context 'with base instance' do
+    let(:instance_name) { 'base' }
+    it 'creates base instance' do
+      expect(chef_run).to create_apache_tomcat_instance('tomcat-test').with(
+        instance_name: 'base')
+    end
+
+    it 'uses correct service name' do
+      expect(chef_run). to enable_poise_service('tomcat7')
+    end
+
+    it 'creates correct logrotate template' do
+      expect(chef_run).to create_template('/etc/logrotate.d/tomcat7')
+    end
   end
 
   it 'creates tomcat catalina_base directory' do

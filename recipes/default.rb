@@ -35,10 +35,7 @@ user node['apache_tomcat']['user'] do
   only_if { node['apache_tomcat']['create_service_user'] }
 end
 
-instance = node['apache_tomcat']['base_instance'] ||
-           ::File.basename(node['apache_tomcat']['base'])
-
-apache_tomcat_instance instance do
+apache_tomcat_instance 'base' do
   base  node['apache_tomcat']['base']
   jmx_port node['apache_tomcat']['jmx_port']
   shutdown_port node['apache_tomcat']['shutdown_port']

@@ -12,7 +12,6 @@ describe 'apache_tomcat::default' do
       node.set['apache_tomcat']['instances']['tomcat2']['base'] = '/var/lib/tomcat2'
       node.set['apache_tomcat']['instances']['tomcat2']['http_port'] = 8082
       node.set['apache_tomcat']['instances']['tomcat2']['shutdown_port'] = -1
-
     end.converge(described_recipe)
   end
 
