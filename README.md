@@ -21,7 +21,7 @@ Required:
 * [logrotate](https://supermarket.chef.io/cookbooks/logrotate)- used by the
 `default` recipe to install logrotate
 * [poise-service](https://supermarket.chef.io/cookbooks/poise-service) -
-used to manage Tomcat service(s)
+used to manage Tomcat service(s) (see below)
 
 Suggested:
 * `java` (see below)
@@ -33,11 +33,6 @@ runlist before consuming recipes/resources in this cookbook. For example...
 * [oracle_jdk](https://github.com/bdclark/chef-oracle_jdk) - a cookbook dedicated
 to installing the Oracle JDK
 
-#### Logrotate
-This cookbook depends on the [logrotate](https://supermarket.chef.io/cookbooks/logrotate)
-cookbook but will only install logrotate when using the `default` recipe. If you
-are using the `apache_tomcat_instance` LWRP you'll need to install logrotate on your own.
-
 #### Poise-Service
 This cookbook depends on [poise-service](https://supermarket.chef.io/cookbooks/poise-service)
 to create and manage Tomcat service(s). On RHEL platforms < 7.0 (and Amazon
@@ -47,76 +42,24 @@ allows a considerable amount of flexibility for setting/overriding service behav
 init scripts, etc.  Refer to that cookbook's documentation for implementation
 details.
 
-## Recipes
+## Attributes
+* `mirror` - Tomcat mirror URL
+* `version` - version of Tomcat to download/install
+* `checksum` - sha256 checksum of downloaded Tomcat tarball
+* `home` - installation path of Tomcat (equiv. to CATALINA_HOME)
+* `base` - default CATALINA_BASE path for base instance
+* `run_base_instance` - whether to run an instance in `base`
+* `create_service_user` - whether to create service user/group specified in
+`user` and `group` attributes
 
-### default
-Installs and configures a single instance of Tomcat by including the `install`
-and `configure` recipes explained below. Also includes the `logrotate` default
-recipe to ensure logrotate is installed.
-
-Tomcat is installed in `node['apache_tomcat']['home']` and becomes
-CATALINA_HOME. An instance is created in `node['apache_tomcat']['base']`
-and becomes CATALINA_BASE. While not the default behavior, these two attributes
-can be set to the same path if desired to install and run Tomcat from a single
-directory.
-
-### install
-Only installs Tomcat binaries, and uses the following node attributes. See
-`attributes/default.rb` for default values.
-
-* `node['apache_tomcat']['home']` - directory to install Tomcat binaries
-* `node['apache_tomcat']['mirror']` - url to apache Tomcat mirror
-* `node['apache_tomcat']['version']` - Tomcat version
-* `node['apache_tomcat']['checksum']` - sha256 checksum of downloaded tarball
-
-Use this recipe to create a CATALINA_HOME as the basis for single or multiple instance of Tomcat.
-
-### configure
-Creates Tomcat service user/group and configures a single Tomcat instance in
-`node['apache_tomcat']['base']`. This recipe expects Tomcat to already
-be installed in `node['apache_tomcat']['home']`.
-
-This recipe uses the `apache_tomcat_instance` LWRP to configure Tomcat. Node
-attributes are exposed for most all of the LWRP's configurable attributes. See
-below for an explanation of the `apache_tomcat_instance` attributes and `attributes/instance.rb`
-for the default values used in this recipe.
-
-Use this recipe to configure Tomcat after installing with the `install` recipe,
-or to configure Tomcat installed by some other means (e.g. an application
-delivered with an embedded version of Tomcat).
-
-## Resources / Providers
-
-### apache_tomcat
-Install or remove Tomcat binaries. In typical applications this is used to
-create a CATALINA_HOME for one or more instances of Tomcat.
-
-#### Actions
-* `install` - Default action. Install Tomcat binaries into `path`
-* `remove` - Uninstalls Tomcat binaries from `path`
-
-#### Attributes
-* `path` - Directory to install Tomcat binaries; default: name of resource block
-* `mirror` - url to apache Tomcat mirror (defaults to node attribute)
-* `version` - version of Tomcat to download/install (defaults to node attribute)
-* `checksum` - sha256 checksum of downloaded tarball (defaults to node attribute)
-
-### apache_tomcat_instance
-Install and/or configure an instance of Tomcat. In typical applications this is
-used to create one or more instances of Tomcat (CATALINA_BASE) after installing
-Tomcat with the `apache_tomcat` LWRP.
-
-#### Actions
-* `create` - Default action. Install and configure Tomcat instance in `base`
-
-#### Attributes
-* `base` - required directory to create this Tomcat instance; default: name of
-resource block (equiv. to CATALINA_BASE)
-* `home` - required path to existing apahe binaries (equiv. to CATALINA_HOME)
-* `service_name` - optional name of service (defaults to basename of `base`)
-* `enable_service` - whether to enable/start service; default: `true`
-* `user` - Tomcat service user; default: `tomcat`
-* `group` - Tomcat service group; default: `tomcat`
+Attributes for Tomcat instance(s):
+* `shutdown_port` - Shutdown port (integer)
+* `http_port` - HTTP port (integer)
+* `ssl_port` - SSL port (integer)
+* `ajp_port` - AJP port (integer)
+* `jmx_port` - JMX port (integer); default: `nil` (JMX management is disabled if `nil`)
+* `user` - service user for Tomcat instances; default: `tomcat`
+* `group` - primary group of service user; default: `tomcat`
 * `webapps_mode` - optional permissions for webapps directory; default: `0775`
 * `enable_manager` - whether to enable manager webapp by copying from `home`
 to `base`; default: `false`
@@ -124,13 +67,12 @@ to `base`; default: `false`
 * `logrotate_frequency` - rotation frequency; default: `weekly`
 * `logrotate_count` - logrotate file count; default: `4`
 * `kill_delay` - seconds to wait before kill -9 on service stop/restart; default: 45 (integer)
-* `initial_heap_size` - optional java initial heap size (-Xms) added to CATALINA_OPTS
-* `max_heap_size` - optional java max heap size (-Xmx) added to CATALINA_OPTS
-* `max_perm_size` - optional java max permanent size (-XX:MaxPermSize) added to CATALINA_OPTS
+* `initial_heap_size` - optional java initial heap size; adds `-Xms` CATALINA_OPTS
+* `max_heap_size` - optional java max heap size; adds `-Xmx` to CATALINA_OPTS
+* `max_perm_size` - optional java max permanent size; adds `-XX:MaxPermSize` to CATALINA_OPTS
 * `catalina_opts` - optional string or array of CATALINA_OPTS in setenv.sh
 * `java_opts` - optional string or array of JAVA_OPTS in setenv.sh
-* `java_home` - optional JAVA_HOME in setenv.sh
-* `jmx_port` - JMX report port (integer); default: `nil` (JMX management is disabled if `nil`)
+* `java_home` - optional JAVA_HOME environment variable in setenv.sh
 * `jmx_authenticate` - whether JMX authentication is enabled; default: `true`
 (ignored unless `jmx_port` set)
 * `jmx_monitor_password` - password for JMX readonly access; default: `nil`
@@ -139,10 +81,6 @@ to `base`; default: `false`
 (ignored unless `jmx_port` set and `jmx_authenticate` true)
 * `jmx_dir` - optional directory for jmxremote.password and jmxremote.access,
 defaults to `home`/conf
-* `shutdown_port` - Tomcat shutdown port in server.xml; required
-* `http_port` - optional http port (integer), http connector undef
-* `ajp_port` - optional ajp port (integer)
-* `ssl_port` - optional ssl port (integer)
 * `pool_enabled` - enable shared executor (thread pool); default: `false`
 * `access_log_enabled` - whether to enable access log valve; default: `false`
 * `http_additional` - hash of additional http connector attributes
@@ -163,23 +101,96 @@ with your own. Use `name` to reference a template in the calling cookbook or
 * `tomcat_users_template` - conf/tomcat-users.xml
 * `logrotate_template` - /etc/logrotate.d/`service_name`
 
-## Usage and examples
-Install Tomcat 7.0.56 binaries in /usr/local/tomcat7; create an instance in /var/lib/tomat1 with service Tomcat1 running as user Tomcat:
-```
-apache_tomcat '/usr/local/tomcat7' do
-  version '7.0.56'
-end
+## Usage
+Include the default recipe to install and configure Tomcat.
 
-apache_tomcat_instance '/var/lib/tomcat1' do
-  home 'usr/local/tomcat7'
-  user 'tomcat'
-  group 'tomcat'
-  http_port 8080
-end
-```
-The example above will use `/usr/local/tomcat7` as CATALINA_HOME and
-`/var/lib/tomcat1` as CATALINA_BASE.
+Tomcat will be installed in `home`, and becomes CATALINA_HOME. If `run_base_instance`
+is `true`, an instance will be created in `base` and becomes CATALINA_BASE. The
+instance will be configured using the instance-related node attributes listed
+above.
 
+A Tomcat service user/group will also be created if `create_service_user` is `true`.
+
+## Multiple Instances
+To run multiple instances of Tomcat, populate the instances attribute, which is
+a dictionary of instance name => array of attributes. Most of the same attributes
+that can be used globally for the tomcat cookbook can also be set per-instance -
+see `resources/instance.rb` for detail.
+
+IF the `base` attribute is NOT set for a particular instance, it will be derived
+from `node['apache_tomcat']['base']`. For example, for instance 'instance1' if
+`node['apache_tomcat']['base']` is /var/lib/tomcat, then `base` for 'instance1'
+will be set to /var/lib/instance1.
+
+The port attributes - `http_port`, `ssl_port`, `ajp_port`, `jmx_port`, and
+`shutdown_port` - are not inherited from node attributes and must be set per-instance
+if they are to be used. Other attributes for an instance that aren't set are
+inherited unmodified from global node attributes.
+
+If you only want to run specific instances and not the base instance specified
+in `node['apache_tomcat']['base']`, set `run_base_instance` to `false`.
+
+Example of partial role:
+```
+...
+"override_attributes": {
+  "apache_tomcat": {
+    "run_base_instance": false,
+    "http_additional": {
+      "protocol": "org.apache.coyote.http11.Http11NioProtocol"
+    },
+    "instances": {
+      "instance1": {
+        "http_port": 8081,
+        "shutdown_port": 8006
+      },
+      "instance2": {
+        "http_port": 8082,
+        "shutdown_port": 8007,
+        "catalina_opts": [
+          "-XX:+UseConcMarkSweepGC"
+        ]
+      }
+    },
+    ...
+  }
+  ...
+}
+```
+
+## Resources / Providers
+
+### apache_tomcat
+Install or remove Tomcat binaries. In typical applications this is used to
+create a CATALINA_HOME for one or more instances of Tomcat.
+
+#### Actions
+* `install` - Default action. Install Tomcat binaries into `path`
+* `remove` - Uninstalls Tomcat binaries from `path`
+
+#### Attributes
+* `path` - Directory to install Tomcat binaries; default: name of resource block
+* `mirror`, `version`, `checksum` - see Attributes above; inherits from node
+attributes if not specified.
+
+### apache_tomcat_instance
+Install and/or configure an instance of Tomcat. In typical applications this is
+used to create one or more instances of Tomcat (CATALINA_BASE) after installing
+Tomcat with the `apache_tomcat` LWRP.
+
+#### Actions
+* `create` - Default action. Install and configure Tomcat instance in `base`
+
+#### Attributes
+The following attributes are specific to each instance and are not inherited
+from node attributes:
+* `instance_name` - name of service; default: name of resource block
+* `base` - directory to create this Tomcat instance;
+default: dirname of `node['apache_tomcat']['base']` + `instance_name`
+
+Additional attributes for this resource are described in Attributes above.
+
+## Attribute Examples
 
 #### HTTP Connector
 To define a non-SSL HTTP Connector, set `http_port` to a port number. If `nil` the
@@ -270,8 +281,8 @@ While it's possible to set `node['apache_tomcat']['tomcat_users']` node attribut
 for use with the `default` or `configure` recipes, it's probably not a good idea.
 The attribute is more suited for `apache_tomcat_instance` LWRP consumers...
 setting the LWRP attribute from a data bag or some other means in a wrapper cookbook.
-Support for setting tomcat_users from a data bag (or even run_state) for use with
-the default and configure recipes may be considered in the future.
+Support for setting tomcat_users from a data bag (or run_state) for use with
+the default recipe may be considered in the future.
 
 ## License and Authors
 - Author:: Brian Clark (brian@clark.zone)

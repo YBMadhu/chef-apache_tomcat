@@ -21,17 +21,18 @@
 actions :create
 default_action :create
 
+# Specific to each instance
+# not inheritied from node attributes when not specified
 attribute :instance_name, kind_of: String, name_attribute: true
-attribute :home, kind_of: String, required: true
-attribute :base, kind_of: String, required: true
-
 attribute :shutdown_port, kind_of: Integer
 attribute :http_port, kind_of: Integer
 attribute :ssl_port, kind_of: Integer
 attribute :ajp_port, kind_of: Integer
 attribute :jmx_port, kind_of: Integer
 
+# Inherited from node attributes if not specified
 attribute :home, kind_of: String
+attribute :base, kind_of: String
 attribute :enable_service, equal_to: [true, false]
 attribute :user, kind_of: String
 attribute :group, kind_of: String
