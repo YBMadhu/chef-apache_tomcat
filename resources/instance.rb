@@ -23,7 +23,7 @@ default_action :create
 
 attribute :service_name, kind_of: String, name_attribute: true, required: true
 attribute :home, kind_of: String, required: true
-attribute :base, kind_of: String
+attribute :base, kind_of: String, required: true
 
 attribute :shutdown_port, kind_of: Integer
 attribute :http_port, kind_of: Integer

@@ -11,9 +11,6 @@ describe 'apache_tomcat::default' do
     end.converge(described_recipe)
   end
 
-  it 'installs apache tomcat' do
-  end
-
   context 'with create_service_user' do
     context 'when true' do
       let(:create_service_user) { true }

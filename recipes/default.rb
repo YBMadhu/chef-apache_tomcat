@@ -47,3 +47,9 @@ apache_tomcat_instance instance do
   ajp_port node['apache_tomcat']['ajp_port']
   only_if { node['apache_tomcat']['run_base_instance'] }
 end
+
+node['apache_tomcat']['instances'].each do |name, attribs|
+  apache_tomcat_instance name do
+    attribs.each { |k, v| send(k, v) if v }
+  end
+end
