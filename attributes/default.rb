@@ -1,6 +1,6 @@
 # rubocop:disable Metrics/LineLength
 
-# Default installation settings - intall recipe and apache_tomcat LWRP
+# Default installation settings
 default['apache_tomcat']['mirror']  = 'https://repository.apache.org/content/repositories/releases/org/apache/tomcat/tomcat'
 default['apache_tomcat']['version'] = '7.0.56'
 default['apache_tomcat']['checksum'] = 'c0ca44be20bccebbb043ccd7ab5ea4d94060fdde6bb84812f3da363955dae5bb'

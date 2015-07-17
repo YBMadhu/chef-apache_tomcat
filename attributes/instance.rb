@@ -1,5 +1,12 @@
 # rubocop:disable Metrics/LineLength
 
+# Only used in base instance if base instance enabled
+default['apache_tomcat']['shutdown_port'] = 8005
+default['apache_tomcat']['http_port'] = 8080
+default['apache_tomcat']['ssl_port'] = nil
+default['apache_tomcat']['ajp_port'] = 8009
+default['apache_tomcat']['jmx_port'] = nil
+
 # General instance settings
 default['apache_tomcat']['user'] = 'tomcat'
 default['apache_tomcat']['group'] = 'tomcat'
@@ -23,19 +30,13 @@ default['apache_tomcat']['initial_heap_size'] = nil
 default['apache_tomcat']['max_heap_size'] = nil
 default['apache_tomcat']['max_perm_size'] = nil
 
-default['apache_tomcat']['jmx_port'] = nil
 default['apache_tomcat']['jmx_authenticate'] = true
 default['apache_tomcat']['jmx_monitor_password'] = nil
 default['apache_tomcat']['jmx_control_password'] = nil
 
 # Server.xml settings
-default['apache_tomcat']['shutdown_port'] = 8005
-default['apache_tomcat']['http_port'] = 8080
-default['apache_tomcat']['ajp_port'] = 8009
-default['apache_tomcat']['ssl_port'] = nil
 default['apache_tomcat']['pool_enabled'] = false
 default['apache_tomcat']['access_log_enabled'] = false
-
 default['apache_tomcat']['http_additional'] = Mash.new
 default['apache_tomcat']['ajp_additional'] = Mash.new
 default['apache_tomcat']['ssl_additional'] = Mash.new
