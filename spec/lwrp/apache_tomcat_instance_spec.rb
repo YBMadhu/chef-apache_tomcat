@@ -20,7 +20,8 @@ describe 'tomcat_test::instance_lwrp' do
   let(:logrotate_template) { nil }
   let(:tomcat_users_template) { nil }
   let(:tomcat_home) { '/opt/tomcat7' }
-  let(:webapps_mode) { '0775' }
+  let(:instance_base) { '/var/tomcat7' }
+  let(:webapps_mode) { '0666' }
   let(:enable_manager) { false }
   let(:instance_name) { nil }
   let(:chef_run) do
@@ -51,6 +52,7 @@ describe 'tomcat_test::instance_lwrp' do
       node.set['apache_tomcat']['webapps_mode'] = webapps_mode
       node.set['apache_tomcat']['enable_manager'] = enable_manager
       node.set['tomcat_test']['instance_name'] = instance_name
+      node.set['tomcat_test']['base'] = instance_base
     end.converge(described_recipe)
   end
 
@@ -60,16 +62,148 @@ describe 'tomcat_test::instance_lwrp' do
   let(:tomcat_users_resource) { chef_run.template('/var/tomcat7/conf/tomcat-users.xml') }
   let(:jmxaccess_resource) { chef_run.template('/var/tomcat7/conf/jmxremote.access') }
   let(:jmxpassword_resource) { chef_run.template('/var/tomcat7/conf/jmxremote.password') }
-  let(:logrotate_resource) { chef_run.template('/etc/logrotate.d/tomcat-test') }
+  let(:logrotate_resource) { chef_run.template('/etc/logrotate.d/tomcat7-test') }
 
-  it 'creates tomcat instance' do
-    expect(chef_run).to create_apache_tomcat_instance('tomcat-test')
+  {
+    '/var/tomcat7' => '/var/tomcat7',
+    nil => '/var/tomcat7-test'
+  }.each do |base, path|
+    context "when base is #{base.inspect}" do
+      let(:instance_base) { base }
+
+      it 'creates instance' do
+        expect(chef_run).to create_apache_tomcat_instance('test')
+      end
+
+      it 'creates tomcat catalina_base directory' do
+        expect(chef_run).to create_directory(path).with(
+          owner: 'tomcat', group: 'tomcat', mode: '0755')
+      end
+
+      it 'creates webapps directory' do
+        expect(chef_run).to create_directory("#{path}/webapps").with(
+          owner: 'root', group: 'tomcat', mode: '0666')
+      end
+
+      %w(bin conf lib).each do |dir|
+        it "creates tomcat #{dir} directory" do
+          expect(chef_run).to create_directory("#{path}/#{dir}").with(
+            owner: 'root', group: 'tomcat', mode: '0755')
+        end
+      end
+
+      %w(temp work).each do |dir|
+        it "creates tomcat #{dir} directory" do
+          expect(chef_run).to create_directory("#{path}/#{dir}").with(
+            owner: 'tomcat', group: 'tomcat', mode: '0755')
+        end
+      end
+
+      context 'when home = base' do
+        let(:tomcat_home) { path }
+
+        %w(catalina.policy catalina.properties web.xml context.xml).each do |file|
+          it "does not create link to #{file}" do
+            expect(chef_run).not_to create_link("#{path}/conf/#{file}")
+          end
+        end
+
+        it 'does not create catalina_base directory' do
+          expect(chef_run).not_to create_directory(path)
+        end
+      end
+
+      context 'when home != base' do
+        %w(catalina.policy catalina.properties web.xml context.xml).each do |file|
+          it "creates link to #{file}" do
+            expect(chef_run).to create_link("#{path}/conf/#{file}")
+          end
+        end
+      end
+
+      context 'when log_dir is nil' do
+        it 'creates local logs dir' do
+          expect(chef_run).to create_directory("#{path}/logs").with(
+            owner: 'tomcat', group: 'tomcat', mode: '0755')
+        end
+      end
+
+      context 'when log_dir is relative' do
+        let(:log_dir) { 'logs' }
+        it 'raises error' do
+          expect { chef_run }.to raise_error
+        end
+      end
+
+      context 'when log_dir is absolute' do
+        let(:log_dir) { '/var/log/my_tomcat_logs' }
+        it 'creates absolute log_dir' do
+          expect(chef_run).to create_directory('/var/log/my_tomcat_logs')
+        end
+
+        it 'creates link from logs dir to absolute dir' do
+          expect(chef_run).to create_link("#{path}/logs").with(
+            to: '/var/log/my_tomcat_logs')
+        end
+      end
+
+      it 'creates setenv.sh template' do
+        expect(chef_run).to create_template("#{path}/bin/setenv.sh").with(
+          mode: '0640',
+          owner: 'root',
+          group: 'tomcat',
+          source: 'setenv.sh.erb',
+          cookbook: 'apache_tomcat')
+      end
+
+      it 'creates server.xml template' do
+        expect(chef_run).to create_template("#{path}/conf/server.xml").with(
+          mode: '0640',
+          owner: 'root',
+          group: 'tomcat',
+          source: 'server.xml.erb',
+          cookbook: 'apache_tomcat')
+      end
+
+      it 'creates logging.properties template' do
+        expect(chef_run).to create_template("#{path}/conf/logging.properties").with(
+          mode: '0640',
+          owner: 'root',
+          group: 'tomcat',
+          source: 'logging.properties.erb',
+          cookbook: 'apache_tomcat')
+      end
+
+      it 'creates logrotate template' do
+        expect(chef_run).to create_template('/etc/logrotate.d/tomcat7-test').with(
+          mode: '0644',
+          owner: 'root',
+          group: 'root',
+          source: 'logrotate.erb',
+          cookbook: 'apache_tomcat')
+      end
+
+      it 'creates tomcat-users.xml template' do
+        expect(chef_run).to create_template("#{path}/conf/tomcat-users.xml").with(
+          mode: '640',
+          owner: 'root',
+          group: 'tomcat')
+      end
+
+      it 'jmxremote.access template has correct path' do
+        expect(chef_run).to delete_template("#{path}/conf/jmxremote.access")
+      end
+
+      it 'jmxremote.password template has correct path' do
+        expect(chef_run).to delete_template("#{path}/conf/jmxremote.password")
+      end
+    end
   end
 
   context 'with base instance' do
     let(:instance_name) { 'base' }
     it 'creates base instance' do
-      expect(chef_run).to create_apache_tomcat_instance('tomcat-test').with(
+      expect(chef_run).to create_apache_tomcat_instance('test').with(
         instance_name: 'base')
     end
 
@@ -80,58 +214,9 @@ describe 'tomcat_test::instance_lwrp' do
     it 'creates correct logrotate template' do
       expect(chef_run).to create_template('/etc/logrotate.d/tomcat7')
     end
-  end
 
-  it 'creates tomcat catalina_base directory' do
-    expect(chef_run).to create_directory('/var/tomcat7').with(
-      owner: 'tomcat', group: 'tomcat', mode: '0755')
-  end
-
-  it 'creates webapps directory' do
-    expect(chef_run).to create_directory('/var/tomcat7/webapps').with(
-      owner: 'root', group: 'tomcat', mode: '0775')
-  end
-
-  context 'with specified webapps_mode' do
-    let(:webapps_mode) { '0666' }
-    it 'webapps directory has correct mode' do
-      expect(chef_run).to create_directory('/var/tomcat7/webapps').with(mode: '0666')
-    end
-  end
-
-  %w(bin conf lib).each do |dir|
-    it "creates tomcat #{dir} directory" do
-      expect(chef_run).to create_directory("/var/tomcat7/#{dir}").with(
-        owner: 'root', group: 'tomcat', mode: '0755')
-    end
-  end
-
-  %w(temp work).each do |dir|
-    it "creates tomcat #{dir} directory" do
-      expect(chef_run).to create_directory("/var/tomcat7/#{dir}").with(
-        owner: 'tomcat', group: 'tomcat', mode: '0755')
-    end
-  end
-
-  context 'when home = base' do
-    let(:tomcat_home) { '/var/tomcat7' }
-
-    %w(catalina.policy catalina.properties web.xml context.xml).each do |file|
-      it "does not create link to #{file}" do
-        expect(chef_run).not_to create_link("/var/tomcat7/conf/#{file}")
-      end
-    end
-
-    it 'does not create catalina_base directory' do
-      expect(chef_run).not_to create_directory('/var/tomcat7')
-    end
-  end
-
-  context 'when home != base' do
-    %w(catalina.policy catalina.properties web.xml context.xml).each do |file|
-      it "creates link to #{file}" do
-        expect(chef_run).to create_link("/var/tomcat7/conf/#{file}")
-      end
+    it 'creates base directory' do
+      expect(chef_run).to create_directory('/var/tomcat7')
     end
   end
 
@@ -160,8 +245,8 @@ describe 'tomcat_test::instance_lwrp' do
         end
 
         it 'deletes and does not copy manager webapp' do
-          expect(chef_run).to run_ruby_block('tomcat-test-delete_manager')
-          expect(chef_run).not_to run_ruby_block('tomcat-test-copy_manager')
+          expect(chef_run).to run_ruby_block('test-delete_manager')
+          expect(chef_run).not_to run_ruby_block('test-copy_manager')
         end
       end
     end
@@ -177,8 +262,8 @@ describe 'tomcat_test::instance_lwrp' do
         end
 
         it 'copies and does not delete manager webapp' do
-          expect(chef_run).to run_ruby_block('tomcat-test-copy_manager')
-          expect(chef_run).not_to run_ruby_block('tomcat-test-delete_manager')
+          expect(chef_run).to run_ruby_block('test-copy_manager')
+          expect(chef_run).not_to run_ruby_block('test-delete_manager')
         end
       end
 
@@ -190,80 +275,11 @@ describe 'tomcat_test::instance_lwrp' do
         end
 
         it 'does not copy or delete manager webapp' do
-          expect(chef_run).not_to run_ruby_block('tomcat-test-copy_manager')
-          expect(chef_run).not_to run_ruby_block('tomcat-test-delete_manager')
+          expect(chef_run).not_to run_ruby_block('test-copy_manager')
+          expect(chef_run).not_to run_ruby_block('test-delete_manager')
         end
       end
     end
-  end
-
-  context 'when log_dir is nil' do
-    it 'creates local logs dir' do
-      expect(chef_run).to create_directory('/var/tomcat7/logs').with(
-        owner: 'tomcat', group: 'tomcat', mode: '0755')
-    end
-  end
-
-  context 'when log_dir is relative' do
-    let(:log_dir) { 'logs' }
-    it 'raises error' do
-      expect { chef_run }.to raise_error
-    end
-  end
-
-  context 'when log_dir is absolute' do
-    let(:log_dir) { '/var/log/my_tomcat_logs' }
-    it 'creates absolute log_dir' do
-      expect(chef_run).to create_directory('/var/log/my_tomcat_logs')
-    end
-
-    it 'creates link from logs dir to absolute dir' do
-      expect(chef_run).to create_link('/var/tomcat7/logs').with(
-        to: '/var/log/my_tomcat_logs')
-    end
-  end
-
-  it 'creates setenv.sh template' do
-    expect(chef_run).to create_template('/var/tomcat7/bin/setenv.sh').with(
-      mode: '0640',
-      owner: 'root',
-      group: 'tomcat',
-      source: 'setenv.sh.erb',
-      cookbook: 'apache_tomcat')
-  end
-
-  it 'creates server.xml template' do
-    expect(chef_run).to create_template('/var/tomcat7/conf/server.xml').with(
-      mode: '0640',
-      owner: 'root',
-      group: 'tomcat',
-      source: 'server.xml.erb',
-      cookbook: 'apache_tomcat')
-  end
-
-  it 'creates logging.properties template' do
-    expect(chef_run).to create_template('/var/tomcat7/conf/logging.properties').with(
-      mode: '0640',
-      owner: 'root',
-      group: 'tomcat',
-      source: 'logging.properties.erb',
-      cookbook: 'apache_tomcat')
-  end
-
-  it 'creates logrotate template' do
-    expect(chef_run).to create_template('/etc/logrotate.d/tomcat-test').with(
-      mode: '0644',
-      owner: 'root',
-      group: 'root',
-      source: 'logrotate.erb',
-      cookbook: 'apache_tomcat')
-  end
-
-  it 'creates tomcat-users.xml template' do
-    expect(chef_run).to create_template('/var/tomcat7/conf/tomcat-users.xml').with(
-      mode: '640',
-      owner: 'root',
-      group: 'tomcat')
   end
 
   context 'with no tomcat_users' do
@@ -363,7 +379,7 @@ describe 'tomcat_test::instance_lwrp' do
 
   context 'when enable_service true' do
     it 'enables poise-service' do
-      expect(chef_run).to enable_poise_service('tomcat-test').with(
+      expect(chef_run).to enable_poise_service('tomcat7-test').with(
         command: '/opt/tomcat7/bin/catalina.sh run',
         directory: '/var/tomcat7',
         user: 'tomcat',
@@ -374,50 +390,50 @@ describe 'tomcat_test::instance_lwrp' do
     end
 
     it 'setenv.sh template notifies service restart' do
-      expect(setenv_resource).to notify('poise_service[tomcat-test]').to(:restart)
+      expect(setenv_resource).to notify('poise_service[tomcat7-test]').to(:restart)
     end
 
     it 'server.xml template notifies service restart' do
-      expect(serverxml_resource).to notify('poise_service[tomcat-test]').to(:restart)
+      expect(serverxml_resource).to notify('poise_service[tomcat7-test]').to(:restart)
     end
 
     it 'logging.properties template notifies service restart' do
-      expect(logprop_resource).to notify('poise_service[tomcat-test]').to(:restart)
+      expect(logprop_resource).to notify('poise_service[tomcat7-test]').to(:restart)
     end
 
     it 'jmxremote.access template notifies service restart' do
-      expect(jmxaccess_resource).to notify('poise_service[tomcat-test]').to(:restart)
+      expect(jmxaccess_resource).to notify('poise_service[tomcat7-test]').to(:restart)
     end
 
     it 'jmxremote.password template notifies service restart' do
-      expect(jmxpassword_resource).to notify('poise_service[tomcat-test]').to(:restart)
+      expect(jmxpassword_resource).to notify('poise_service[tomcat7-test]').to(:restart)
     end
   end
 
   context 'when enable_service false' do
     let(:enable_service) { false }
     it 'poise-service is disabled' do
-      expect(chef_run).to disable_poise_service('tomcat-test')
+      expect(chef_run).to disable_poise_service('tomcat7-test')
     end
 
     it 'setenv.sh template does not notify service' do
-      expect(setenv_resource).not_to notify('poise_service[tomcat-test]')
+      expect(setenv_resource).not_to notify('poise_service[tomcat7-test]')
     end
 
     it 'server.xml template does not notify service' do
-      expect(serverxml_resource).not_to notify('poise_service[tomcat-test]')
+      expect(serverxml_resource).not_to notify('poise_service[tomcat7-test]')
     end
 
     it 'logging.properties template does not notify service' do
-      expect(logprop_resource).not_to notify('poise_service[tomcat-test]')
+      expect(logprop_resource).not_to notify('poise_service[tomcat7-test]')
     end
 
     it 'jmxremote.access template does not notify service' do
-      expect(jmxaccess_resource).not_to notify('poise_service[tomcat-test]')
+      expect(jmxaccess_resource).not_to notify('poise_service[tomcat7-test]')
     end
 
     it 'jmxremote.password template does not notify service' do
-      expect(jmxpassword_resource).not_to notify('poise_service[tomcat-test]')
+      expect(jmxpassword_resource).not_to notify('poise_service[tomcat7-test]')
     end
   end
 

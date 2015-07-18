@@ -1,7 +1,9 @@
 node.default['tomcat_test']['instance_name'] = nil
-apache_tomcat_instance 'tomcat-test' do
+node.default['tomcat_test']['base'] = nil
+
+apache_tomcat_instance 'test' do
   instance_name node['tomcat_test']['instance_name']
-  base node['apache_tomcat']['base']
+  base node['tomcat_test']['base']
   jmx_port node['apache_tomcat']['jmx_port']
   shutdown_port node['apache_tomcat']['shutdown_port']
   http_port node['apache_tomcat']['http_port']

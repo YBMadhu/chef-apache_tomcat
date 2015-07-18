@@ -48,6 +48,7 @@ details.
 * `checksum` - sha256 checksum of downloaded Tomcat tarball
 * `home` - installation path of Tomcat (equiv. to CATALINA_HOME)
 * `base` - default CATALINA_BASE path for base instance
+* `base_instance` - name of base instance; default: basename of `base`
 * `run_base_instance` - whether to run an instance in `base`
 * `create_service_user` - whether to create service user/group specified in
 `user` and `group` attributes
@@ -117,10 +118,10 @@ a dictionary of instance name => array of attributes. Most of the same attribute
 that can be used globally for the tomcat cookbook can also be set per-instance -
 see `resources/instance.rb` for detail.
 
-IF the `base` attribute is NOT set for a particular instance, it will be derived
+If the `base` attribute is NOT set for a particular instance, it will be derived
 from `node['apache_tomcat']['base']`. For example, for instance 'instance1' if
-`node['apache_tomcat']['base']` is /var/lib/tomcat, then `base` for 'instance1'
-will be set to /var/lib/instance1.
+`node['apache_tomcat']['base']` is /var/lib/tomcat7, then `base` for 'instance1'
+will be set to /var/lib/tomcat7-instance1.
 
 The port attributes - `http_port`, `ssl_port`, `ajp_port`, `jmx_port`, and
 `shutdown_port` - are not inherited from node attributes and must be set per-instance

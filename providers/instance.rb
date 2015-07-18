@@ -66,18 +66,21 @@ action :create do
     end
   end
 
+  base_instance = node['apache_tomcat']['base_instance'] ||
+                  ::File.basename(node['apache_tomcat']['base'])
+
   if new_resource.instance_name == 'base'
-    instance_name = node['apache_tomcat']['base_instance'] ||
-                    ::File.basename(node['apache_tomcat']['base'])
+    instance_name = base_instance
   else
-    instance_name = new_resource.instance_name
+    instance_name = "#{base_instance}-#{new_resource.instance_name}"
   end
-  unless new_resource.base
-    path = ::File.join(::File.dirname(node['apache_tomcat']['base']), instance_name)
-    new_resource.instance_variable_set('@base', path)
+  if new_resource.base
+    catalina_base = new_resource.base
+  else
+    catalina_base =
+      ::File.join(::File.dirname(node['apache_tomcat']['base']), instance_name)
   end
   catalina_home = new_resource.home
-  catalina_base = new_resource.base
 
   if new_resource.log_dir
     unless ::Pathname.new(new_resource.log_dir).absolute?

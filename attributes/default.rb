@@ -7,7 +7,7 @@ default['apache_tomcat']['checksum'] = 'c0ca44be20bccebbb043ccd7ab5ea4d94060fdde
 
 default['apache_tomcat']['home'] = '/usr/local/tomcat'
 default['apache_tomcat']['base'] = '/var/lib/tomcat'
-
+default['apache_tomcat']['base_instance'] = ::File.basename(node['apache_tomcat']['base'])
 default['apache_tomcat']['run_base_instance'] = true
 default['apache_tomcat']['create_service_user'] = true
 
