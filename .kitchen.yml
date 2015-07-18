@@ -35,17 +35,35 @@ suites:
         base: '/opt/tomcat'
       java:
         jdk_version: '7'
+  - name: multi
+    run_list:
+      - recipe[java]
+      - recipe[apache_tomcat::default]
+    attributes:
+      apache_tomcat:
+        run_base_instance: false
+        initial_heap_size: 256m
+        instances:
+          instance1:
+            shutdown_port: 8005
+            ajp_port: 8009
+            http_port: 8080
+            ssl_port: 8443
+          instance2:
+            ajp_port: 9009
+            http_port: 9080
+            ssl_port: 9443
+      java:
+        jdk_version: '7'
   - name: custom
     run_list:
       - 'recipe[java]'
       - 'recipe[apache_tomcat::default]'
     attributes:
       apache_tomcat:
-        install_java: true
-        version: 7.0.56
         home: '/opt/tomcat7'
         base: '/var/tomcat'
-        service_name: 'tomcat-default'
+        base_instance: 'tomcat-default'
         enable_manager: true
         webapps_mode: '0755'
         log_dir: '/var/log/tomcat7'
