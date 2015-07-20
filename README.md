@@ -78,7 +78,6 @@ to `base`; default: `false`
 (ignored unless `jmx_port` set)
 * `jmx_users` - optional array of JMX users/access (see below for expected format)
 (ignored unless `jmx_port` set and `jmx_authenticate` true)
-(ignored unless `jmx_port` set and `jmx_authenticate` true)
 * `pool_enabled` - enable shared executor (thread pool); default: `false`
 * `access_log_enabled` - whether to enable access log valve; default: `false`
 * `http_additional` - hash of additional http connector attributes
@@ -185,8 +184,15 @@ from node attributes:
 * `instance_name` - name of service; default: name of resource block
 * `base` - directory to create this Tomcat instance;
 default: dirname of `node['apache_tomcat']['base']` + `instance_name`
+* `shutdown_port` - Shutdown port (integer)
+* `http_port` - HTTP port (integer)
+* `ssl_port` - SSL port (integer)
+* `ajp_port` - AJP port (integer)
+* `jmx_port` - JMX port (integer); default: `nil` (JMX management is disabled if `nil`)
 
-Additional attributes for this resource are described in Attributes above.
+Additional attributes for this resource are described in Attributes above. If not
+specified they will be inherited from node attributes. Also see resources/instance.rb
+for further details.
 
 ## Attribute Examples
 
