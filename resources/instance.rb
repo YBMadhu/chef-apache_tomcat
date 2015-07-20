@@ -46,9 +46,7 @@ attribute :initial_heap_size, kind_of: String
 attribute :max_heap_size, kind_of: String
 attribute :max_perm_size, kind_of: String
 attribute :jmx_authenticate, equal_to: [true, false]
-attribute :jmx_monitor_password, kind_of: String
-attribute :jmx_control_password, kind_of: String
-attribute :jmx_dir, kind_of: String
+attribute :jmx_users, kind_of: String
 attribute :tomcat_users, kind_of: Array
 attribute :pool_enabled, equal_to: [true, false]
 attribute :pool_additional, kind_of: Hash

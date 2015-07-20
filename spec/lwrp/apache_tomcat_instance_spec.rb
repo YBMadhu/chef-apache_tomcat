@@ -7,8 +7,7 @@ describe 'tomcat_test::instance_lwrp' do
   let(:max_perm_size) { nil }
   let(:catalina_opts) { nil }
   let(:jmx_port) { nil }
-  let(:jmx_monitor_password) { nil }
-  let(:jmx_control_password) { nil }
+  let(:jmx_users) { nil }
   let(:jmx_authenticate) { true }
   let(:java_opts) { nil }
   let(:log_dir) { nil }
@@ -40,8 +39,7 @@ describe 'tomcat_test::instance_lwrp' do
       node.set['apache_tomcat']['java_opts'] = java_opts
       node.set['apache_tomcat']['jmx_port'] = jmx_port
       node.set['apache_tomcat']['jmx_authenticate'] = jmx_authenticate
-      node.set['apache_tomcat']['jmx_monitor_password'] = jmx_monitor_password
-      node.set['apache_tomcat']['jmx_control_password'] = jmx_control_password
+      node.set['apache_tomcat']['jmx_users'] = jmx_users
       node.set['apache_tomcat']['enable_service'] = enable_service
       node.set['apache_tomcat']['tomcat_users'] = tomcat_users
       node.set['apache_tomcat']['setenv_template'] = setenv_template

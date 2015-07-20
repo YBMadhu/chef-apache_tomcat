@@ -48,8 +48,7 @@ default['apache_tomcat']['max_perm_size'] = nil
 
 # JMX settings
 default['apache_tomcat']['jmx_authenticate'] = true
-default['apache_tomcat']['jmx_monitor_password'] = nil
-default['apache_tomcat']['jmx_control_password'] = nil
+default['apache_tomcat']['jmx_users'] = []
 
 # Additinal server.xml settings
 default['apache_tomcat']['pool_enabled'] = false

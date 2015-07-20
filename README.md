@@ -76,12 +76,9 @@ to `base`; default: `false`
 * `java_home` - optional JAVA_HOME environment variable in setenv.sh
 * `jmx_authenticate` - whether JMX authentication is enabled; default: `true`
 (ignored unless `jmx_port` set)
-* `jmx_monitor_password` - password for JMX readonly access; default: `nil`
+* `jmx_users` - optional array of JMX users/access (see below for expected format)
 (ignored unless `jmx_port` set and `jmx_authenticate` true)
-* `jmx_control_password` - password for JMX readwrite access; default: `nil`
 (ignored unless `jmx_port` set and `jmx_authenticate` true)
-* `jmx_dir` - optional directory for jmxremote.password and jmxremote.access,
-defaults to `home`/conf
 * `pool_enabled` - enable shared executor (thread pool); default: `false`
 * `access_log_enabled` - whether to enable access log valve; default: `false`
 * `http_additional` - hash of additional http connector attributes
@@ -284,6 +281,25 @@ The attribute is more suited for `apache_tomcat_instance` LWRP consumers...
 setting the LWRP attribute from a data bag or some other means in a wrapper cookbook.
 Support for setting tomcat_users from a data bag (or run_state) for use with
 the default recipe may be considered in the future.
+
+### JMX Users
+The `jmx_users` attributes accepts an array of user hashes like the example below.
+Each user must include an `id`, `password` and `access`. Access must be one of
+`readonly` or `readwrite`.
+```
+[
+  {
+    'id' => 'monitorMe',
+    'password' => 'bacon',
+    'access' => 'readonly'
+  },
+  {
+    'id' => 'controlMe',
+    'password' => 'supersecret',
+    'access' => 'readwrite'
+  }
+]
+```
 
 ## License and Authors
 - Author:: Brian Clark (brian@clark.zone)

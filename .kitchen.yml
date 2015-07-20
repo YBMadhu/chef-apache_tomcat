@@ -90,8 +90,13 @@ suites:
             protocolHeader: x-forwarded-proto
             portHeader: x-forwarded-port
         jmx_port: 9599
-        jmx_monitor_password: mymonitorpw
-        jmx_control_password: mycontrolpw
+        jmx_users:
+          - id: monitorRole
+            password: mymonitorpw
+            access: readonly
+          - id: controlRole
+            password: mycontrolpw
+            access: readwrite
         tomcat_users:
           - id: joedirt
             password: mullet

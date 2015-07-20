@@ -38,9 +38,7 @@ action :create do
     :max_heap_size,
     :max_perm_size,
     :jmx_authenticate,
-    :jmx_monitor_password,
-    :jmx_control_password,
-    :jmx_dir,
+    :jmx_users,
     :tomcat_users,
     :pool_enabled,
     :pool_additional,
@@ -211,6 +209,7 @@ action :create do
     mode '0600'
     owner new_resource.user
     group new_resource.group
+    variables(jmx_users: new_resource.jmx_users || [])
     if new_resource.jmx_port.nil? || new_resource.jmx_authenticate == false
       action :delete
     else
@@ -227,10 +226,7 @@ action :create do
     mode '0600'
     owner new_resource.user
     group new_resource.group
-    variables(
-      control_password: new_resource.jmx_control_password,
-      monitor_password: new_resource.jmx_monitor_password
-    )
+    variables(jmx_users: new_resource.jmx_users || [])
     if new_resource.jmx_port.nil? || new_resource.jmx_authenticate == false
       action :delete
     else
