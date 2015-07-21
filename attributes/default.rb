@@ -22,6 +22,7 @@ default['apache_tomcat']['http_port'] = 8080
 default['apache_tomcat']['ssl_port'] = nil
 default['apache_tomcat']['ajp_port'] = 8009
 default['apache_tomcat']['jmx_port'] = nil
+default['apache_tomcat']['debug_port'] = nil
 
 # General instance settings
 default['apache_tomcat']['user'] = 'tomcat'

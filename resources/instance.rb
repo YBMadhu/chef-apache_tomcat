@@ -29,6 +29,7 @@ attribute :http_port, kind_of: Integer
 attribute :ssl_port, kind_of: Integer
 attribute :ajp_port, kind_of: Integer
 attribute :jmx_port, kind_of: Integer
+attribute :debug_port, kind_of: Integer, regex: /^[1-9]\d*/
 
 # Inherited from node attributes if not specified
 attribute :home, kind_of: String

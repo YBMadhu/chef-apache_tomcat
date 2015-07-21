@@ -9,6 +9,10 @@ JAVA_HOME="<%= @config.java_home %>"
 <% unless @config.java_opts.nil? || @config.java_opts.empty? %>
 JAVA_OPTS="<%= @config.java_opts %>"
 <% end %>
+<% unless @config.debug_port.nil? %>
+# enable remote debugging
+CATALINA_OPTS="${CATALINA_OPTS} -agentlib:jdwp=transport=dt_socket,address=<%= @config.debug_port %>,server=y,suspend=n
+<% end %>
 <% unless @config.initial_heap_size.nil? || @config.initial_heap_size.empty? %>
 # set initial Java heap size
 CATALINA_OPTS="${CATALINA_OPTS} -Xms<%= @config.initial_heap_size %>"

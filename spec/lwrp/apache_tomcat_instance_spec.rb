@@ -23,6 +23,7 @@ describe 'tomcat_test::instance_lwrp' do
   let(:webapps_mode) { '0666' }
   let(:enable_manager) { false }
   let(:instance_name) { nil }
+  let(:debug_port) { nil }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['apache_tomcat_instance'],
                              file_cache_path: '/var/chef') do |node|
@@ -49,6 +50,7 @@ describe 'tomcat_test::instance_lwrp' do
       node.set['apache_tomcat']['tomcat_users_template'] = tomcat_users_template
       node.set['apache_tomcat']['webapps_mode'] = webapps_mode
       node.set['apache_tomcat']['enable_manager'] = enable_manager
+      node.set['apache_tomcat']['debug_port'] = debug_port
       node.set['tomcat_test']['instance_name'] = instance_name
       node.set['tomcat_test']['base'] = instance_base
     end.converge(described_recipe)
@@ -564,6 +566,23 @@ describe 'tomcat_test::instance_lwrp' do
       it 'does not set jmxremote.password.file in setenv.sh' do
         expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
           .with_content('jmxremote.password.file')
+      end
+    end
+
+    context 'with debug_port' do
+      context 'when nil' do
+        it 'does not add debugging to setenv.sh' do
+          expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
+            .with_content(' -agentlib:jdwp=transport=dt_socket,address')
+        end
+      end
+
+      context 'when valid port number' do
+        let(:debug_port) { 6666 }
+        it 'adds debugging to setenv.sh' do
+          expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+            .with_content(' -agentlib:jdwp=transport=dt_socket,address=6666,server=y,suspend=n')
+        end
       end
     end
   end

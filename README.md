@@ -59,6 +59,7 @@ Attributes for Tomcat instance(s):
 * `ssl_port` - SSL port (integer)
 * `ajp_port` - AJP port (integer)
 * `jmx_port` - JMX port (integer); default: `nil` (JMX management is disabled if `nil`)
+* `debug_port` - JDWP debug port (integer); default: `nil` (debug disabled if `nil`)
 * `user` - service user for Tomcat instances; default: `tomcat`
 * `group` - primary group of service user; default: `tomcat`
 * `webapps_mode` - optional permissions for webapps directory; default: `0775`
@@ -119,7 +120,7 @@ from `node['apache_tomcat']['base']`. For example, for instance 'instance1' if
 `node['apache_tomcat']['base']` is /var/lib/tomcat7, then `base` for 'instance1'
 will be set to /var/lib/tomcat7-instance1.
 
-The port attributes - `http_port`, `ssl_port`, `ajp_port`, `jmx_port`, and
+The port attributes - `http_port`, `ssl_port`, `ajp_port`, `jmx_port`, `debug_port`,
 `shutdown_port` - are not inherited from node attributes and must be set per-instance
 if they are to be used. Other attributes for an instance that aren't set are
 inherited unmodified from global node attributes.

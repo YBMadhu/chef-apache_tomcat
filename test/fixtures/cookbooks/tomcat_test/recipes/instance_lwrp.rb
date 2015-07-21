@@ -9,4 +9,5 @@ apache_tomcat_instance 'test' do
   http_port node['apache_tomcat']['http_port']
   ssl_port node['apache_tomcat']['ssl_port']
   ajp_port node['apache_tomcat']['ajp_port']
+  debug_port node['apache_tomcat']['debug_port']
 end
