@@ -24,6 +24,7 @@ describe 'tomcat_test::instance_lwrp' do
   let(:enable_manager) { false }
   let(:instance_name) { nil }
   let(:debug_port) { nil }
+  let(:setenv_additional) { nil }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['apache_tomcat_instance'],
                              file_cache_path: '/var/chef') do |node|
@@ -51,6 +52,7 @@ describe 'tomcat_test::instance_lwrp' do
       node.set['apache_tomcat']['webapps_mode'] = webapps_mode
       node.set['apache_tomcat']['enable_manager'] = enable_manager
       node.set['apache_tomcat']['debug_port'] = debug_port
+      node.set['apache_tomcat']['setenv_additional'] = setenv_additional
       node.set['tomcat_test']['instance_name'] = instance_name
       node.set['tomcat_test']['base'] = instance_base
     end.converge(described_recipe)
@@ -582,6 +584,24 @@ describe 'tomcat_test::instance_lwrp' do
         it 'adds debugging to setenv.sh' do
           expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
             .with_content(' -agentlib:jdwp=transport=dt_socket,address=6666,server=y,suspend=n')
+        end
+      end
+    end
+
+    context 'with setenv_additional' do
+      context 'when nil' do
+        it 'does not export env vars in setenv.sh' do
+          expect(chef_run).not_to render_file('/var/tomcat7/bin/setenv.sh')
+            .with_content(/^export/)
+        end
+      end
+
+      context 'when hash' do
+        let(:setenv_additional) { { 'FOO' => 'bar' } }
+
+        it 'exports env var in setenv.sh' do
+          expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
+            .with_content('export FOO="bar"')
         end
       end
     end

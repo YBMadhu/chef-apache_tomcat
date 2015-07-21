@@ -46,6 +46,7 @@ default['apache_tomcat']['setenv_additional'] = nil
 default['apache_tomcat']['initial_heap_size'] = nil
 default['apache_tomcat']['max_heap_size'] = nil
 default['apache_tomcat']['max_perm_size'] = nil
+default['apache_tomcat']['setenv_additional'] = nil
 
 # JMX settings
 default['apache_tomcat']['jmx_authenticate'] = true

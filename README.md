@@ -75,6 +75,7 @@ to `base`; default: `false`
 * `catalina_opts` - optional string or array of CATALINA_OPTS in setenv.sh
 * `java_opts` - optional string or array of JAVA_OPTS in setenv.sh
 * `java_home` - optional JAVA_HOME environment variable in setenv.sh
+* `setenv_additional` optional hash of environment vars to export in setenv.sh
 * `jmx_authenticate` - whether JMX authentication is enabled; default: `true`
 (ignored unless `jmx_port` set)
 * `jmx_users` - optional array of JMX users/access (see below for expected format)

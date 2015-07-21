@@ -37,6 +37,7 @@ action :create do
     :initial_heap_size,
     :max_heap_size,
     :max_perm_size,
+    :setenv_additional,
     :jmx_authenticate,
     :jmx_users,
     :tomcat_users,
