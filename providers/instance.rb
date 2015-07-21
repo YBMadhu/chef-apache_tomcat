@@ -299,7 +299,7 @@ action :create do
     environment(
       CATALINA_HOME: catalina_home,
       CATALINA_BASE: catalina_base)
-    options :sysvinit, template: 'sysvinit.erb'
+    options :sysvinit, template: 'apache_tomcat:sysvinit.erb'
     action new_resource.enable_service ? :enable : :disable
   end
 end
