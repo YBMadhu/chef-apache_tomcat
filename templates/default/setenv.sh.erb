@@ -15,26 +15,21 @@ JAVA_HOME="<%= @config.java_home %>"
 JAVA_OPTS="<%= @config.java_opts %>"
 <% end %>
 <% unless @config.debug_port.nil? %>
-# enable remote debugging
 CATALINA_OPTS="${CATALINA_OPTS} -agentlib:jdwp=transport=dt_socket,address=<%= @config.debug_port %>,server=y,suspend=n
 <% end %>
 <% unless @config.initial_heap_size.nil? || @config.initial_heap_size.empty? %>
-# set initial Java heap size
 CATALINA_OPTS="${CATALINA_OPTS} -Xms<%= @config.initial_heap_size %>"
 <% end %>
 <% unless @config.max_heap_size.nil? || @config.max_heap_size.empty? %>
-# set maximum Java heap size
 CATALINA_OPTS="${CATALINA_OPTS} -Xmx<%= @config.max_heap_size %>"
 <% end %>
 <% unless @config.max_perm_size.nil? || @config.max_perm_size.empty? %>
-# set Java permanent generation size
 CATALINA_OPTS="${CATALINA_OPTS} -XX:MaxPermSize=<%= @config.max_perm_size %>"
 <% end %>
 <% Array(@config.catalina_opts).each do |opt| %>
 CATALINA_OPTS="${CATALINA_OPTS} <%= opt %>"
 <% end %>
 <% if @config.jmx_port %>
-# enable JMX remote
 CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote"
 CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.ssl=false"
 CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.port=<%= @config.jmx_port %>"
