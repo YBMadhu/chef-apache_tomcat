@@ -20,8 +20,8 @@ default['apache_tomcat']['instances'] = Mash.new
 # Only used in base instance - if run_base_instance true
 default['apache_tomcat']['shutdown_port'] = 8005
 default['apache_tomcat']['http_port'] = 8080
-default['apache_tomcat']['ssl_port'] = nil
 default['apache_tomcat']['ajp_port'] = 8009
+default['apache_tomcat']['ssl_port'] = nil
 default['apache_tomcat']['jmx_port'] = nil
 default['apache_tomcat']['debug_port'] = nil
 
