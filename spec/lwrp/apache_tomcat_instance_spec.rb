@@ -94,7 +94,7 @@ describe 'tomcat_test::instance_lwrp' do
         end
       end
 
-      %w(temp work).each do |dir|
+      %w(temp work conf/Catalina).each do |dir|
         it "creates tomcat #{dir} directory" do
           expect(chef_run).to create_directory("#{path}/#{dir}").with(
             owner: 'tomcat', group: 'tomcat', mode: '0755')

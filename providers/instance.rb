@@ -112,7 +112,7 @@ action :create do
     end
   end
 
-  %w(temp work).each do |dir|
+  %w(temp work conf/Catalina).each do |dir|
     directory ::File.join(catalina_base, dir) do
       owner new_resource.user
       group new_resource.group

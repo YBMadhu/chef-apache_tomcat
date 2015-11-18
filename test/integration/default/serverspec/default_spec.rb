@@ -28,7 +28,7 @@ end
   end
 end
 
-%w(temp work).each do |dir|
+%w(temp work conf/Catalina).each do |dir|
   describe file("/var/lib/tomcat/#{dir}") do
     it { should be_directory }
     it { should be_owned_by 'tomcat' }
