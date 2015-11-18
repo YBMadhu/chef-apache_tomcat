@@ -1,4 +1,3 @@
-# rubocop:disable Metrics/LineLength
 require_relative '../spec_helper'
 
 describe 'tomcat_test::install_lwrp' do
@@ -22,7 +21,7 @@ describe 'tomcat_test::install_lwrp' do
   context 'with specified attributes' do
     it 'installs tomcat with specified attribs' do
       expect(chef_run).to install_apache_tomcat('test_tomcat').with(
-      mirror: mirror, checksum: checksum, version: version)
+        mirror: mirror, checksum: checksum, version: version)
     end
   end
 

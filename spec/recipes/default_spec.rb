@@ -1,4 +1,3 @@
-# rubocop:disable Metrics/LineLength
 require_relative '../spec_helper'
 
 describe 'apache_tomcat::default' do
