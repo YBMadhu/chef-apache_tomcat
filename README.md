@@ -69,7 +69,7 @@ to `base`; default: `false`
 * `logrotate_frequency` - rotation frequency; default: `weekly`
 * `logrotate_count` - logrotate file count; default: `4`
 * `kill_delay` - seconds to wait before kill -9 on service stop/restart; default: 45 (integer)
-* `initial_heap_size` - optional java initial heap size; adds `-Xms` CATALINA_OPTS
+* `initial_heap_size` - optional java initial heap size; adds `-Xms` to CATALINA_OPTS
 * `max_heap_size` - optional java max heap size; adds `-Xmx` to CATALINA_OPTS
 * `max_perm_size` - optional java max permanent size; adds `-XX:MaxPermSize` to CATALINA_OPTS
 * `catalina_opts` - optional string or array of CATALINA_OPTS in setenv.sh
@@ -80,6 +80,7 @@ to `base`; default: `false`
 (ignored unless `jmx_port` set)
 * `jmx_users` - optional array of JMX users/access (see below for expected format)
 (ignored unless `jmx_port` set and `jmx_authenticate` true)
+* `context_entries` - optional array of entries to add to `context.xml`
 * `pool_enabled` - enable shared executor (thread pool); default: `false`
 * `access_log_enabled` - whether to enable access log valve; default: `false`
 * `http_additional` - hash of additional http connector attributes
@@ -87,7 +88,7 @@ to `base`; default: `false`
 * `ssl_additional` - hash of addtional ssl connector attributes
 * `pool_additional` - hash of additional executor (thread pool) attributes
 * `access_log_additional` - hash of additional access log valve attributes
-* `engine_valves` - nested hash of one or more engine valves
+* `engine_valves` - nested hash of one or more engine valves (see below for format)
 * `host_valves` - nested hash of one or more host valves
 * `tomcat_users` - optional array of Tomcat-users (see below for expected format)
 
@@ -98,6 +99,7 @@ with your own. Use `name` to reference a template in the calling cookbook or
 * `server_xml_template` - conf/server.xml
 * `logging_properties_template` - conf/logging.properties
 * `tomcat_users_template` - conf/tomcat-users.xml
+* `context_template` - conf/context.xml
 * `logrotate_template` - /etc/logrotate.d/`service_name`
 
 ## Usage
@@ -260,14 +262,45 @@ If desired these can be overridden with `ssl_additional`.
 
 *NOTE:* If the ssl connector is enabled, it will by default add the `redirectPort`
 attribute to the http connector (and the ajp connector if enabled) with the value
-set to the `ssl_port`.
+set to the `ssl_port` (override with `ssl_additional`).
 
 #### AJP Connector
 TODO
+
 #### Thread Pool
 TODO
 
-#### Tomcat users
+#### Engine Valves
+Example:
+```
+node.default['apache_tomcat']['engine_valves']['org.apache.catalina.valves.RemoteIpValve']['internalProxies'] = '127\.0\.0\.1'
+node.default['apache_tomcat']['engine_valves']['org.apache.catalina.valves.RemoteIpValve']['protocolHeader'] = 'x-forwarded-proto'
+node.default['apache_tomcat']['engine_valves']['org.apache.catalina.valves.RemoteIpValve']['portHeader'] = 'x-forwarded-port'
+```
+Will render the following engine valve in server.xml
+```
+<Valve className="org.apache.catalina.valves.RemoteIpValve"
+       internalProxies="127\.0\.0\.1"
+       protocolHeader="x-forwarded-proto"
+       portHeader="x-forwarded-port"
+       />
+```
+
+#### Context.xml Entries
+The `conf/context.xml` file can be customized with the `context_entries` attribute.
+You can also choose a different template for context.xml with the
+`context_template` attribute.
+
+The `context_entries` attribute accepts an array of strings, each string being a
+valid XML fragment:
+```
+[
+  '<Transaction factory="myTransFactory" />',
+  '<Resource name="my/Resource" type="bacon" description="Something"/>'
+]
+```
+
+#### Tomcat Users
 The `tomcat_users` attribute accepts an array of user hashes like so:
 ```
 [

@@ -25,6 +25,7 @@ describe 'tomcat_test::instance_lwrp' do
   let(:instance_name) { nil }
   let(:debug_port) { nil }
   let(:setenv_additional) { nil }
+  let(:context_entries) { [] }
   let(:chef_run) do
     ChefSpec::SoloRunner.new(step_into: ['apache_tomcat_instance'],
                              file_cache_path: '/var/chef') do |node|
@@ -53,6 +54,7 @@ describe 'tomcat_test::instance_lwrp' do
       node.set['apache_tomcat']['enable_manager'] = enable_manager
       node.set['apache_tomcat']['debug_port'] = debug_port
       node.set['apache_tomcat']['setenv_additional'] = setenv_additional
+      node.set['apache_tomcat']['context_entries'] = context_entries
       node.set['tomcat_test']['instance_name'] = instance_name
       node.set['tomcat_test']['base'] = instance_base
     end.converge(described_recipe)
@@ -116,7 +118,7 @@ describe 'tomcat_test::instance_lwrp' do
       end
 
       context 'when home != base' do
-        %w(catalina.policy catalina.properties web.xml context.xml).each do |file|
+        %w(catalina.policy catalina.properties web.xml).each do |file|
           it "creates link to #{file}" do
             expect(chef_run).to create_link("#{path}/conf/#{file}")
           end
@@ -187,7 +189,14 @@ describe 'tomcat_test::instance_lwrp' do
 
       it 'creates tomcat-users.xml template' do
         expect(chef_run).to create_template("#{path}/conf/tomcat-users.xml").with(
-          mode: '640',
+          mode: '0640',
+          owner: 'root',
+          group: 'tomcat')
+      end
+
+      it 'creates context.xml template' do
+        expect(chef_run).to create_template("#{path}/conf/context.xml").with(
+          mode: '0640',
           owner: 'root',
           group: 'tomcat')
       end
@@ -603,6 +612,17 @@ describe 'tomcat_test::instance_lwrp' do
           expect(chef_run).to render_file('/var/tomcat7/bin/setenv.sh')
             .with_content('export FOO="bar"')
         end
+      end
+    end
+
+    context 'with context_entries' do
+      let(:context_entries) { ['<Resource name="bacon" />', '<Transaction foo="bar" />'] }
+
+      it 'add entries to context.xml' do
+        expect(chef_run).to render_file('/var/tomcat7/conf/context.xml').with_content(
+          "<Resource name=\"bacon\" />\n\n")
+        expect(chef_run).to render_file('/var/tomcat7/conf/context.xml').with_content(
+          "<Transaction foo=\"bar\" />\n\n")
       end
     end
   end

@@ -41,6 +41,7 @@ action :create do
     :jmx_authenticate,
     :jmx_users,
     :tomcat_users,
+    :context_entries,
     :pool_enabled,
     :pool_additional,
     :http_additional,
@@ -58,6 +59,7 @@ action :create do
     :server_xml_template,
     :logging_properties_template,
     :tomcat_users_template,
+    :context_template,
     :logrotate_template
   ].each do |attrib|
     unless new_resource.instance_variable_get("@#{attrib}")
@@ -120,7 +122,7 @@ action :create do
     end
   end
 
-  %w(catalina.policy catalina.properties web.xml context.xml).each do |conf_file|
+  %w(catalina.policy catalina.properties web.xml).each do |conf_file|
     link ::File.join(catalina_base, 'conf', conf_file) do
       to ::File.join(catalina_home, 'conf', conf_file)
       not_if { catalina_home == catalina_base }
@@ -167,6 +169,19 @@ action :create do
 
   cb, src = template_source(new_resource.setenv_template, 'setenv.sh.erb')
   template ::File.join(catalina_base, 'bin', 'setenv.sh') do
+    source src
+    cookbook cb
+    mode '0640'
+    owner 'root'
+    group new_resource.group
+    variables(config: new_resource)
+    if new_resource.enable_service
+      notifies :restart, "poise_service[#{instance_name}]"
+    end
+  end
+
+  cb, src = template_source(new_resource.context_template, 'context.xml.erb')
+  template ::File.join(catalina_base, 'conf', 'context.xml') do
     source src
     cookbook cb
     mode '0640'
@@ -256,7 +271,7 @@ action :create do
   template ::File.join(catalina_base, 'conf', 'tomcat-users.xml') do
     source src
     cookbook cb
-    mode '640'
+    mode '0640'
     owner 'root'
     group new_resource.group
     variables(

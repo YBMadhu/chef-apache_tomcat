@@ -67,11 +67,15 @@ default['apache_tomcat']['host_valves'] = Mash.new
 # Tomcat-users.xml settings
 default['apache_tomcat']['tomcat_users'] = []
 
+# Context.xml entries
+default['apache_tomcat']['context_entries'] = []
+
 # custom templates - template or cookbook:template
 default['apache_tomcat']['setenv_template'] = nil
 default['apache_tomcat']['server_xml_template'] = nil
 default['apache_tomcat']['logging_properties_template'] = nil
 default['apache_tomcat']['tomcat_users_template'] = nil
+default['apache_tomcat']['context_template'] = nil
 default['apache_tomcat']['logrotate_template'] = nil
 
 # Override init wierdnesses since poise-service

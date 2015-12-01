@@ -52,7 +52,7 @@ describe file('/var/tomcat/webapps/manager') do
   it { should be_mode 755 }
 end
 
-%w(catalina.policy catalina.properties web.xml context.xml).each do |conf_file|
+%w(catalina.policy catalina.properties web.xml).each do |conf_file|
   describe file("/var/tomcat/conf/#{conf_file}") do
     it { should be_file }
     it { should be_linked_to "/opt/tomcat7/conf/#{conf_file}" }
@@ -69,6 +69,13 @@ describe file('/var/tomcat/bin/setenv.sh') do
 end
 
 describe file('/var/tomcat/conf/server.xml') do
+  it { should be_file }
+  it { should be_owned_by 'root' }
+  it { should be_grouped_into 'tomcat' }
+  it { should  be_mode 640 }
+end
+
+describe file('/var/tomcat/conf/context.xml') do
   it { should be_file }
   it { should be_owned_by 'root' }
   it { should be_grouped_into 'tomcat' }
