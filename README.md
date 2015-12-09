@@ -58,7 +58,7 @@ Attributes for Tomcat instance(s):
 * `http_port` - HTTP port (integer)
 * `ssl_port` - SSL port (integer)
 * `ajp_port` - AJP port (integer)
-* `jmx_port` - JMX port (integer); default: `nil` (JMX management is disabled if `nil`)
+* `jmx_port` - JMX port (integer); default: `nil` (see "JMX Remote Management" section below)
 * `debug_port` - JDWP debug port (integer); default: `nil` (debug disabled if `nil`)
 * `user` - service user for Tomcat instances; default: `tomcat`
 * `group` - primary group of service user; default: `tomcat`
@@ -77,8 +77,8 @@ to `base`; default: `false`
 * `java_home` - optional JAVA_HOME environment variable in setenv.sh
 * `setenv_additional` optional hash of environment vars to export in setenv.sh
 * `jmx_authenticate` - whether JMX authentication is enabled; default: `true`
-(ignored unless `jmx_port` set)
-* `jmx_users` - optional array of JMX users/access (see below for expected format)
+* `jmx_users` - optional hash of JMX users/access
+(see "JMX Remote Management" section below for expected format)
 (ignored unless `jmx_port` set and `jmx_authenticate` true)
 * `context_entries` - optional array of entries to add to `context.xml`
 * `pool_enabled` - enable shared executor (thread pool); default: `false`
@@ -323,23 +323,33 @@ setting the LWRP attribute from a data bag or some other means in a wrapper cook
 Support for setting tomcat_users from a data bag (or run_state) for use with
 the default recipe may be considered in the future.
 
-### JMX Users
-The `jmx_users` attributes accepts an array of user hashes like the example below.
-Each user must include an `id`, `password` and `access`. Access must be one of
-`readonly` or `readwrite`.
+### JMX Remote Management
+JMX remote management settings will be enabled in `setenv.sh` if the `jmx_port`
+attribute is set. Furthermore, the `jmx_authenticate` boolean attribute will
+enable/disable JMX authentication, and `jmx_users` will control access by
+creating jmxremote access and password files. The `jmx_users` settings will be
+ignored unless `jmx_authenticate` is `true`.
+
+The `jmx_users` attributes accepts a nested hash of users like the example below.
+Each user should include `password` and `access`. Access must be one of
+`readonly` or `readwrite`.  If `access` any other value besides `readonly`
+or `readwrite`, the user will be removed.
 ```
-[
-  {
-    'id' => 'monitorMe',
+{
+  'monitorMe' => {
     'password' => 'bacon',
     'access' => 'readonly'
   },
-  {
-    'id' => 'controlMe',
+  'controlMe' => {
     'password' => 'supersecret',
     'access' => 'readwrite'
-  }
-]
+  },
+  # this user will not be present
+  'some_user' => {
+    'password' => 'notRelevant',
+    'access' => 'disabled' # could be anything other than readonly or readwrite
+  },
+}
 ```
 
 ## License and Authors

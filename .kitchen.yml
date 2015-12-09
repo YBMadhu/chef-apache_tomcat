@@ -91,10 +91,10 @@ suites:
             portHeader: x-forwarded-port
         jmx_port: 9599
         jmx_users:
-          - id: monitorRole
+          monitorRole:
             password: mymonitorpw
             access: readonly
-          - id: controlRole
+          controlRole:
             password: mycontrolpw
             access: readwrite
         tomcat_users:

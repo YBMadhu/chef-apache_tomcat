@@ -51,7 +51,7 @@ default['apache_tomcat']['setenv_additional'] = nil
 
 # JMX settings
 default['apache_tomcat']['jmx_authenticate'] = true
-default['apache_tomcat']['jmx_users'] = []
+default['apache_tomcat']['jmx_users'] = {}
 
 # Additinal server.xml settings
 default['apache_tomcat']['pool_enabled'] = false
