@@ -68,7 +68,8 @@ def tomcat_resource(exec_action)
     rm -rf logs temp work
     rm -rf bin/*.bat
     mv webapps bundled_webapps
-    chmod 0644 conf/*
+    mv conf bundled_conf
+    chmod 0644 bundled_conf/*
     EOH
     not_if { ::File.directory?(::File.join(extract_path, 'bin')) }
     only_if { exec_action == :install }

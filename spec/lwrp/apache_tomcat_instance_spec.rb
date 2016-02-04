@@ -103,25 +103,10 @@ describe 'tomcat_test::instance_lwrp' do
         end
       end
 
-      context 'when home = base' do
-        let(:tomcat_home) { path }
-
-        %w(catalina.policy catalina.properties web.xml context.xml).each do |file|
-          it "does not create link to #{file}" do
-            expect(chef_run).not_to create_link("#{path}/conf/#{file}")
-          end
-        end
-
-        it 'does not create catalina_base directory' do
-          expect(chef_run).not_to create_directory(path)
-        end
-      end
-
-      context 'when home != base' do
-        %w(catalina.policy catalina.properties web.xml).each do |file|
-          it "creates link to #{file}" do
-            expect(chef_run).to create_link("#{path}/conf/#{file}")
-          end
+      %w(catalina.policy catalina.properties web.xml).each do |file|
+        it "copies #{file} from bundled_conf" do
+          expect(chef_run).to create_remote_file("copy_conf-#{file}").with(
+            owner: 'root', group: 'tomcat', mode: '0640')
         end
       end
 

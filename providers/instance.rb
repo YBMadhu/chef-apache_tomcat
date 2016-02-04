@@ -123,9 +123,13 @@ action :create do
   end
 
   %w(catalina.policy catalina.properties web.xml).each do |conf_file|
-    link ::File.join(catalina_base, 'conf', conf_file) do
-      to ::File.join(catalina_home, 'conf', conf_file)
-      not_if { catalina_home == catalina_base }
+    remote_file "copy_conf-#{conf_file}" do
+      path ::File.join(catalina_base, 'conf', conf_file)
+      source "file:///#{::File.join(catalina_home, 'bundled_conf', conf_file)}"
+      owner 'root'
+      group new_resource.group
+      mode '0640'
+      notifies :restart, "poise_service[#{instance_name}]"
     end
   end
 
