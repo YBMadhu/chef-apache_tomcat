@@ -29,6 +29,7 @@ action :create do
     :user,
     :group,
     :webapps_mode,
+    :conf_mode,
     :enable_manager,
     :kill_delay,
     :java_home,
@@ -128,7 +129,7 @@ action :create do
       source "file:///#{::File.join(catalina_home, 'bundled_conf', conf_file)}"
       owner 'root'
       group new_resource.group
-      mode '0640'
+      mode new_resource.conf_mode
       notifies :restart, "poise_service[#{instance_name}]"
     end
   end
@@ -175,7 +176,7 @@ action :create do
   template ::File.join(catalina_base, 'bin', 'setenv.sh') do
     source src
     cookbook cb
-    mode '0640'
+    mode new_resource.conf_mode
     owner 'root'
     group new_resource.group
     variables(config: new_resource)
@@ -188,7 +189,7 @@ action :create do
   template ::File.join(catalina_base, 'conf', 'context.xml') do
     source src
     cookbook cb
-    mode '0640'
+    mode new_resource.conf_mode
     owner 'root'
     group new_resource.group
     variables(config: new_resource)
@@ -206,7 +207,7 @@ action :create do
   template ::File.join(catalina_base, 'conf', 'server.xml') do
     source src
     cookbook cb
-    mode '0640'
+    mode new_resource.conf_mode
     owner 'root'
     group new_resource.group
     variables(
@@ -263,7 +264,7 @@ action :create do
   template ::File.join(catalina_base, 'conf', 'logging.properties') do
     source src
     cookbook cb
-    mode '0640'
+    mode new_resource.conf_mode
     owner 'root'
     group new_resource.group
     if new_resource.enable_service
@@ -275,7 +276,7 @@ action :create do
   template ::File.join(catalina_base, 'conf', 'tomcat-users.xml') do
     source src
     cookbook cb
-    mode '0640'
+    mode new_resource.conf_mode
     owner 'root'
     group new_resource.group
     variables(

@@ -63,6 +63,7 @@ Attributes for Tomcat instance(s):
 * `user` - service user for Tomcat instances; default: `tomcat`
 * `group` - primary group of service user; default: `tomcat`
 * `webapps_mode` - optional permissions for webapps directory; default: `0775`
+* `conf_mode` - optional permissions for conf directory; default: `0640`
 * `enable_manager` - whether to enable manager webapp by copying from `home`
 to `base`; default: `false`
 * `log_dir` - optional directory for Tomcat logs; must be absolute if specified

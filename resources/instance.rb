@@ -37,6 +37,7 @@ attribute :enable_service, equal_to: [true, false]
 attribute :user, kind_of: String
 attribute :group, kind_of: String
 attribute :webapps_mode, kind_of: String
+attribute :conf_mode, kind_of: String
 attribute :enable_manager, equal_to: [true, false]
 attribute :kill_delay, regex: /^[1-9][0-9]?$/
 attribute :java_home, kind_of: String
