@@ -67,9 +67,8 @@ def tomcat_resource(exec_action)
     cd "#{extract_path}"
     rm -rf logs temp work
     rm -rf bin/*.bat
-    rm -rf webapps/ROOT webapps/docs webapps/examples webapps/host-manager
+    mv webapps bundled_webapps
     chmod 0644 conf/*
-    # chmod 0750 bin/*.sh webapps/*
     EOH
     not_if { ::File.directory?(::File.join(extract_path, 'bin')) }
     only_if { exec_action == :install }
