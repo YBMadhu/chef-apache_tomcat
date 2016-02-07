@@ -38,13 +38,9 @@ user node['apache_tomcat']['user'] do
 end
 
 apache_tomcat_instance 'base' do
-  base  node['apache_tomcat']['base']
-  shutdown_port node['apache_tomcat']['shutdown_port']
-  http_port node['apache_tomcat']['http_port']
-  ajp_port node['apache_tomcat']['ajp_port']
-  ssl_port node['apache_tomcat']['ssl_port'] if node['apache_tomcat']['ssl_port']
-  jmx_port node['apache_tomcat']['jmx_port'] if node['apache_tomcat']['jmx_port']
-  debug_port node['apache_tomcat']['debug_port'] if node['apache_tomcat']['debug_port']
+  %w(base shutdown_port http_port ajp_port ssl_port jmx_port debug_port).each do |a|
+    send(a, node['apache_tomcat'][a]) unless node['apache_tomcat'][a].nil?
+  end
   only_if { node['apache_tomcat']['run_base_instance'] }
 end
 
