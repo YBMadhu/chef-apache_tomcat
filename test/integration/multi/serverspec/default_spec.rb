@@ -52,7 +52,6 @@ end
   %w(catalina.policy catalina.properties web.xml).each do |conf_file|
     describe file("/var/lib/tomcat-#{instance}/conf/#{conf_file}") do
       it { should be_file }
-      it { should be_linked_to "/usr/local/tomcat/conf/#{conf_file}" }
     end
   end
 
