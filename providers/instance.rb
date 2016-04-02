@@ -43,6 +43,7 @@ action :create do
     :jmx_users,
     :tomcat_users,
     :context_entries,
+    :shutdown_command,
     :pool_enabled,
     :pool_additional,
     :http_additional,
@@ -212,6 +213,7 @@ action :create do
     group new_resource.group
     variables(
       shutdown_port: new_resource.shutdown_port,
+      shutdown_command: new_resource.shutdown_command,
       thread_pool: thread_pool_,
       http: http_,
       ssl: ssl_,

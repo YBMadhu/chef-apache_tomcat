@@ -55,6 +55,7 @@ default['apache_tomcat']['jmx_authenticate'] = true
 default['apache_tomcat']['jmx_users'] = {}
 
 # Additinal server.xml settings
+default['apache_tomcat']['shutdown_command'] = 'SHUTDOWN'
 default['apache_tomcat']['pool_enabled'] = false
 default['apache_tomcat']['access_log_enabled'] = false
 default['apache_tomcat']['http_additional'] = Mash.new

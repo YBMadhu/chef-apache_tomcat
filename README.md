@@ -55,6 +55,7 @@ details.
 
 Attributes for Tomcat instance(s):
 * `shutdown_port` - Shutdown port (integer)
+* `shutdown_command` - Shutdown command (string); default: `SHUTDOWN`
 * `http_port` - HTTP port (integer)
 * `ssl_port` - SSL port (integer)
 * `ajp_port` - AJP port (integer)

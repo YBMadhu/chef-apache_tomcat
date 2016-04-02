@@ -51,6 +51,7 @@ attribute :jmx_authenticate, equal_to: [true, false]
 attribute :jmx_users, kind_of: Hash
 attribute :tomcat_users, kind_of: Array
 attribute :context_entries, kind_of: Array
+attribute :shutdown_command, kind_of: String
 attribute :pool_enabled, equal_to: [true, false]
 attribute :pool_additional, kind_of: Hash
 attribute :http_additional, kind_of: Hash
