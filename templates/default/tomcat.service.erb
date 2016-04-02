@@ -1,0 +1,20 @@
+[Unit]
+Description=Apache Tomcat Web Application Container
+After=syslog.target network.target
+
+[Service]
+Environment=CATALINA_HOME=<%= @environment[:CATALINA_HOME] %>
+Environment=CATALINA_BASE=<%= @environment[:CATALINA_BASE] %>
+<%- @environment.each do |key, val| -%>
+<%- next if [:CATALINA_HOME, :CATALINA_BASE, :CATALINA_PID, :KILL_WAIT].include? key %>
+Environment=<%= key %>="<%= val %>"
+<%- end -%>
+
+ExecStart=<%= @environment[:CATALINA_HOME] %>/bin/catalina.sh start
+ExecStop=<%= @environment[:CATALINA_HOME] %>/bin/catalina.sh stop
+TimeoutStopSec=<%= @environment[:KILL_WAIT] || 45 %>
+SuccessExitStatus=143
+User=<%= @user %>
+
+[Install]
+WantedBy=multi-user.target
