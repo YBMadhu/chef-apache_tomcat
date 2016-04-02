@@ -320,6 +320,7 @@ action :create do
     end
     user new_resource.user
     environment(
+      KILL_WAIT: new_resource.kill_delay,
       CATALINA_HOME: catalina_home,
       CATALINA_BASE: catalina_base)
     options :sysvinit, template: 'apache_tomcat:sysvinit.erb'
