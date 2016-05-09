@@ -4,7 +4,7 @@ maintainer_email 'brian@clark.zone'
 license          'apache2'
 description      'Installs/Configures Apache Tomcat'
 long_description 'Installs/Configures Apache Tomcat'
-version          '0.3.0'
+version          '0.3.1'
 
 supports 'ubuntu'
 supports 'centos'

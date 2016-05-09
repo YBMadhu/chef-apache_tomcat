@@ -15,7 +15,7 @@ JAVA_HOME="<%= @config.java_home %>"
 JAVA_OPTS="<%= @config.java_opts %>"
 <% end %>
 <% unless @config.debug_port.nil? %>
-CATALINA_OPTS="${CATALINA_OPTS} -agentlib:jdwp=transport=dt_socket,address=<%= @config.debug_port %>,server=y,suspend=n
+CATALINA_OPTS="${CATALINA_OPTS} -agentlib:jdwp=transport=dt_socket,address=<%= @config.debug_port %>,server=y,suspend=n"
 <% end %>
 <% unless @config.initial_heap_size.nil? || @config.initial_heap_size.empty? %>
 CATALINA_OPTS="${CATALINA_OPTS} -Xms<%= @config.initial_heap_size %>"
