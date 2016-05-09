@@ -72,11 +72,12 @@ action :create do
   base_instance = node['apache_tomcat']['base_instance'] ||
                   ::File.basename(node['apache_tomcat']['base'])
 
-  if new_resource.instance_name == 'base'
-    instance_name = base_instance
-  else
-    instance_name = "#{base_instance}-#{new_resource.instance_name}"
-  end
+  instance_name =
+    if new_resource.instance_name == 'base'
+      base_instance
+    else
+      "#{base_instance}-#{new_resource.instance_name}"
+    end
   if new_resource.base
     catalina_base = new_resource.base
   else
@@ -87,7 +88,7 @@ action :create do
 
   if new_resource.log_dir
     unless ::Pathname.new(new_resource.log_dir).absolute?
-      fail 'log_dir must be absolute if specified'
+      raise 'log_dir must be absolute if specified'
     end
     log_dir = new_resource.log_dir
   else
@@ -396,9 +397,6 @@ end
 def template_source(template_attrib, default)
   return 'apache_tomcat', default unless template_attrib
   parts = template_attrib.split(/:/, 2)
-  if parts.length == 2
-    return parts
-  else
-    return new_resource.cookbook_name.to_s, parts.first
-  end
+  return parts if parts.length == 2
+  [new_resource.cookbook_name.to_s, parts.first]
 end

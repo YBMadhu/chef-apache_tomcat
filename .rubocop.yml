@@ -8,7 +8,7 @@ AllCops:
   Exclude:
     - vendor/**
 
-Style/SingleSpaceBeforeFirstArg:
+Style/SpaceBeforeFirstArg:
   Enabled: false
 
 Metrics/AbcSize:

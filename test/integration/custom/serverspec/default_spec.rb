@@ -62,7 +62,7 @@ describe file('/var/tomcat/bin/setenv.sh') do
   it { should be_file }
   it { should be_owned_by 'root' }
   it { should be_grouped_into 'tomcat' }
-  it { should  be_mode 640 }
+  it { should be_mode 640 }
   its(:content) { should include 'CATALINA_OPTS="${CATALINA_OPTS} -Xms256m"' }
   its(:content) { should include 'CATALINA_OPTS="${CATALINA_OPTS} -Xmx512m"' }
 end
@@ -71,28 +71,28 @@ describe file('/var/tomcat/conf/server.xml') do
   it { should be_file }
   it { should be_owned_by 'root' }
   it { should be_grouped_into 'tomcat' }
-  it { should  be_mode 640 }
+  it { should be_mode 640 }
 end
 
 describe file('/var/tomcat/conf/context.xml') do
   it { should be_file }
   it { should be_owned_by 'root' }
   it { should be_grouped_into 'tomcat' }
-  it { should  be_mode 640 }
+  it { should be_mode 640 }
 end
 
 describe file('/var/tomcat/conf/logging.properties') do
   it { should be_file }
   it { should be_owned_by 'root' }
   it { should be_grouped_into 'tomcat' }
-  it { should  be_mode 640 }
+  it { should be_mode 640 }
 end
 
 describe file('/var/tomcat/conf/tomcat-users.xml') do
   it { should be_file }
   it { should be_owned_by 'root' }
   it { should be_grouped_into 'tomcat' }
-  it { should  be_mode 640 }
+  it { should be_mode 640 }
   its(:content) { should include '<role rolename="manager-gui" />' }
   its(:content) { should include '<user username="joedirt" password="mullet" roles="manager-gui" />' }
 end

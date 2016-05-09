@@ -58,35 +58,35 @@ describe file('/var/lib/tomcat/bin/setenv.sh') do
   it { should be_file }
   it { should be_owned_by 'root' }
   it { should be_grouped_into 'tomcat' }
-  it { should  be_mode 640 }
+  it { should be_mode 640 }
 end
 
 describe file('/var/lib/tomcat/conf/server.xml') do
   it { should be_file }
   it { should be_owned_by 'root' }
   it { should be_grouped_into 'tomcat' }
-  it { should  be_mode 640 }
+  it { should be_mode 640 }
 end
 
 describe file('/var/lib/tomcat/conf/context.xml') do
   it { should be_file }
   it { should be_owned_by 'root' }
   it { should be_grouped_into 'tomcat' }
-  it { should  be_mode 640 }
+  it { should be_mode 640 }
 end
 
 describe file('/var/lib/tomcat/conf/logging.properties') do
   it { should be_file }
   it { should be_owned_by 'root' }
   it { should be_grouped_into 'tomcat' }
-  it { should  be_mode 640 }
+  it { should be_mode 640 }
 end
 
 describe file('/var/lib/tomcat/conf/tomcat-users.xml') do
   it { should be_file }
   it { should be_owned_by 'root' }
   it { should be_grouped_into 'tomcat' }
-  it { should  be_mode 640 }
+  it { should be_mode 640 }
   its(:content) { should include "<tomcat-users>\n</tomcat-users>" }
 end
 

@@ -381,7 +381,8 @@ describe 'tomcat_test::instance_lwrp' do
         user: 'tomcat',
         environment: {
           CATALINA_HOME: tomcat_home,
-          CATALINA_BASE: '/var/tomcat7'
+          CATALINA_BASE: '/var/tomcat7',
+          KILL_WAIT: nil
         })
     end
 
